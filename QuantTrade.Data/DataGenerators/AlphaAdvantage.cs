@@ -1,4 +1,4 @@
-﻿using QuantTrade.Configuration;
+﻿using QuantTrade.Core.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace QuantTrade.Algorithm
 {
-    public class BaseAlgorithm
+    public interface IAlogorithm
     {
-
+        void Initialize();
     }
 }

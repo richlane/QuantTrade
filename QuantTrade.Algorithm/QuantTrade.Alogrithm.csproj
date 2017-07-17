@@ -40,8 +40,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseAlgorithm.cs" />
+    <Compile Include="Interfaces\IAlogorithm.cs" />
+    <Compile Include="SimpleAlogrithm.cs" />
+    <Compile Include="Interfaces\BaseAlgorithm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\QuantTrade.Core\QuantTrade.Core\QuantTrade.Core.csproj">
+      <Project>{ff8af88e-4105-4ee2-bb41-2ae10f6d3064}</Project>
+      <Name>QuantTrade.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\QuantTrade.Data\QuantTrade.Data.csproj">
+      <Project>{b7e87263-1052-43f3-9cb9-0883ea69f8c4}</Project>
+      <Name>QuantTrade.Data</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

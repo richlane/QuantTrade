@@ -54,13 +54,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\QuantTrade.Configuration\QuantTrade.Configuration\QuantTrade.Configuration.csproj">
-      <Project>{f9009555-eafb-40a3-b3f3-1b3e37f4228b}</Project>
-      <Name>QuantTrade.Configuration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\QuantTrade.Data\QuantTrade.Data.csproj">
-      <Project>{b7e87263-1052-43f3-9cb9-0883ea69f8c4}</Project>
-      <Name>QuantTrade.Data</Name>
+    <ProjectReference Include="..\QuantTrade.Algorithm\QuantTrade.Alogrithm.csproj">
+      <Project>{738bb688-0cf3-4102-925e-6e9df488756c}</Project>
+      <Name>QuantTrade.Alogrithm</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

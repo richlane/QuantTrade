@@ -22,6 +22,7 @@ namespace QuantTrade.Tests
             reader.OnData += Reader_OnData;
             reader.ReadData(symbol, Resolution.Daily, new AlphaAdvantage());
         }
+
         private void Reader_OnData(TradeBar data, EventArgs e)
         {
             Assert.IsTrue(data.High > 0);

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CsvHelper;
 using System.IO;
-using QuantTrade.Configuration;
+using QuantTrade.Core.Configuration;
 using QuantTrade.Core;
 
 namespace QuantTrade.Data.Providers 
