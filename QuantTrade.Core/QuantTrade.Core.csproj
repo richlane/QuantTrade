@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F9009555-EAFB-40A3-B3F3-1B3E37F4228B}</ProjectGuid>
+    <ProjectGuid>{FF8AF88E-4105-4EE2-BB41-2AE10F6D3064}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>QuantTrade.Configuration</RootNamespace>
-    <AssemblyName>QuantTrade.Configuration</AssemblyName>
+    <RootNamespace>QuantTrade.Core</RootNamespace>
+    <AssemblyName>QuantTrade.Core</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -44,11 +44,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config.cs" />
+    <Compile Include="Algorithms\BaseAlgorithm.cs" />
+    <Compile Include="Algorithms\IAlogorithm.cs" />
+    <Compile Include="Algorithms\SimpleAlogrithm.cs" />
+    <Compile Include="Configuration\Config.cs" />
+    <Compile Include="Data\DataGenerators\AlphaAdvantage.cs" />
+    <Compile Include="Data\DataGenerators\IGenerator.cs" />
+    <Compile Include="Data\DataReaders\CSVReader.cs" />
+    <Compile Include="Data\DataReaders\IDataReader.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="Events.cs" />
+    <Compile Include="Indicators\IIndicator.cs" />
+    <Compile Include="Indicators\RelativeStrengthIndex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Securities\Portfolio.cs" />
+    <Compile Include="Securities\TradeBar.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Downloads\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

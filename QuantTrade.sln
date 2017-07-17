@@ -3,15 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantTrade.Data", "QuantTrade.Data\QuantTrade.Data.csproj", "{B7E87263-1052-43F3-9CB9-0883EA69F8C4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantTrade.Engine", "QuantTrade.Engine\QuantTrade.Engine.csproj", "{313A6F58-C4CB-4665-80C3-281DDF3986FB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantTrade.Alogrithm", "QuantTrade.Algorithm\QuantTrade.Alogrithm.csproj", "{738BB688-0CF3-4102-925E-6E9DF488756C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantTrade.Tests", "QuantTrade.Tests\QuantTrade.Tests.csproj", "{8872CB6D-E080-4D57-841F-B61FBCBAB5F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantTrade.Core", "QuantTrade.Core\QuantTrade.Core\QuantTrade.Core.csproj", "{FF8AF88E-4105-4EE2-BB41-2AE10F6D3064}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantTrade.Core", "QuantTrade.Core\QuantTrade.Core.csproj", "{FF8AF88E-4105-4EE2-BB41-2AE10F6D3064}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,18 +15,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B7E87263-1052-43F3-9CB9-0883EA69F8C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B7E87263-1052-43F3-9CB9-0883EA69F8C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B7E87263-1052-43F3-9CB9-0883EA69F8C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B7E87263-1052-43F3-9CB9-0883EA69F8C4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{313A6F58-C4CB-4665-80C3-281DDF3986FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{313A6F58-C4CB-4665-80C3-281DDF3986FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{313A6F58-C4CB-4665-80C3-281DDF3986FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{313A6F58-C4CB-4665-80C3-281DDF3986FB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{738BB688-0CF3-4102-925E-6E9DF488756C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{738BB688-0CF3-4102-925E-6E9DF488756C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{738BB688-0CF3-4102-925E-6E9DF488756C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{738BB688-0CF3-4102-925E-6E9DF488756C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8872CB6D-E080-4D57-841F-B61FBCBAB5F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8872CB6D-E080-4D57-841F-B61FBCBAB5F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8872CB6D-E080-4D57-841F-B61FBCBAB5F4}.Release|Any CPU.ActiveCfg = Release|Any CPU

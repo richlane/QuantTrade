@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using QuantTrade.Core;
 
 
-namespace QuantTrade.Data.Providers
+namespace QuantTrade.Core.Data
 {
     public class AlphaAdvantage : IGenerator
     {

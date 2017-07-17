@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using QuantTrade.Algorithm;
 using QuantTrade.Core;
-using QuantTrade.Data.Providers;
+using QuantTrade.Core.Algorithm;
+using QuantTrade.Core.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;

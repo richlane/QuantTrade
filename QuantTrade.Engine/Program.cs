@@ -1,11 +1,10 @@
 ﻿
+using QuantTrade.Core.Algorithm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using QuantTrade.Algorithm;
-
 
 
 namespace QuantTrade

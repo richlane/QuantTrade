@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CsvHelper;
 using System.IO;
 using QuantTrade.Core.Configuration;
 using QuantTrade.Core;
 
-namespace QuantTrade.Data.Providers 
+namespace QuantTrade.Core.Data
 {
     public class CSVReader : IDataReader
     {
         #region Event Handlers
 
-        public event OnDataHandler OnData;
+        public event OnDataIndicatorHandler OnDataIndicator;  //used by indicators
+        public event OnDataHandler OnData;  //Used by algorithms
+
         public EventArgs e = null;
 
         #endregion
@@ -30,12 +31,12 @@ namespace QuantTrade.Data.Providers
             //Make sure we have data to read
             string inputFile= dataGenerator.GenerateData(symbol, resolution);
       
-            using (TextReader fileReader = File.OpenText(inputFile))
+            using (StreamReader fileReader = new StreamReader(inputFile))
             {
-                var csv = new CsvReader(fileReader);
-                csv.Configuration.HasHeaderRecord = false;
-                while (csv.Read())
+                while (!fileReader.EndOfStream) //best way to do it
                 {
+                    var csv = fileReader.ReadLine().Split(',');
+
                     //Time, Open, High, Low, Close, Volume
                     TradeBar bar = new TradeBar()
                     {
@@ -49,14 +50,23 @@ namespace QuantTrade.Data.Providers
                         Volume = decimal.Parse(csv[5])
                     };
 
-                    //Throw Events!!!!!
-                    if(OnData != null)
+
+                    //1. Throw event to the indicators
+                    if (OnDataIndicator != null)
+                    {
+                        OnDataIndicator(bar, e);
+                    }
+
+                    //2. Throw event to the alogos
+                    if (OnData != null)
                     {
                         OnData(bar, e);
                     }
 
-                    //string x = "";
+
                 }
+
+            
             }
 
         }

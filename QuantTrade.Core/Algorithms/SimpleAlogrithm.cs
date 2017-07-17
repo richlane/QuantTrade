@@ -1,12 +1,11 @@
 ﻿using QuantTrade.Core;
-using QuantTrade.Data.Providers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QuantTrade.Algorithm
+namespace QuantTrade.Core.Algorithm
 {
     public class SimpleAlogrithm : BaseAlgorithm, IAlogorithm
     {
@@ -31,9 +30,12 @@ namespace QuantTrade.Algorithm
             SetEndDate(_endYear, 12, 31);
             Portfolio.Cash = _availableCash;
             TransactionFee = _transactionFee;
+            Resolution = _resolution;
+            Symbol = _symbol;
 
-            //Intit base class 
-            base.Initialize(_symbol, _resolution);
+           // Indicators.Add(new RelativeStrengthIndex(_symbol, 2));
+
+            RunTest();
 
         }
 

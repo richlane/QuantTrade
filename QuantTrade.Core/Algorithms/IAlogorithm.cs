@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QuantTrade.Algorithm
+namespace QuantTrade.Core.Algorithm
 {
     public interface IAlogorithm
     {

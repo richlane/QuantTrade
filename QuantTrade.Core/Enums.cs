@@ -10,5 +10,9 @@ namespace QuantTrade.Core
     {
         Daily
     }
-  
+ 
+    public enum MovingAverageType
+    {
+        Wilders
+    }
 }

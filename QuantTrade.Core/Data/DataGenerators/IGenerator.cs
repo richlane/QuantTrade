@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QuantTrade.Data.Providers
+namespace QuantTrade.Core.Data
 {
     public interface IGenerator
     {

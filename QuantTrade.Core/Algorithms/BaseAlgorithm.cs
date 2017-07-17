@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using QuantTrade.Core;
-using QuantTrade.Data.Providers;
-using System;
 using QuantTrade.Core.Securities;
+using QuantTrade.Core.Indicators;
+using QuantTrade.Core.Data;
 
-namespace QuantTrade.Algorithm
+namespace QuantTrade.Core.Algorithm
 {
     public class BaseAlgorithm
     {
@@ -20,12 +19,19 @@ namespace QuantTrade.Algorithm
 
         public decimal TransactionFee { get; set; }
 
+        public Resolution Resolution { get; set; }
+
+        public String Symbol { get; set; }
+
+        public List<IIndicator> Indicators { get; set; }
+
         /// <summary>
         /// 
         /// </summary>
         public BaseAlgorithm()
         {
             Portfolio = new Portfolio();
+            Indicators = new List<IIndicator>();
         }
 
         /// <summary>
@@ -53,11 +59,12 @@ namespace QuantTrade.Algorithm
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="resolution"></param>
-        public virtual void Initialize(string symbol, Resolution resolution)
+        public void RunTest()
         {
             IDataReader reader = new CSVReader();
             reader.OnData += OnData;
-            reader.ReadData(symbol, resolution, new AlphaAdvantage());
+
+            reader.ReadData(Symbol, Resolution, new AlphaAdvantage());
         }
 
         /// <summary>

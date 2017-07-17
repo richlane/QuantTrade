@@ -1,4 +1,4 @@
 ﻿{
-  "data-directory": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Data\\Data",
+  "data-directory": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads",
   "default-alogrithm":  "SimpleAlgorithm"
 }
