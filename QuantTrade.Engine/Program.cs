@@ -18,7 +18,7 @@ namespace QuantTrade
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            SimpleAlogrithm algo = new SimpleAlogrithm();
+            IAlogorithm algo = new SimpleAlogrithm();
             algo.Initialize();
         }
     }

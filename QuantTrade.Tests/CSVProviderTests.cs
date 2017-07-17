@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using QuantTrade.Algorithm;
 using QuantTrade.Core;
 using QuantTrade.Data.Providers;
 using System;
@@ -27,5 +28,14 @@ namespace QuantTrade.Tests
         {
             Assert.IsTrue(data.High > 0);
         }
+
+
+        [TestMethod()]
+        public void RunSimpleAlgo()
+        {
+            IAlogorithm algo = new SimpleAlogrithm();
+            algo.Initialize();
+        }
     }
+
 }

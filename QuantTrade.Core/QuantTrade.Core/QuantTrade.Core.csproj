@@ -47,6 +47,7 @@
     <Compile Include="Configuration\Config.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Securities\Portfolio.cs" />
     <Compile Include="Securities\TradeBar.cs" />
   </ItemGroup>
   <ItemGroup>
