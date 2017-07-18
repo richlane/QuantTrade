@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using QuantTrade.Core;
-
+using QuantTrade.Core.Indicators;
 
 namespace QuantTrade.Core.Data
 {
@@ -13,6 +13,8 @@ namespace QuantTrade.Core.Data
         event OnDataIndicatorHandler OnDataIndicator;
         event OnDataHandler OnData;
        
-        void ReadData(string symbol, Resolution resolution, IGenerator dataGenerator);
+        void ReadData(string symbol, 
+                      Resolution resolution, 
+                      Dictionary<string, IIndicator> indicators);
     }
 }

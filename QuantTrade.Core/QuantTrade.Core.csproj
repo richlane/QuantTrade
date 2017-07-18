@@ -54,6 +54,7 @@
     <Compile Include="Data\DataReaders\IDataReader.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Events.cs" />
+    <Compile Include="Indicators\BaseIndicator.cs" />
     <Compile Include="Indicators\IIndicator.cs" />
     <Compile Include="Indicators\RelativeStrengthIndex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

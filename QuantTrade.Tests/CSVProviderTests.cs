@@ -17,11 +17,11 @@ namespace QuantTrade.Tests
         [TestMethod()]
         public void ReadDataTest()
         { 
-            string symbol = "SPY";
+            //string symbol = "SPY";
 
-            IDataReader reader = new CSVReader();
-            reader.OnData += Reader_OnData;
-            reader.ReadData(symbol, Resolution.Daily, new AlphaAdvantage());
+            //IDataReader reader = new CSVReader();
+            //reader.OnData += Reader_OnData;
+            //reader.ReadData(symbol, Resolution.Daily, new AlphaAdvantage());
         }
 
         private void Reader_OnData(TradeBar data, EventArgs e)

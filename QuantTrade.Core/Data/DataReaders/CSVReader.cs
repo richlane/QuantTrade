@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using QuantTrade.Core.Configuration;
 using QuantTrade.Core;
+using QuantTrade.Core.Indicators;
 
 namespace QuantTrade.Core.Data
 {
@@ -26,9 +27,10 @@ namespace QuantTrade.Core.Data
         /// <param name="symbol"></param>
         /// <param name="resolution"></param>
         /// <param name="dataGenerator"></param>
-        public void ReadData(string symbol, Resolution resolution, IGenerator dataGenerator)
+        public void ReadData(string symbol, Resolution resolution, Dictionary<string, IIndicator> indicators)
         {
             //Make sure we have data to read
+            IGenerator dataGenerator = new AlphaAdvantage();
             string inputFile= dataGenerator.GenerateData(symbol, resolution);
       
             using (StreamReader fileReader = new StreamReader(inputFile))
@@ -52,12 +54,19 @@ namespace QuantTrade.Core.Data
 
 
                     //1. Throw event to the indicators
-                    if (OnDataIndicator != null)
-                    {
-                        OnDataIndicator(bar, e);
-                    }
+                    //if (OnDataIndicator != null)
+                    //{
+                    //    OnDataIndicator(bar, e);
+                    //}
 
-                    //2. Throw event to the alogos
+                    //Update Indicators
+                    foreach (string key in indicators.Keys)
+                    {
+                        indicators[key].UpdateIndicator(bar);
+
+                    }
+                  
+                    //1. Throw event to the alogos
                     if (OnData != null)
                     {
                         OnData(bar, e);

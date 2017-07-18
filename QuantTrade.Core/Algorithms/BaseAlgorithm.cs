@@ -23,7 +23,7 @@ namespace QuantTrade.Core.Algorithm
 
         public String Symbol { get; set; }
 
-        public List<IIndicator> Indicators { get; set; }
+        public Dictionary<string, IIndicator> Indicators { get; set; }
 
         /// <summary>
         /// 
@@ -31,7 +31,7 @@ namespace QuantTrade.Core.Algorithm
         public BaseAlgorithm()
         {
             Portfolio = new Portfolio();
-            Indicators = new List<IIndicator>();
+            Indicators = new Dictionary<string, IIndicator>();  
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace QuantTrade.Core.Algorithm
             IDataReader reader = new CSVReader();
             reader.OnData += OnData;
 
-            reader.ReadData(Symbol, Resolution, new AlphaAdvantage());
+            reader.ReadData(Symbol, Resolution, Indicators);
         }
 
         /// <summary>
@@ -74,6 +74,15 @@ namespace QuantTrade.Core.Algorithm
         {
 
         }
+
+        ///// <summary>
+        ///// Event handling for indicators
+        ///// </summary>
+        ///// <param name="data"></param>
+        //public virtual void UpdateIndicator(TradeBar data)
+        //{
+           
+        //}
 
     }
 }

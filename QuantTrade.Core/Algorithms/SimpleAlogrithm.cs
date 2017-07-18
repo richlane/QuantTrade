@@ -1,4 +1,5 @@
 ﻿using QuantTrade.Core;
+using QuantTrade.Core.Indicators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,8 @@ namespace QuantTrade.Core.Algorithm
         private decimal _availableCash = 10000M;
         private Resolution _resolution = Resolution.Daily;
 
+        private RelativeStrengthIndex _rsi2;
+
 
         /// <summary>
         /// Launch Algo
@@ -33,8 +36,11 @@ namespace QuantTrade.Core.Algorithm
             Resolution = _resolution;
             Symbol = _symbol;
 
-           // Indicators.Add(new RelativeStrengthIndex(_symbol, 2));
+            //Add Indictors
+            _rsi2 = new RelativeStrengthIndex(_symbol, 2);
+            Indicators.Add("RSI2", _rsi2);
 
+            //Execute Tests
             RunTest();
 
         }
@@ -44,7 +50,7 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         public override void OnData(TradeBar data, EventArgs e)
         {
-            string x = "";
+            if (_rsi2.IsReady == false) return;
         }
 
     }
