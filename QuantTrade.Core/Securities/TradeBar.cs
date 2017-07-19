@@ -23,5 +23,7 @@ namespace QuantTrade.Core
         public DateTime Day { get; set; }
 
         public Resolution TradeResolution { get; set; }
+
+        public int Index { get; set; }
     }
 }

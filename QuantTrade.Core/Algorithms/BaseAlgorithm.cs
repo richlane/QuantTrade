@@ -23,7 +23,7 @@ namespace QuantTrade.Core.Algorithm
 
         public String Symbol { get; set; }
 
-        public Dictionary<string, IIndicator> Indicators { get; set; }
+        public List<IIndicator> Indicators { get; set; }
 
         /// <summary>
         /// 
@@ -31,7 +31,7 @@ namespace QuantTrade.Core.Algorithm
         public BaseAlgorithm()
         {
             Portfolio = new Portfolio();
-            Indicators = new Dictionary<string, IIndicator>();  
+            Indicators = new List<IIndicator>() ;  
         }
 
         /// <summary>

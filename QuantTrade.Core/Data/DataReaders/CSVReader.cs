@@ -16,7 +16,6 @@ namespace QuantTrade.Core.Data
 
         public event OnDataIndicatorHandler OnDataIndicator;  //used by indicators
         public event OnDataHandler OnData;  //Used by algorithms
-
         public EventArgs e = null;
 
         #endregion
@@ -27,16 +26,18 @@ namespace QuantTrade.Core.Data
         /// <param name="symbol"></param>
         /// <param name="resolution"></param>
         /// <param name="dataGenerator"></param>
-        public void ReadData(string symbol, Resolution resolution, Dictionary<string, IIndicator> indicators)
+        public void ReadData(string symbol, Resolution resolution, List<IIndicator> indicators)
         {
             //Make sure we have data to read
             IGenerator dataGenerator = new AlphaAdvantage();
             string inputFile= dataGenerator.GenerateData(symbol, resolution);
-      
+            int index = 0;
+
             using (StreamReader fileReader = new StreamReader(inputFile))
             {
                 while (!fileReader.EndOfStream) //best way to do it
                 {
+                    index++;
                     var csv = fileReader.ReadLine().Split(',');
 
                     //Time, Open, High, Low, Close, Volume
@@ -49,7 +50,8 @@ namespace QuantTrade.Core.Data
                         High = decimal.Parse(csv[2]),
                         Low = decimal.Parse(csv[3]),
                         Close = decimal.Parse(csv[4]),
-                        Volume = decimal.Parse(csv[5])
+                        Volume = decimal.Parse(csv[5]),
+                        Index = index
                     };
 
 
@@ -60,13 +62,12 @@ namespace QuantTrade.Core.Data
                     //}
 
                     //Update Indicators
-                    foreach (string key in indicators.Keys)
+                    foreach (IIndicator ind in indicators)
                     {
-                        indicators[key].UpdateIndicator(bar);
-
+                        ind.UpdateIndicator(bar);
                     }
                   
-                    //1. Throw event to the alogos
+                    //Throw event to the alogos
                     if (OnData != null)
                     {
                         OnData(bar, e);

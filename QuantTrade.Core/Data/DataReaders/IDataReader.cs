@@ -15,6 +15,6 @@ namespace QuantTrade.Core.Data
        
         void ReadData(string symbol, 
                       Resolution resolution, 
-                      Dictionary<string, IIndicator> indicators);
+                      List<IIndicator> indicators);
     }
 }
