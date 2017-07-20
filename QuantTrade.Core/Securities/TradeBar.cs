@@ -24,6 +24,6 @@ namespace QuantTrade.Core
 
         public Resolution TradeResolution { get; set; }
 
-        public int Index { get; set; }
+        public int SampleNumber { get; set; }
     }
 }

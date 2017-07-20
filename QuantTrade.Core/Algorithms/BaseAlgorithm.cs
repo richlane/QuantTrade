@@ -31,7 +31,8 @@ namespace QuantTrade.Core.Algorithm
         public BaseAlgorithm()
         {
             Portfolio = new Portfolio();
-            Indicators = new List<IIndicator>() ;  
+            Indicators = new List<IIndicator>() ; 
+        
         }
 
         /// <summary>
@@ -74,15 +75,6 @@ namespace QuantTrade.Core.Algorithm
         {
 
         }
-
-        ///// <summary>
-        ///// Event handling for indicators
-        ///// </summary>
-        ///// <param name="data"></param>
-        //public virtual void UpdateIndicator(TradeBar data)
-        //{
-           
-        //}
-
+        
     }
 }

@@ -22,7 +22,7 @@ namespace QuantTrade.Core.Algorithm
         private Resolution _resolution = Resolution.Daily;
 
         private RelativeStrengthIndex _rsi2;
-        WilderMovingAverage _wa;
+        ExponentialMovingAverage _wa;
 
 
         /// <summary>
@@ -38,11 +38,11 @@ namespace QuantTrade.Core.Algorithm
             Symbol = _symbol;
 
             //Add Indictors
-            //_rsi2 = new RelativeStrengthIndex(2);
-            //Indicators.Add(_rsi2);
+            _rsi2 = new RelativeStrengthIndex(2);
+            Indicators.Add(_rsi2);
 
-            _wa = new WilderMovingAverage(10);
-            Indicators.Add(_wa);
+            //_wa = new ExponentialMovingAverage(2, 2);
+            //Indicators.Add(_wa);
 
             //Execute Tests
             RunTest();
@@ -54,8 +54,11 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         public override void OnData(TradeBar data, EventArgs e)
         {
-            bool x = _wa.IsReady;
-            string r = "";
+            if (_rsi2.IsReady)
+            {
+                string r = "";
+            }
+           
          //   if (_rsi2.IsReady == false) return;
         }
 

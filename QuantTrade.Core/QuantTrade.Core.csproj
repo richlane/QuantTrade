@@ -56,7 +56,7 @@
     <Compile Include="Events.cs" />
     <Compile Include="Indicators\BaseIndicator.cs" />
     <Compile Include="Indicators\IIndicator.cs" />
-    <Compile Include="Indicators\WilderMovingAverage.cs" />
+    <Compile Include="Indicators\ExponentialMovingAverage.cs" />
     <Compile Include="Indicators\RelativeStrengthIndex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Securities\Portfolio.cs" />

@@ -23,9 +23,14 @@ namespace QuantTrade.Core.Data
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="symbol"></param>
-        /// <param name="resolution"></param>
-        /// <param name="dataGenerator"></param>
+        public void ReadData(string symbol, Resolution resolution)
+        {
+            ReadData(symbol, resolution, new List<IIndicator>());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public void ReadData(string symbol, Resolution resolution, List<IIndicator> indicators)
         {
             //Make sure we have data to read
@@ -51,16 +56,10 @@ namespace QuantTrade.Core.Data
                         Low = decimal.Parse(csv[3]),
                         Close = decimal.Parse(csv[4]),
                         Volume = decimal.Parse(csv[5]),
-                        Index = index
+                        SampleNumber = index
                     };
 
-
-                    //1. Throw event to the indicators
-                    //if (OnDataIndicator != null)
-                    //{
-                    //    OnDataIndicator(bar, e);
-                    //}
-
+                    
                     //Update Indicators
                     foreach (IIndicator ind in indicators)
                     {

@@ -10,5 +10,7 @@ namespace QuantTrade.Core.Indicators
     public interface IIndicator
     {
         void UpdateIndicator(TradeBar data);
+
+        void UpdateIndicator(decimal data);
     }
 }
