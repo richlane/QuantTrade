@@ -4,27 +4,46 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using QuantTrade.Core;
-
+using System.Diagnostics;
 
 namespace QuantTrade.Core.Indicators
 {
     public class RelativeStrengthIndex : BaseIndicator, IIndicator
     {
         
-        private ExponentialMovingAverage _avgGains;
+        private ExponentialMovingAverage _avgGain;
         private ExponentialMovingAverage _avgLoss;
-        private decimal _previousValue;
+        private decimal ? _previousValue;
 
+
+        public override bool IsReady
+        {
+            get
+            {
+                return _avgLoss.IsReady && _avgLoss.IsReady;
+            }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public RelativeStrengthIndex(int period)
+        public RelativeStrengthIndex(int period, MovingAverageType movingAverageType)
         {
-            this.Buffer = new List<decimal>();
             Period = period;
-            _avgGains = new ExponentialMovingAverage(Period, 1m / period);
-            _avgLoss = new ExponentialMovingAverage(Period, 1m / period);
+            
+            //Creating a Wilders EMA
+            if(movingAverageType == MovingAverageType.Wilders)
+            { 
+                 _avgGain = new ExponentialMovingAverage(Period, 1m / Period);
+                 _avgLoss = new ExponentialMovingAverage(Period, 1m / Period);
+            }
+            //Creating a Standard EMA
+            else
+            {
+                _avgGain = new ExponentialMovingAverage(Period, (decimal)period + 1.0m);
+                _avgLoss = new ExponentialMovingAverage(Period, (decimal)period + 1.0m);
+
+            }
         }
 
         /// <summary>
@@ -33,7 +52,7 @@ namespace QuantTrade.Core.Indicators
         /// <param name="data"></param>
         public void UpdateIndicator (decimal data)
         {
-
+            calculate(data);
         }
 
 
@@ -42,48 +61,39 @@ namespace QuantTrade.Core.Indicators
         /// </summary>
         public void UpdateIndicator(TradeBar data)
         {
-            var input = Math.Round(data.Close,2);
-            decimal ? previousInput = null;
+            calculate(data.Close);
+            
+        }
 
-            //make sure we have enough info in the buffer
-            if(Buffer.Count >= 2)
-            {
-                previousInput = Buffer[Buffer.Count - 1];
-            }
+        private void calculate(decimal input)
+        {
 
-            if (previousInput != null && input >= previousInput)
+            if (_previousValue != null && input >= _previousValue.Value)
             {
-                _avgGains.UpdateIndicator(input - previousInput.Value);
+                _avgGain.UpdateIndicator(input - _previousValue.Value);
                 _avgLoss.UpdateIndicator(0m);
             }
-            else if (previousInput != null && input < previousInput)
+            else if (_previousValue != null && input < _previousValue.Value)
             {
-                _avgGains.UpdateIndicator(0m);
-                _avgLoss.UpdateIndicator(previousInput.Value - input);
+                _avgGain.UpdateIndicator(0m);
+                _avgLoss.UpdateIndicator(_previousValue.Value - input);
             }
 
-            //Only need 2 items in the buffer
-            Buffer.Add(input);
-
-            if (Buffer.Count > 2)
-            Buffer.RemoveAt(0);
-
-            //Make sure we are really warmed up
-            if(_avgLoss.IsReady && _avgLoss.IsReady)            if (data.SampleNumber >= 5)
-                this.IsReady = true; 
+            _previousValue = input;
 
             if (_avgLoss.Value == 0m)
             {
                 // all up days is 100
-                Value =  100m;
+                Value = 100m;
             }
             else
             {
-                var rs = _avgGains.Value / _avgLoss.Value;
-                Value= 100m - (100m / (1 + rs));
+                var rs = _avgGain.Value / _avgLoss.Value;
+                Value = 100m - (100m / (1 + rs));
             }
 
-            
+           
+
         }
     }
 }

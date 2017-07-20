@@ -17,7 +17,7 @@ namespace QuantTrade.Tests
     {
 
         [TestMethod()]
-        public void ExponentialMovingAverage()
+        public void EMATest()
         {
             int period =6;
 
@@ -32,13 +32,45 @@ namespace QuantTrade.Tests
                 if (i+1 == period) Assert.IsTrue(ema.IsReady);
 
                 if (i == 5) Assert.IsTrue(Math.Round(ema.Value,2) == 142.66m, "Assert 5");
-                if (i == 6) Assert.IsTrue(Math.Round(ema.Value, 2) == 143.08m, "Assert 6");
+                if (i == 6) Assert.IsTrue(Math.Round(ema.Value, 2) == 143.07m, "Assert 6");
                 if (i == 7) Assert.IsTrue(Math.Round(ema.Value, 2) == 143.08m, "Assert 7");
-                if (i == 8) Assert.IsTrue(Math.Round(ema.Value, 2) == 143.64m, "Assert 8");
-                if (i == 9) Assert.IsTrue(Math.Round(ema.Value, 2) == 144.61m, "Assert 9");
+                if (i == 8) Assert.IsTrue(Math.Round(ema.Value, 2) == 143.63m, "Assert 8");
+                if (i == 9) Assert.IsTrue(Math.Round(ema.Value, 2) == 144.59m, "Assert 9");
 
             }
 
+        }
+
+        [TestMethod()]
+        public void RSITest()
+        {
+            int period = 2;
+
+            //Read a string
+            double[] vars = { 242.64, 244.66, 243.01, 242.95, 242.84, 243.13, 243.29, 241.33, 243.49, 241.35, 241.8, 242.21, 242.77, 240.55, 242.11, 242.37, 242.19, 244.01, 244.42, 245.56, 245.53 };
+
+            RelativeStrengthIndex rsi = new RelativeStrengthIndex(period, MovingAverageType.Wilders);
+
+            for (int i = 0; i < vars.Length; i++)
+            {
+                rsi.UpdateIndicator(Convert.ToDecimal(vars[i]));
+
+                if (i == period) Assert.IsTrue(rsi.IsReady);
+
+                if (i == 0) Assert.IsTrue(Math.Round(rsi.Value, 0) == 100m, "Assert 0");
+                if (i == 1) Assert.IsTrue(Math.Round(rsi.Value, 0) == 100m, "Assert 1");
+                if (i == 2) Assert.IsTrue(Math.Round(rsi.Value, 0) == 55m, "Assert 2");
+                if (i == 3) Assert.IsTrue(Math.Round(rsi.Value, 0) == 53m, "Assert 3");
+                if (i == 4) Assert.IsTrue(Math.Round(rsi.Value, 0) == 48m, "Assert 4");
+
+                if (i == 5) Assert.IsTrue(Math.Round(rsi.Value, 0) == 66m, "Assert 5");
+                if (i == 6) Assert.IsTrue(Math.Round(rsi.Value, 0) == 76m, "Assert 6");
+                if (i == 7) Assert.IsTrue(Math.Round(rsi.Value, 0) == 10m, "Assert 7");
+                if (i == 8) Assert.IsTrue(Math.Round(rsi.Value, 0) == 69m, "Assert 8");
+                if (i == 9) Assert.IsTrue(Math.Round(rsi.Value, 0) == 30m, "Assert 9");
+                
+            }
+            
         }
 
         [TestMethod()]
@@ -52,6 +84,7 @@ namespace QuantTrade.Tests
             
         }
 
+        [TestMethod()]
         private void Reader_OnData(TradeBar data, EventArgs e)
         {
             Assert.IsTrue(data.High > 0, "high");

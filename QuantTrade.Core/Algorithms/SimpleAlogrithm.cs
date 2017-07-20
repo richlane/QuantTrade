@@ -38,8 +38,8 @@ namespace QuantTrade.Core.Algorithm
             Symbol = _symbol;
 
             //Add Indictors
-            _rsi2 = new RelativeStrengthIndex(2);
-            Indicators.Add(_rsi2);
+            //_rsi2 = new RelativeStrengthIndex(period, MovingAverageType.Wilders);
+            //Indicators.Add(_rsi2);
 
             //_wa = new ExponentialMovingAverage(2, 2);
             //Indicators.Add(_wa);

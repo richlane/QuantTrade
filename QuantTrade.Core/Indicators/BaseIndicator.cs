@@ -8,7 +8,7 @@ namespace QuantTrade.Core.Indicators
 {
    public class BaseIndicator
     {
-        public bool IsReady { get; set; }
+        public virtual bool IsReady { get; set; }
 
         public int Samples { get; set; }
        
@@ -20,15 +20,16 @@ namespace QuantTrade.Core.Indicators
             }
         }
 
-        protected List<Decimal> Buffer { get; set; }
-        
         public int Period { get; set; }
 
-        public void Reset()
-        {
-            Buffer.Clear();
-        }
-     
+        // protected List<Decimal> Buffer { get; set; }
+        
+
+        //public void Reset()
+        //{
+        //    Buffer.Clear();
+        //}
+
         public decimal Value { get; set; }
 
 

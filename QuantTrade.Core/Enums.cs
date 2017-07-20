@@ -13,6 +13,7 @@ namespace QuantTrade.Core
  
     public enum MovingAverageType
     {
-        Wilders
+        Wilders,
+        Exponential
     }
 }
