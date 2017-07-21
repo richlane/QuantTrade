@@ -25,25 +25,46 @@ namespace QuantTrade.Core.Data
         /// </summary>
         public void ReadData(string symbol, Resolution resolution)
         {
-            ReadData(symbol, resolution, new List<IIndicator>());
+            ReadData(symbol, resolution, new List<IIndicator>(), null, null);
         }
 
+ 
         /// <summary>
         /// 
         /// </summary>
-        public void ReadData(string symbol, Resolution resolution, List<IIndicator> indicators)
+        public void ReadData(string symbol, 
+            Resolution resolution, 
+            List<IIndicator> indicators, 
+            DateTime ? startDate, 
+            DateTime ? endDate)
         {
             //Make sure we have data to read
             IGenerator dataGenerator = new AlphaAdvantage();
             string inputFile= dataGenerator.GenerateData(symbol, resolution);
             int index = 0;
 
+
+            //Read the file
             using (StreamReader fileReader = new StreamReader(inputFile))
             {
-                while (!fileReader.EndOfStream) //best way to do it
+                while (!fileReader.EndOfStream) 
                 {
                     index++;
                     var csv = fileReader.ReadLine().Split(',');
+
+                    bool skipLine = false;
+                    DateTime transactionDate = DateTime.Parse(csv[0]);
+
+                    //Filter dates if applicable
+                    if (startDate != null && endDate != null)
+                    {
+                        if(transactionDate < startDate || transactionDate > endDate)
+                        {
+                            skipLine = true;
+                        }
+                    }
+
+                    if (skipLine) continue;
 
                     //Time, Open, High, Low, Close, Volume
                     TradeBar bar = new TradeBar()
@@ -66,7 +87,7 @@ namespace QuantTrade.Core.Data
                         ind.UpdateIndicator(bar);
                     }
                   
-                    //Throw event to the alogos
+                    //Throw Event to the alogos
                     if (OnData != null)
                     {
                         OnData(bar, e);

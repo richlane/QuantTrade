@@ -19,6 +19,9 @@ namespace QuantTrade
         {
             IAlogorithm algo = new SimpleAlogrithm();
             algo.Initialize();
+
+            Console.WriteLine("Hit any Endter to exit");
+            Console.ReadLine();
         }
     }
 }

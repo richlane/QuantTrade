@@ -11,6 +11,8 @@ namespace QuantTrade.Core.Algorithm
 {
     public class BaseAlgorithm
     {
+        #region Properties 
+
         public Portfolio Portfolio { get; set; }
 
         public DateTime StartDate { get; set; }
@@ -25,6 +27,8 @@ namespace QuantTrade.Core.Algorithm
 
         public List<IIndicator> Indicators { get; set; }
 
+        #endregion
+
         /// <summary>
         /// 
         /// </summary>
@@ -32,7 +36,6 @@ namespace QuantTrade.Core.Algorithm
         {
             Portfolio = new Portfolio();
             Indicators = new List<IIndicator>() ; 
-        
         }
 
         /// <summary>
@@ -65,7 +68,7 @@ namespace QuantTrade.Core.Algorithm
             IDataReader reader = new CSVReader();
             reader.OnData += OnData;
 
-            reader.ReadData(Symbol, Resolution, Indicators);
+            reader.ReadData(Symbol, Resolution, Indicators, StartDate, EndDate);
         }
 
         /// <summary>
@@ -75,6 +78,23 @@ namespace QuantTrade.Core.Algorithm
         {
 
         }
+
+        #region Indicator Factories
+
+        public RelativeStrengthIndex GenerateRelativeStrengthIndexIndicator(int period, MovingAverageType movingAverageType)
+        {
+            RelativeStrengthIndex indicator = new RelativeStrengthIndex(period, movingAverageType);
+            Indicators.Add(indicator);
+            return indicator;
+        }
         
+        public SimpleMovingAverage GenerateSimpleMovingAverageIndicator(int period)
+        {
+            SimpleMovingAverage indicator = new SimpleMovingAverage(period);
+            Indicators.Add(indicator);
+            return indicator;
+        }
+        #endregion
+
     }
 }

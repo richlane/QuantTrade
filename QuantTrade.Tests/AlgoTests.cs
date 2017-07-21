@@ -88,8 +88,8 @@ namespace QuantTrade.Tests
             {
                 sma.UpdateIndicator(Convert.ToDecimal(vars[i]));
 
-                // Assert.IsTrue(sma.IsReady);
-
+                if (i == 1) Assert.IsTrue(sma.IsReady);
+                
                 if (i == 0) Assert.IsTrue(Math.Round(sma.Value, 2) == 242.64m, "Assert 0");
                 if (i == 1) Assert.IsTrue(Math.Round(sma.Value, 2) == 243.65m, "Assert 1");
                 if (i == 2) Assert.IsTrue(Math.Round(sma.Value, 2) == 243.84m, "Assert 2");
