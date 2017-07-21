@@ -20,7 +20,7 @@ namespace QuantTrade.Core.Indicators
         {
             get
             {
-                return _avgLoss.IsReady && _avgLoss.IsReady;
+                return _avgLoss.IsReady && _avgLoss.IsReady && (Samples >= Period * 5);
             }
         }
 
@@ -67,6 +67,7 @@ namespace QuantTrade.Core.Indicators
 
         private void calculate(decimal input)
         {
+            Samples++;
 
             if (_previousValue != null && input >= _previousValue.Value)
             {

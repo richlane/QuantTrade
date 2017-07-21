@@ -55,7 +55,8 @@ namespace QuantTrade.Tests
             {
                 rsi.UpdateIndicator(Convert.ToDecimal(vars[i]));
 
-                if (i == period) Assert.IsTrue(rsi.IsReady);
+                if (i == period * 5)
+                    Assert.IsTrue(rsi.IsReady);
 
                 if (i == 0) Assert.IsTrue(Math.Round(rsi.Value, 0) == 100m, "Assert 0");
                 if (i == 1) Assert.IsTrue(Math.Round(rsi.Value, 0) == 100m, "Assert 1");
@@ -71,6 +72,34 @@ namespace QuantTrade.Tests
                 
             }
             
+        }
+
+        [TestMethod()]
+        public void SMATest()
+        {
+            int period = 2;
+
+            //Read a string
+            double[] vars = { 242.64, 244.66, 243.01, 242.95, 242.84, 243.13, 243.29, 241.33, 243.49, 241.35, 241.8, 242.21, 242.77, 240.55, 242.11, 242.37, 242.19, 244.01, 244.42, 245.56, 245.53 };
+
+            SimpleMovingAverage sma = new SimpleMovingAverage(period);
+
+            for (int i = 0; i < vars.Length; i++)
+            {
+                sma.UpdateIndicator(Convert.ToDecimal(vars[i]));
+
+                // Assert.IsTrue(sma.IsReady);
+
+                if (i == 0) Assert.IsTrue(Math.Round(sma.Value, 2) == 242.64m, "Assert 0");
+                if (i == 1) Assert.IsTrue(Math.Round(sma.Value, 2) == 243.65m, "Assert 1");
+                if (i == 2) Assert.IsTrue(Math.Round(sma.Value, 2) == 243.84m, "Assert 2");
+                if (i == 3) Assert.IsTrue(Math.Round(sma.Value, 2) == 242.98m, "Assert 3");
+                if (i == 4) Assert.IsTrue(Math.Round(sma.Value, 2) == 242.90m, "Assert 4");
+
+                //Debug.WriteLine(Math.Round(sma.Value,2));
+
+            }
+
         }
 
         [TestMethod()]

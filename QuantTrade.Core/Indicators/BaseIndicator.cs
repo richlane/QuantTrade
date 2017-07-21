@@ -22,7 +22,7 @@ namespace QuantTrade.Core.Indicators
 
         public int Period { get; set; }
 
-        // protected List<Decimal> Buffer { get; set; }
+        //protected List<Decimal> Buffer { get; set; }
         
 
         //public void Reset()

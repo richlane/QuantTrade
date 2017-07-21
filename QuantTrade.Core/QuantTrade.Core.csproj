@@ -55,6 +55,7 @@
     <Compile Include="Enums.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Indicators\BaseIndicator.cs" />
+    <Compile Include="Indicators\SimpleMovingAverage.cs" />
     <Compile Include="Indicators\IIndicator.cs" />
     <Compile Include="Indicators\ExponentialMovingAverage.cs" />
     <Compile Include="Indicators\RelativeStrengthIndex.cs" />
