@@ -121,9 +121,9 @@ namespace QuantTrade.Tests
         private void processOrder(Order data, EventArgs e)
         {
             Assert.IsTrue(data.ExecutionDate == DateTime.Today);
-           // Assert.IsTrue(data.ExecutionPrice == 25.21m);
-            //Assert.IsTrue(data.DateSubmitted == DateTime.Today);
-            //Assert.IsTrue(data.Quantity == 100);
+            Assert.IsTrue(data.ExecutionPrice == 25.21m);
+            Assert.IsTrue(data.DateSubmitted == DateTime.Today);
+            Assert.IsTrue(data.Quantity == 100);
             Assert.IsTrue(data.Status ==  OrderStatus.Complete);
             Assert.IsTrue(data.OrderType == OrderType.Market);
             Assert.IsTrue(data.Symbol == "SPY");

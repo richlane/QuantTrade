@@ -1,4 +1,5 @@
 ﻿{
   "data-directory": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads",
-  "default-alogrithm":  "SimpleAlgorithm"
+  "default-alogrithm": "SimpleAlgorithm",
+  "api-key":  "1CP91IVE5IWVQE4A"
 }

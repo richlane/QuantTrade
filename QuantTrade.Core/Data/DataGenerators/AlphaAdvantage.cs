@@ -25,13 +25,14 @@ namespace QuantTrade.Core.Data
         public string GenerateData(string symbol, Resolution resolution)
         {
             string outputDirectory = Config.GetToken("data-directory");
+            string apiKey = Config.GetToken("api-key");
+
             _csvFileName = outputDirectory + @"\" + resolution + "_" + symbol + ".csv";
 
             if (isDataNeeded())
             {
                 //See https://www.alphavantage.co/documentation/ for docs!
-                string requestString = @"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + symbol +
-                       "&apikey=1CP91IVE5IWVQE4A&datatype=csv&outputsize=full";
+                string requestString = $"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={apiKey}&datatype=csv&outputsize=full";
 
                 callWebsite(requestString);
             }
