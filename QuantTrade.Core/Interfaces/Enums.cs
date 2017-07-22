@@ -20,7 +20,7 @@ namespace QuantTrade.Core
 
     public enum OrderStatus
     {
-        Complete,
+        Filled,
         New,
         Pending,
         Cancelled
@@ -28,7 +28,7 @@ namespace QuantTrade.Core
 
     public enum OrderType
     {
-        MOC,
+        MOC, 
         MOO,
         Market
     }

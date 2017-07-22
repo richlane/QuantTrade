@@ -101,8 +101,8 @@ namespace QuantTrade.Core.Algorithm
             Logger.Log($"Ending Cash: {endingCash}");
             Logger.Log($"Total Profitability: {profitability}%");
             Logger.Log($"Total Fees: ${Broker.TotalTransactionFees}");
-            Logger.Log($"Transactions: {Broker.TotalTransactions}");
-            Logger.Log($"Transaction Errors: {Broker.TransactionErrors}");
+            Logger.Log($"Total Trades: {Broker.TotalTrades}");
+            Logger.Log($"Trades Cancelled: {Broker.TotalTradesCancelled}");
             Logger.Log("---------------------------------------------------");
             Logger.Log(" ");
         }
@@ -113,7 +113,7 @@ namespace QuantTrade.Core.Algorithm
         public virtual void OnOrder(Order data, EventArgs e)
         {
             //update portfolio
-            if(data.Status== OrderStatus.Complete)
+            if(data.Status== OrderStatus.Filled)
             {
                 if (OnOrderEvent != null)
                 {

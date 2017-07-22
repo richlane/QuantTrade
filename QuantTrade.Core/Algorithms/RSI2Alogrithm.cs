@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace QuantTrade.Core.Algorithm
 {
-    public class SimpleAlogrithm : BaseAlgorithm, IAlogorithm
+    public class RSI2Alogrithm : BaseAlgorithm, IAlogorithm
     {
         private string _symbol = "SPXL";
         bool _buyAndHold = false;
@@ -18,9 +18,17 @@ namespace QuantTrade.Core.Algorithm
         int _rsiLookBackPeriod = 2;
         int _rsiBuyLevel = 30;
         int _rsiSellLevel = 70;
+        OrderType _orderType = OrderType.MOC;
 
-        private int _startYear = 2013;
-        private int _endYear = 2013;
+        //Date Ranges
+        private int _startYear = 2007;
+        private int _endYear = 2016;
+
+
+
+        //Sell Stop
+        bool _useSellStop = true;
+        decimal _sellStopMultiplier = .05M;
 
         //Account Settings
         private decimal _transactionFee = 7M;
@@ -34,16 +42,14 @@ namespace QuantTrade.Core.Algorithm
         #region Misc
 
         bool _isLastTradingDay;
-        DateTime _previousDate;
         bool _holdingStock;
-        bool _firstRun = true;
         decimal _sellStopPrice;
         decimal _pctToInvest;
      
         #endregion
 
         /// <summary>
-        /// 
+        /// Subscribe to base class events.
         /// </summary>
         private void subscribeToEvents()
         {
@@ -54,7 +60,7 @@ namespace QuantTrade.Core.Algorithm
         
         
         /// <summary>
-        /// Launch Algo
+        /// Launch Algo.
         /// </summary>
         public void Initialize()
         {
@@ -76,9 +82,16 @@ namespace QuantTrade.Core.Algorithm
         }
 
 
+        /// <summary>
+        /// Event handler for a newly executed order
+        /// </summary>
         public void OnOrderEvent(Order data, EventArgs e)
         {
-            
+            //set sell stop price
+            if (data.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
+            {
+                _sellStopPrice = Broker.Holdings.Find(p => p.Symbol == _symbol).FillPrice * (1 - _sellStopMultiplier);
+            }
         }
 
         /// <summary>
@@ -88,30 +101,39 @@ namespace QuantTrade.Core.Algorithm
         {
             //Make sure indicators are ready
             if (!_rsi.IsReady || !_sma.IsReady)
+            {
                 return;
-
+            }
+                
             //Watch for last trading day so we can liquidate portfolio
             if (data.Day >= EndDate.AddDays(-5).Date)
+            {
                 _isLastTradingDay = true;
+            }
+              
 
+            //Buy, Sell, or Hold?
             Action action = getBuySellHoldDecision(data);
 
             switch (action)
             {
                 case Action.Buy:
                     decimal dollarAmt = (Broker.AvailableCash * _pctToInvest);
-                    int qty = Convert.ToInt32(Math.Round(dollarAmt / data.Close));
-                    base.ExecuteOrder(Action.Buy, OrderType.MOC, qty);
+                    int buyQty = Convert.ToInt32(Math.Round(dollarAmt / data.Close));
+
+                    base.ExecuteOrder(Action.Buy, _orderType, buyQty);
                     break;
 
                 case Action.Sell:
-                     base.ExecuteOrder(Action.Sell, OrderType.MOC, Broker.StockPortfolio.Find(p=> p.Symbol == _symbol).Quantity);
+                    int sellQty = Broker.Holdings.Find(p => p.Symbol == _symbol).Quantity;
+                    base.ExecuteOrder(Action.Sell, _orderType, sellQty);
                     break;
             }
-
-   
         }
 
+        /// <summary>
+        /// Should we buy, sell or hold?
+        /// </summary>
         private Action getBuySellHoldDecision(TradeBar data)
         {
             if (_buyAndHold)
@@ -124,18 +146,16 @@ namespace QuantTrade.Core.Algorithm
             /////////////////////////////////////////
             //Buy Logic
             /////////////////////////////////////////
-            if (
-                _rsi.Value  < _rsiBuyLevel &&
+            if ( _rsi.Value  < _rsiBuyLevel &&
                 _isLastTradingDay == false &&
-                _pctToInvest < 1M
-                )
+                _pctToInvest < 1M)
             {
                 action = Action.Buy;
                 _holdingStock = true;
                 buying = true;
       
-                //_pctToInvest = 1M;
-
+                //Calculate how much we want to invest using the 2%, 3%, 5% strategy
+               
                 if (_pctToInvest == 0)
                 {
                     _pctToInvest = .2M;
@@ -148,6 +168,9 @@ namespace QuantTrade.Core.Algorithm
                 {
                     _pctToInvest = 1M;
                 }
+
+                //_pctToInvest = 1M;
+
 
                 //if (_pctToInvest == 0)
                 //{
@@ -164,18 +187,16 @@ namespace QuantTrade.Core.Algorithm
             /////////////////////////////////////////
             if (_holdingStock && buying == false)
             {
-                //Sell
-                if (
-                   _rsi.Value > _rsiSellLevel
-                   && data.Close > _sma.Value
-                    )
+                //Sell - we hit our oversold RSI and SMA levels
+                if ( _rsi.Value > _rsiSellLevel
+                   && data.Close > _sma.Value)
                 {
                     action = Action.Sell;
                     _pctToInvest = 0;
                     _holdingStock = false;
                     _sellStopPrice = 0;
                 }
-                //Sell
+                //Sell - last trading day and we want to close out positons to calc returns
                 else if (_isLastTradingDay)
                 {
                     action = Action.Sell;
@@ -183,7 +204,7 @@ namespace QuantTrade.Core.Algorithm
                     _holdingStock = false;
                     _sellStopPrice = 0;
                 }
-                //Sell
+                //Sell - stopped out
                 else if (_sellStopPrice > 0 && data.Close < _sellStopPrice)
                 {
                     action = Action.Sell;
@@ -196,13 +217,15 @@ namespace QuantTrade.Core.Algorithm
                 {
                     action = Action.Hold;
                 }
-
             }
 
             return action;
-
         }
 
+
+        /// <summary>
+        /// Used for buy and hold only!
+        /// </summary>
         private Action getLongTermBuyAndHold(TradeBar data)
         {
             Action action = Action.Hold;
@@ -221,8 +244,6 @@ namespace QuantTrade.Core.Algorithm
                 _holdingStock = false;
                 _pctToInvest = 0M;
             }
-
-
             return action;
         }
     }

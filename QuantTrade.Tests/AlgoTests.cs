@@ -71,8 +71,9 @@ namespace QuantTrade.Tests
             broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Buy, 100); //execute
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 1);
-            Assert.IsTrue(broker.StockPortfolio.Count == 1);
-            Assert.IsTrue(broker.TotalTransactions ==1);
+            Assert.IsTrue(broker.Holdings.Count == 1);
+            Assert.IsTrue(broker.Holdings[0].FillPrice > 0);
+            Assert.IsTrue(broker.TotalTrades ==1);
             Assert.IsTrue(broker.TotalTransactionFees == 7);
             Assert.IsTrue(broker.AvailableCash == 7472);
 
@@ -80,37 +81,37 @@ namespace QuantTrade.Tests
             broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Buy, 100); //execute
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 2);
-            Assert.IsTrue(broker.TotalTransactions == 2);
-            Assert.IsTrue(broker.StockPortfolio.Count == 1);
+            Assert.IsTrue(broker.TotalTrades == 2);
+            Assert.IsTrue(broker.Holdings.Count == 1);
             Assert.IsTrue(broker.TotalTransactionFees == 14);
-            Assert.IsTrue(broker.TransactionErrors == 0);
+            Assert.IsTrue(broker.TotalTradesCancelled == 0);
             Assert.IsTrue(broker.AvailableCash == 4944);
 
             //Exceed buy qty
             broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Buy, 1000); // execute
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 3);
-            Assert.IsTrue(broker.TotalTransactions == 2);
-            Assert.IsTrue(broker.StockPortfolio.Count == 1);
+            Assert.IsTrue(broker.TotalTrades == 2);
+            Assert.IsTrue(broker.Holdings.Count == 1);
             Assert.IsTrue(broker.TotalTransactionFees == 14);
-            Assert.IsTrue(broker.TransactionErrors == 1);
+            Assert.IsTrue(broker.TotalTradesCancelled == 1);
             Assert.IsTrue(broker.AvailableCash == 4944);
 
             //Sell stock  
             broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Sell, 100); //execute
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 4);
-            Assert.IsTrue(broker.TotalTransactions == 3);
-            Assert.IsTrue(broker.StockPortfolio.Count == 1);
+            Assert.IsTrue(broker.TotalTrades == 3);
+            Assert.IsTrue(broker.Holdings.Count == 1);
             Assert.IsTrue(broker.TotalTransactionFees == 21);
             Assert.IsTrue(broker.AvailableCash == 7458);
 
             //Sell remaining stock  
             broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Sell, 100); //execute
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
-            Assert.IsTrue(broker.TotalTransactions == 4);
+            Assert.IsTrue(broker.TotalTrades == 4);
             Assert.IsTrue(broker.OrderHistory.Count == 5);
-            Assert.IsTrue(broker.StockPortfolio.Count == 0);
+            Assert.IsTrue(broker.Holdings.Count == 0);
             Assert.IsTrue(broker.TotalTransactionFees == 28);
             Assert.IsTrue(broker.AvailableCash == 9972m);
             Assert.IsTrue(broker.StartingCash == 10000m);
@@ -120,11 +121,11 @@ namespace QuantTrade.Tests
 
         private void processOrder(Order data, EventArgs e)
         {
-            Assert.IsTrue(data.ExecutionDate == DateTime.Today);
-            Assert.IsTrue(data.ExecutionPrice == 25.21m);
+            Assert.IsTrue(data.FillDate == DateTime.Today);
+            Assert.IsTrue(data.FillPrice == 25.21m);
             Assert.IsTrue(data.DateSubmitted == DateTime.Today);
             Assert.IsTrue(data.Quantity == 100);
-            Assert.IsTrue(data.Status ==  OrderStatus.Complete);
+            Assert.IsTrue(data.Status ==  OrderStatus.Filled);
             Assert.IsTrue(data.OrderType == OrderType.Market);
             Assert.IsTrue(data.Symbol == "SPY");
         }

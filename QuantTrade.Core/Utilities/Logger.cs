@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QuantTrade.Core.Utilities
 {
-    static class Logger
+   public static class Logger
     {
 
        public static void Log(string message)

@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="Algorithms\BaseAlgorithm.cs" />
     <Compile Include="Interfaces\IAlogorithm.cs" />
-    <Compile Include="Algorithms\SimpleAlogrithm.cs" />
+    <Compile Include="Algorithms\RSI2Alogrithm.cs" />
     <Compile Include="Configuration\Config.cs" />
     <Compile Include="Data\DataGenerators\AlphaAdvantage.cs" />
     <Compile Include="Interfaces\IGenerator.cs" />

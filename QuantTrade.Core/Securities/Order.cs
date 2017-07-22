@@ -12,9 +12,9 @@ namespace QuantTrade.Core.Securities
         
         public OrderType OrderType { get; set; }
 
-        public Decimal ExecutionPrice { get; set; }
+        public Decimal FillPrice { get; set; }
 
-        public DateTime ExecutionDate { get; set; }
+        public DateTime FillDate { get; set; }
 
         /// <summary>
         /// The date the actual order was placed but
