@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QuantTrade.Core
+namespace QuantTrade.Core.Securities
 {
     public class TradeBar
     {

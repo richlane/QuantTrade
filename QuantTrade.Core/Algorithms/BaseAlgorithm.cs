@@ -6,26 +6,37 @@ using System.Threading.Tasks;
 using QuantTrade.Core.Securities;
 using QuantTrade.Core.Indicators;
 using QuantTrade.Core.Data;
+using QuantTrade.Core.Utilities;
 
 namespace QuantTrade.Core.Algorithm
 {
     public class BaseAlgorithm
     {
+        public event OnDataHandler OnTradeBarEvent;  //Used by inheriting algorithm
+        public event OnOrderHandler OnOrderEvent;  //Used by inheriting algorithm
+        public EventArgs e = null;
+
         #region Properties 
 
-        public Portfolio Portfolio { get; set; }
+        private TradeBar _currentTradebar;
+       
+        public Broker Broker { get; set; }
 
         public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
-
-        public decimal TransactionFee { get; set; }
-
+            
         public Resolution Resolution { get; set; }
 
         public String Symbol { get; set; }
 
         public List<IIndicator> Indicators { get; set; }
+
+        public decimal StartingCash  { get; set; }
+
+        public decimal TransactionFee { get; set; }
+
+        private IDataReader _dataReader;
 
         #endregion
 
@@ -34,8 +45,11 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         public BaseAlgorithm()
         {
-            Portfolio = new Portfolio();
-            Indicators = new List<IIndicator>() ; 
+            Indicators = new List<IIndicator>() ;
+       
+            _dataReader = new CSVReader();
+            _dataReader.OnTradeBar += this.OnTradeBar;
+            
         }
 
         /// <summary>
@@ -61,22 +75,79 @@ namespace QuantTrade.Core.Algorithm
         /// <summary>
         /// Read Data from data sources
         /// </summary>
-        /// <param name="symbol"></param>
-        /// <param name="resolution"></param>
         public void RunTest()
         {
-            IDataReader reader = new CSVReader();
-            reader.OnData += OnData;
+            Broker = new Broker(StartingCash, TransactionFee);
+            Broker.OnOrder += this.OnOrder;
 
-            reader.ReadData(Symbol, Resolution, Indicators, StartDate, EndDate);
+            Logger.Log("Staring Run...............");
+            _dataReader.ReadData(Symbol, Resolution, StartDate, EndDate);
+
+            generateReport();
         }
 
         /// <summary>
-        /// Event Handing new trade bar
+        /// 
         /// </summary>
-        public virtual void OnData(TradeBar data, EventArgs e)
+        private void generateReport()
         {
+            decimal profitability = Math.Round( ((Broker.AvailableCash - Broker.StartingCash)/ Broker.StartingCash) *100, 2);
+            string endingCash = string.Format("{0:c}", Broker.AvailableCash);
+            string startingCash = string.Format("{0:c}", Broker.StartingCash);
 
+            Logger.Log(" ");
+            Logger.Log("---------------------------------------------------");
+            Logger.Log($"Starting Cash: {startingCash}");
+            Logger.Log($"Ending Cash: {endingCash}");
+            Logger.Log($"Total Profitability: {profitability}%");
+            Logger.Log($"Total Fees: ${Broker.TotalTransactionFees}");
+            Logger.Log($"Transactions: {Broker.TotalTransactions}");
+            Logger.Log($"Transaction Errors: {Broker.TransactionErrors}");
+            Logger.Log("---------------------------------------------------");
+            Logger.Log(" ");
+        }
+
+        /// <summary>
+        /// Picks up order events from the transaction manager
+        /// </summary>
+        public virtual void OnOrder(Order data, EventArgs e)
+        {
+            //update portfolio
+            if(data.Status== OrderStatus.Complete)
+            {
+                if (OnOrderEvent != null)
+                {
+                    OnOrderEvent(data, e);
+                }
+            }
+        }
+        
+        /// <summary>
+         /// Event Handing for new trade bar - this is used by the inheriting algo's and is called from the IDataReader.
+         /// </summary> 
+        public virtual void OnTradeBar(TradeBar data, EventArgs e)
+        {
+            _currentTradebar = data;
+
+            //Update indicators
+            foreach (IIndicator item in Indicators)
+            {
+                item.UpdateIndicator(data.Close);
+            }
+       
+            //Update the inheriting class OnData events
+            if (OnTradeBarEvent != null)
+            {
+                OnTradeBarEvent(data, e);
+            }
+
+        }
+
+        public void ExecuteOrder(Core.Action action, OrderType orderType, int quantity)
+        {
+            
+            //Place Order
+            Broker.ExecuteOrder(_currentTradebar, orderType, action, quantity);
         }
 
         #region Indicator Factories

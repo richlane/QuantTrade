@@ -10,12 +10,10 @@ namespace QuantTrade.Core.Data
 {
     public interface IDataReader
     {
-        event OnDataIndicatorHandler OnDataIndicator;
-        event OnDataHandler OnData;
+        event OnDataHandler OnTradeBar;
        
         void ReadData(string symbol, 
                       Resolution resolution, 
-                      List<IIndicator> indicators,
                       DateTime? startDate,
                       DateTime? endDate);
 

@@ -7,6 +7,7 @@ using System.IO;
 using QuantTrade.Core.Configuration;
 using QuantTrade.Core;
 using QuantTrade.Core.Indicators;
+using QuantTrade.Core.Securities;
 
 namespace QuantTrade.Core.Data
 {
@@ -14,8 +15,7 @@ namespace QuantTrade.Core.Data
     {
         #region Event Handlers
 
-        public event OnDataIndicatorHandler OnDataIndicator;  //used by indicators
-        public event OnDataHandler OnData;  //Used by algorithms
+        public event OnDataHandler OnTradeBar;  //Used by base algorithm
         public EventArgs e = null;
 
         #endregion
@@ -25,7 +25,7 @@ namespace QuantTrade.Core.Data
         /// </summary>
         public void ReadData(string symbol, Resolution resolution)
         {
-            ReadData(symbol, resolution, new List<IIndicator>(), null, null);
+            ReadData(symbol, resolution,  null, null);
         }
 
  
@@ -34,7 +34,6 @@ namespace QuantTrade.Core.Data
         /// </summary>
         public void ReadData(string symbol, 
             Resolution resolution, 
-            List<IIndicator> indicators, 
             DateTime ? startDate, 
             DateTime ? endDate)
         {
@@ -80,17 +79,10 @@ namespace QuantTrade.Core.Data
                         SampleNumber = index
                     };
 
-                    
-                    //Update Indicators
-                    foreach (IIndicator ind in indicators)
-                    {
-                        ind.UpdateIndicator(bar);
-                    }
-                  
                     //Throw Event to the alogos
-                    if (OnData != null)
+                    if (OnTradeBar != null)
                     {
-                        OnData(bar, e);
+                        OnTradeBar(bar, e);
                     }
 
 

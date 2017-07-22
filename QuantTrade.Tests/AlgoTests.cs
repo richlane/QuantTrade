@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using QuantTrade.Core.Indicators;
 using System.Diagnostics;
+using QuantTrade.Core.Securities;
 
 namespace QuantTrade.Tests
 {
@@ -40,6 +41,94 @@ namespace QuantTrade.Tests
             }
 
         }
+
+
+        [TestMethod()]
+        public void BrokerMOCBuyTest()
+        {
+            //
+            TradeBar tradeBar = new TradeBar()
+            {
+              Close=25.21m,
+              Day=DateTime.Today,
+              High=26m,
+              Low=24m,
+              Open=24.49m,
+              Symbol="SPY",
+              TradeResolution= Resolution.Daily,
+              Volume=10000
+            };
+
+            //
+            Broker broker = new Broker(10000m, 7m);
+         
+            Assert.IsTrue(broker.TransactionFee == 7m);
+            Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
+            Assert.IsTrue(broker.OrderHistory.Count == 0);
+            broker.OnOrder += processOrder;
+
+            //Buy stock  
+            broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Buy, 100); //execute
+            Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
+            Assert.IsTrue(broker.OrderHistory.Count == 1);
+            Assert.IsTrue(broker.StockPortfolio.Count == 1);
+            Assert.IsTrue(broker.TotalTransactions ==1);
+            Assert.IsTrue(broker.TotalTransactionFees == 7);
+            Assert.IsTrue(broker.AvailableCash == 7472);
+
+            //Buy more stock  
+            broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Buy, 100); //execute
+            Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
+            Assert.IsTrue(broker.OrderHistory.Count == 2);
+            Assert.IsTrue(broker.TotalTransactions == 2);
+            Assert.IsTrue(broker.StockPortfolio.Count == 1);
+            Assert.IsTrue(broker.TotalTransactionFees == 14);
+            Assert.IsTrue(broker.TransactionErrors == 0);
+            Assert.IsTrue(broker.AvailableCash == 4944);
+
+            //Exceed buy qty
+            broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Buy, 1000); // execute
+            Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
+            Assert.IsTrue(broker.OrderHistory.Count == 3);
+            Assert.IsTrue(broker.TotalTransactions == 2);
+            Assert.IsTrue(broker.StockPortfolio.Count == 1);
+            Assert.IsTrue(broker.TotalTransactionFees == 14);
+            Assert.IsTrue(broker.TransactionErrors == 1);
+            Assert.IsTrue(broker.AvailableCash == 4944);
+
+            //Sell stock  
+            broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Sell, 100); //execute
+            Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
+            Assert.IsTrue(broker.OrderHistory.Count == 4);
+            Assert.IsTrue(broker.TotalTransactions == 3);
+            Assert.IsTrue(broker.StockPortfolio.Count == 1);
+            Assert.IsTrue(broker.TotalTransactionFees == 21);
+            Assert.IsTrue(broker.AvailableCash == 7458);
+
+            //Sell remaining stock  
+            broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Sell, 100); //execute
+            Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
+            Assert.IsTrue(broker.TotalTransactions == 4);
+            Assert.IsTrue(broker.OrderHistory.Count == 5);
+            Assert.IsTrue(broker.StockPortfolio.Count == 0);
+            Assert.IsTrue(broker.TotalTransactionFees == 28);
+            Assert.IsTrue(broker.AvailableCash == 9972m);
+            Assert.IsTrue(broker.StartingCash == 10000m);
+
+            string x = "";
+        }
+
+        private void processOrder(Order data, EventArgs e)
+        {
+            Assert.IsTrue(data.ExecutionDate == DateTime.Today);
+           // Assert.IsTrue(data.ExecutionPrice == 25.21m);
+            //Assert.IsTrue(data.DateSubmitted == DateTime.Today);
+            //Assert.IsTrue(data.Quantity == 100);
+            Assert.IsTrue(data.Status ==  OrderStatus.Complete);
+            Assert.IsTrue(data.OrderType == OrderType.Market);
+            Assert.IsTrue(data.Symbol == "SPY");
+        }
+        
 
         [TestMethod()]
         public void RSITest()
@@ -108,7 +197,7 @@ namespace QuantTrade.Tests
             string symbol = "DONOTDELETE";
 
             IDataReader reader = new CSVReader();
-            reader.OnData += Reader_OnData;
+            reader.OnTradeBar += Reader_OnData;
             reader.ReadData(symbol, Resolution.Daily);
             
         }

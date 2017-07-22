@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using QuantTrade.Core;
-
 using System.ComponentModel;
 using System.Diagnostics;
+using QuantTrade.Core.Securities;
 
 namespace QuantTrade.Core.Indicators
 {
@@ -32,7 +32,7 @@ namespace QuantTrade.Core.Indicators
             _rollingSum = new List<decimal>();
         }
 
-      
+
         // <summary>
         /// Gets called from other indicators
         /// </summary>

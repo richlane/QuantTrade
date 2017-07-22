@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using QuantTrade.Core;
 using System.Diagnostics;
+using QuantTrade.Core.Securities;
 
 namespace QuantTrade.Core.Indicators
 {
@@ -14,8 +15,7 @@ namespace QuantTrade.Core.Indicators
         private ExponentialMovingAverage _avgGain;
         private ExponentialMovingAverage _avgLoss;
         private decimal ? _previousValue;
-
-
+        
         public override bool IsReady
         {
             get

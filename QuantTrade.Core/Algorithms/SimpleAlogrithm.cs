@@ -1,5 +1,6 @@
 ﻿using QuantTrade.Core;
 using QuantTrade.Core.Indicators;
+using QuantTrade.Core.Securities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,15 +9,10 @@ using System.Threading.Tasks;
 
 namespace QuantTrade.Core.Algorithm
 {
-    public enum Action
-    {
-        Buy, Sell, Hold
-    }
-
     public class SimpleAlogrithm : BaseAlgorithm, IAlogorithm
     {
-        private string _symbol = "SPY";
-        bool _buyAndHold = true;
+        private string _symbol = "SPXL";
+        bool _buyAndHold = false;
 
         int _smaLookBackPeriod = 30;
         int _rsiLookBackPeriod = 2;
@@ -43,37 +39,52 @@ namespace QuantTrade.Core.Algorithm
         bool _firstRun = true;
         decimal _sellStopPrice;
         decimal _pctToInvest;
-
-
+     
         #endregion
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void subscribeToEvents()
+        {
+            //recieving updated trade data
+            base.OnTradeBarEvent += this.OnTradeBarEvent;
+            base.OnOrderEvent += this.OnOrderEvent;
+        }
+        
+        
         /// <summary>
         /// Launch Algo
         /// </summary>
         public void Initialize()
         {
+            //Update base class proprties 
             SetStartDate(_startYear, 1, 1);
             SetEndDate(_endYear, 12, 31);
-            Portfolio.Cash = _availableCash;
+            StartingCash = _availableCash;
             TransactionFee = _transactionFee;
             Resolution = _resolution;
             Symbol = _symbol;
+            subscribeToEvents();
 
             //Setup Indictors
             _rsi = GenerateRelativeStrengthIndexIndicator(_rsiLookBackPeriod, MovingAverageType.Wilders);
             _sma = GenerateSimpleMovingAverageIndicator(_smaLookBackPeriod);
-
         
             //Execute Tests
             RunTest();
+        }
 
-            //All Done
-            Console.WriteLine("Samples Read: " + _rsi.Samples);
+
+        public void OnOrderEvent(Order data, EventArgs e)
+        {
+            
         }
 
         /// <summary>
         /// Event Handing new trade bar
         /// </summary>
-        public override void OnData(TradeBar data, EventArgs e)
+        public void OnTradeBarEvent(TradeBar data, EventArgs e)
         {
             //Make sure indicators are ready
             if (!_rsi.IsReady || !_sma.IsReady)
@@ -85,18 +96,20 @@ namespace QuantTrade.Core.Algorithm
 
             Action action = getBuySellHoldDecision(data);
 
-
             switch (action)
             {
                 case Action.Buy:
+                    decimal dollarAmt = (Broker.AvailableCash * _pctToInvest);
+                    int qty = Convert.ToInt32(Math.Round(dollarAmt / data.Close));
+                    base.ExecuteOrder(Action.Buy, OrderType.MOC, qty);
                     break;
 
                 case Action.Sell:
+                     base.ExecuteOrder(Action.Sell, OrderType.MOC, Broker.StockPortfolio.Find(p=> p.Symbol == _symbol).Quantity);
                     break;
             }
 
-            Console.WriteLine(action);
-
+   
         }
 
         private Action getBuySellHoldDecision(TradeBar data)
