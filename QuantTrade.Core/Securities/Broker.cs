@@ -45,22 +45,6 @@ namespace QuantTrade.Core.Securities
 
         public Decimal TotalTrades { get; private set; }
 
-        //public Decimal PortfolioValue
-        //{
-        //    get
-        //    {
-        //        decimal total = 0;
-        //        foreach (Stock item in StockPortfolio)
-        //        {
-        //            total += item.StockValue;
-        //        }
-
-        //        return total;
-        //    }
-        //}
-
-        //public decimal TotalProfits { get; set; }
-
         public decimal TotalTransactionFees { get; private set; }
         
         public List<Stock> Holdings { get; private set; }
@@ -97,6 +81,7 @@ namespace QuantTrade.Core.Securities
         /// </summary>
         private void updateHoldingsForFilledOrder(Order order)
         {
+            //Only process filled orders
             if (order.Status != OrderStatus.Filled) return;
                             
             OrderHistory.Add(order);
@@ -106,51 +91,57 @@ namespace QuantTrade.Core.Securities
             TotalTransactionFees += TransactionFee;
             AvailableCash -= TransactionFee;
 
-            Stock newStock = new Stock()
-            {
-                Symbol = order.Symbol,
-                Quantity = order.Quantity,
-                FillPrice=order.FillPrice
-            };
+            decimal totalInvested = order.Quantity * order.FillPrice;
 
             ///////////////////////////////
-            //Update buy transaction
+            //Buying
             //////////////////////////////
-            if (order.Action == Action.Buy)
+            switch (order.Action)
             {
-                AvailableCash -= (order.Quantity * order.FillPrice);
+                //Buying
+                case Action.Buy:
+                    AvailableCash -= totalInvested;
 
-                if(Holdings.Exists(p => p.Symbol == newStock.Symbol))
-                {
-                    Stock existingStock = Holdings.Find(p => p.Symbol == newStock.Symbol);
-                    existingStock.Quantity += newStock.Quantity;
-                    existingStock.FillPrice = newStock.FillPrice;
-                }
-                else
-                {
-                    Holdings.Add(newStock);
-                }
-            }
-            ///////////////////////////////
-            //Update sell transaction
-            //////////////////////////////
-            else if (order.Action == Action.Sell)
-            {
-                AvailableCash += (order.Quantity * order.FillPrice);
-
-                if (Holdings.Exists(p => p.Symbol == newStock.Symbol))
-                {
-                    Stock existingStock  = Holdings.Find(p => p.Symbol == newStock.Symbol);
-                    existingStock.Quantity -= order.Quantity;
-
-                    if (existingStock.Quantity <=0 )
+                    //Find existing stock in holdings
+                    if (Holdings.Exists(p => p.Symbol == order.Symbol))
                     {
-                        Holdings.Remove(existingStock);
+                        Stock stock = Holdings.Find(p => p.Symbol == order.Symbol);
+                        stock.Quantity += order.Quantity;
+                        stock.TotalInvested += totalInvested;
                     }
-                }
-           
-            }
+                    //Create a new stock object and add to holdings
+                    else
+                    {
+                        Stock newStock = new Stock()
+                        {
+                            Symbol = order.Symbol,
+                            Quantity = order.Quantity,
+                            TotalInvested = totalInvested
+                        };
 
+                        Holdings.Add(newStock);
+                    }
+                    break;
+
+                ///////////////////////
+                //Selling
+                ///////////////////////
+                case Action.Sell:
+                    AvailableCash += (order.Quantity * order.FillPrice);
+
+                    if (Holdings.Exists(p => p.Symbol == order.Symbol))
+                    {
+                        Stock stock = Holdings.Find(p => p.Symbol == order.Symbol);
+                        stock.Quantity -= order.Quantity;
+                        stock.TotalInvested -= totalInvested;
+
+                        if (stock.Quantity <= 0)
+                        {
+                            Holdings.Remove(stock);
+                        }
+                    }
+                    break;
+            }
         }
 
         /// <summary>
@@ -165,7 +156,7 @@ namespace QuantTrade.Core.Securities
             {
                 if (AvailableCash < (order.Quantity * order.FillPrice))
                 {
-                    Logger.Log($"{order.FillDate} - Unable to process Buy order: Insufficient funds.");
+                   // Logger.Log($"{order.FillDate} - Unable to process Buy order: Insufficient funds.");
                     isValid = false;
                 }
             }
@@ -176,7 +167,7 @@ namespace QuantTrade.Core.Securities
                if(!Holdings.Exists(p => p.Symbol == order.Symbol && p.Quantity >= order.Quantity))
                 {
                    
-                    Logger.Log($"{order.FillDate} - Unable to process Sell order: {order.Symbol} not in Porfolio or qty exceeded.");
+                   // Logger.Log($"{order.FillDate} - Unable to process Sell order: {order.Symbol} not in Porfolio or qty exceeded.");
                     isValid = false;
                 }
             }
@@ -242,7 +233,7 @@ namespace QuantTrade.Core.Securities
             order.Status = OrderStatus.Filled;
 
             updateHoldingsForFilledOrder(order);
-            Logger.Log($"{order.FillDate} - {order.Action} Order Complete");
+            //Logger.Log($"{order.FillDate} - {order.Action} Order Complete");
 
             //Throw event
             if (OnOrder != null)

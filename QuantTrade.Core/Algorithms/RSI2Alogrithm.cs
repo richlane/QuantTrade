@@ -24,8 +24,6 @@ namespace QuantTrade.Core.Algorithm
         private int _startYear = 2007;
         private int _endYear = 2016;
 
-
-
         //Sell Stop
         bool _useSellStop = true;
         decimal _sellStopMultiplier = .05M;
@@ -90,7 +88,7 @@ namespace QuantTrade.Core.Algorithm
             //set sell stop price
             if (data.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
             {
-                _sellStopPrice = Broker.Holdings.Find(p => p.Symbol == _symbol).FillPrice * (1 - _sellStopMultiplier);
+                _sellStopPrice = Broker.Holdings.Find(p => p.Symbol == _symbol).AverageFillPrice * (1 - _sellStopMultiplier);
             }
         }
 

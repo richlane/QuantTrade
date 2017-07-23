@@ -44,7 +44,7 @@ namespace QuantTrade.Tests
 
 
         [TestMethod()]
-        public void BrokerMOCBuyTest()
+        public void BrokerMOCTest()
         {
             //
             TradeBar tradeBar = new TradeBar()
@@ -65,14 +65,15 @@ namespace QuantTrade.Tests
             Assert.IsTrue(broker.TransactionFee == 7m);
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 0);
-            broker.OnOrder += processOrder;
+            broker.OnOrder += processMOCOrder;
 
             //Buy stock  
             broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Buy, 100); //execute
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 1);
             Assert.IsTrue(broker.Holdings.Count == 1);
-            Assert.IsTrue(broker.Holdings[0].FillPrice > 0);
+            Assert.IsTrue(broker.Holdings[0].AverageFillPrice == tradeBar.Close);
+            Assert.IsTrue(broker.Holdings[0].TotalInvested == 2521m);
             Assert.IsTrue(broker.TotalTrades ==1);
             Assert.IsTrue(broker.TotalTransactionFees == 7);
             Assert.IsTrue(broker.AvailableCash == 7472);
@@ -82,6 +83,8 @@ namespace QuantTrade.Tests
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 2);
             Assert.IsTrue(broker.TotalTrades == 2);
+            Assert.IsTrue(broker.Holdings[0].TotalInvested == 5042);
+            Assert.IsTrue(broker.Holdings[0].AverageFillPrice == tradeBar.Close);
             Assert.IsTrue(broker.Holdings.Count == 1);
             Assert.IsTrue(broker.TotalTransactionFees == 14);
             Assert.IsTrue(broker.TotalTradesCancelled == 0);
@@ -93,7 +96,9 @@ namespace QuantTrade.Tests
             Assert.IsTrue(broker.OrderHistory.Count == 3);
             Assert.IsTrue(broker.TotalTrades == 2);
             Assert.IsTrue(broker.Holdings.Count == 1);
+            Assert.IsTrue(broker.Holdings[0].AverageFillPrice == tradeBar.Close);
             Assert.IsTrue(broker.TotalTransactionFees == 14);
+            Assert.IsTrue(broker.Holdings[0].TotalInvested == 5042);
             Assert.IsTrue(broker.TotalTradesCancelled == 1);
             Assert.IsTrue(broker.AvailableCash == 4944);
 
@@ -101,6 +106,8 @@ namespace QuantTrade.Tests
             broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Sell, 100); //execute
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 4);
+            Assert.IsTrue(broker.Holdings[0].TotalInvested == 2521);
+            Assert.IsTrue(broker.Holdings[0].AverageFillPrice == tradeBar.Close);
             Assert.IsTrue(broker.TotalTrades == 3);
             Assert.IsTrue(broker.Holdings.Count == 1);
             Assert.IsTrue(broker.TotalTransactionFees == 21);
@@ -119,7 +126,53 @@ namespace QuantTrade.Tests
             string x = "";
         }
 
-        private void processOrder(Order data, EventArgs e)
+        public void BrokerMOOTest()
+        {
+            //
+            TradeBar tradeBar = new TradeBar()
+            {
+                Close = 25.21m,
+                Day = DateTime.Today,
+                High = 26m,
+                Low = 24m,
+                Open = 24.49m,
+                Symbol = "SPY",
+                TradeResolution = Resolution.Daily,
+                Volume = 10000
+            };
+
+            //
+            Broker broker = new Broker(10000m, 7m);
+
+            Assert.IsTrue(broker.TransactionFee == 7m);
+            Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
+            Assert.IsTrue(broker.OrderHistory.Count == 0);
+            broker.OnOrder += processMOOOrder;
+
+            //Buy stock  
+            broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Buy, 100); //execute
+            Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
+            Assert.IsTrue(broker.OrderHistory.Count == 1);
+            Assert.IsTrue(broker.Holdings.Count == 1);
+            Assert.IsTrue(broker.TotalTrades == 1);
+            Assert.IsTrue(broker.TotalTransactionFees == 7);
+            Assert.IsTrue(broker.AvailableCash == 7472);
+
+            string x = "";
+        }
+
+        private void processMOOOrder(Order data, EventArgs e)
+        {
+            Assert.IsTrue(data.FillDate == DateTime.Today);
+            Assert.IsTrue(data.FillPrice == 25.21m);
+            Assert.IsTrue(data.DateSubmitted == DateTime.Today);
+            Assert.IsTrue(data.Quantity == 100);
+            Assert.IsTrue(data.Status == OrderStatus.Filled);
+            Assert.IsTrue(data.OrderType == OrderType.Market);
+            Assert.IsTrue(data.Symbol == "SPY");
+        }
+
+        private void processMOCOrder(Order data, EventArgs e)
         {
             Assert.IsTrue(data.FillDate == DateTime.Today);
             Assert.IsTrue(data.FillPrice == 25.21m);

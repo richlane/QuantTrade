@@ -12,14 +12,15 @@ namespace QuantTrade.Core.Securities
 
         public string Symbol { get; set; }
 
-        public decimal FillPrice { get; set; }
-
-        public Decimal TotalValue
+        public decimal AverageFillPrice
         {
             get
             {
-                return FillPrice * Quantity;
+                return TotalInvested/Quantity;
             }
         }
+
+        public Decimal TotalInvested { get; set; }
+      
     }
 }

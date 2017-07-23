@@ -97,12 +97,14 @@ namespace QuantTrade.Core.Algorithm
 
             Logger.Log(" ");
             Logger.Log("---------------------------------------------------");
+            Logger.Log($"Symbol: {Symbol}");
+            Logger.Log($"Dates: {StartDate} - {EndDate}");
             Logger.Log($"Starting Cash: {startingCash}");
             Logger.Log($"Ending Cash: {endingCash}");
             Logger.Log($"Total Profitability: {profitability}%");
             Logger.Log($"Total Fees: ${Broker.TotalTransactionFees}");
             Logger.Log($"Total Trades: {Broker.TotalTrades}");
-            Logger.Log($"Trades Cancelled: {Broker.TotalTradesCancelled}");
+            Logger.Log($"Trades Cancelled: {Broker.TotalTradesCancelled} (Insufficient funds)");
             Logger.Log("---------------------------------------------------");
             Logger.Log(" ");
         }
