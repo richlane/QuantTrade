@@ -19,7 +19,9 @@ namespace QuantTrade.Core.Algorithm
         #region Properties 
 
         private TradeBar _currentTradebar;
-       
+
+        private bool _allowMargin;
+
         public Broker Broker { get; set; }
 
         public DateTime StartDate { get; set; }
@@ -77,7 +79,8 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         public void RunTest()
         {
-            Broker = new Broker(StartingCash, TransactionFee);
+            bool allowMargin = Convert.ToBoolean(Configuration.Config.GetToken("allow-margin"));
+            Broker = new Broker(StartingCash, TransactionFee, allowMargin);
             Broker.OnOrder += this.OnOrder;
 
             Logger.Log("Staring Run...............");
@@ -104,7 +107,7 @@ namespace QuantTrade.Core.Algorithm
             Logger.Log($"Net Profit: {profitability}%");
             Logger.Log($"Total Fees: ${Broker.TotalTransactionFees}");
             Logger.Log($"Total Trades: {Broker.TotalTrades}");
-            Logger.Log($"Trades Cancelled: {Broker.TotalTradesCancelled} (Insufficient funds)");
+            Logger.Log($"Trades Cancelled: {Broker.TotalTradesCancelled}");
             Logger.Log("---------------------------------------------------");
             Logger.Log(" ");
         }
@@ -150,7 +153,6 @@ namespace QuantTrade.Core.Algorithm
 
         public void ExecuteOrder(Core.Action action, OrderType orderType, int quantity)
         {
-            
             //Place Order
             Broker.ExecuteOrder(_currentTradebar, orderType, action, quantity);
         }

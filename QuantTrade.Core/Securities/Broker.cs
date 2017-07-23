@@ -27,6 +27,8 @@ namespace QuantTrade.Core.Securities
 
         #region Portfolio
 
+        private bool _allowMargin;
+
         private decimal _totalWins;
 
         private decimal _totalLosses;
@@ -67,7 +69,7 @@ namespace QuantTrade.Core.Securities
     /// <summary>
     /// Constructor
     /// </summary>
-    public Broker(decimal startingCash, decimal transactionFee)
+    public Broker(decimal startingCash, decimal transactionFee, bool allowMargin)
         {
             StartingCash = startingCash;
             AvailableCash = startingCash;
@@ -77,6 +79,8 @@ namespace QuantTrade.Core.Securities
 
             OrderHistory = new List<Order>();
             PendingOrderQueue = new List<Order>();
+
+            _allowMargin = allowMargin;
         }
 
         /// <summary>
@@ -168,8 +172,8 @@ namespace QuantTrade.Core.Securities
             {
                 if (AvailableCash < (order.Quantity * order.FillPrice))
                 {
-                    // Logger.Log($"{order.FillDate} - Unable to process Buy order: Insufficient funds.");
-                    isValid = false;
+                    if( !_allowMargin )
+                        isValid = false;
                 }
             }
             //Sell side validation
@@ -207,10 +211,11 @@ namespace QuantTrade.Core.Securities
             {
                 Order order = PendingOrderQueue[i];
 
+                // tradeBar.Day.AddDays(-1).ToShortDateString() == order.DateSubmitted.ToShortDateString())
+                
                 //Pick up MOO orders placed yesterday
                 if (order.OrderType == OrderType.MOO &&
-                    order.Status == OrderStatus.Pending &&
-                    tradeBar.Day.AddDays(-1).ToShortDateString() == order.DateSubmitted.ToShortDateString())
+                    order.Status == OrderStatus.Pending)
                 {
                     fillOrder(tradeBar, order);
 

@@ -60,7 +60,7 @@ namespace QuantTrade.Tests
             };
 
             //
-            Broker broker = new Broker(10000m, 7m);
+            Broker broker = new Broker(10000m, 7m, false);
          
             Assert.IsTrue(broker.TransactionFee == 7m);
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
@@ -166,7 +166,7 @@ namespace QuantTrade.Tests
                 Volume = 10000
             };
             //
-            Broker broker = new Broker(10000m, 7m);
+            Broker broker = new Broker(10000m, 7m, false);
 
             Assert.IsTrue(broker.TransactionFee == 7m);
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);

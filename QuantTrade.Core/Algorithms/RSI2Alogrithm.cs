@@ -41,11 +41,11 @@ namespace QuantTrade.Core.Algorithm
         #region Misc
 
         bool _isLastTradingDay;
-        bool _holdingStock;
         decimal _sellStopPrice;
         decimal _pctToInvest;
         bool _firstRun;
         string _comment;
+
         #endregion
 
         /// <summary>
@@ -67,8 +67,8 @@ namespace QuantTrade.Core.Algorithm
             _firstRun = true;
 
             //Update base class proprties 
-            SetStartDate(_startYear-1, 12, 2); //Set Start Date --> Need 45 days for the warmup period so start in November
-            SetEndDate(_endYear, 3, 10);
+            SetStartDate(_startYear-1, 11, 15); //Set Start Date --> Need 45 days for the warmup period so start in November
+            SetEndDate(_endYear, 12, 31);
 
             StartingCash = _availableCash;
             TransactionFee = _transactionFee;
@@ -90,14 +90,7 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         public void OnOrderEvent(Order data, EventArgs e)
         {
-            //if(data.Status== OrderStatus.Filled)
-            //{
-            //    _holdingStock = true;
-            //}
-            //else
-            //{
-            //    _holdingStock = false;
-            //}
+            //Logger.Log("-->" + data.Action.ToString());
 
             //set sell stop price
             if (data.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
@@ -171,25 +164,24 @@ namespace QuantTrade.Core.Algorithm
                 _pctToInvest < 1M)
             {
                 action = Action.Buy;
-                //_holdingStock = true;
                 buying = true;
-      
-                //Calculate how much we want to invest using the 2%, 3%, 5% strategy
-               
-                //if (_pctToInvest == 0)
-                //{
-                //    _pctToInvest = .2M;
-                //}
-                //else if (_pctToInvest == .2M)
-                //{
-                //    _pctToInvest = .38M;
-                //}
-                //else if (_pctToInvest == .38M)
-                //{
-                //    _pctToInvest = 1M;
-                //}
 
-                _pctToInvest = 1M;
+                //Calculate how much we want to invest using the 2%, 3%, 5% strategy
+
+                if (_pctToInvest == 0)
+                {
+                    _pctToInvest = .2M;
+                }
+                else if (_pctToInvest == .2M)
+                {
+                    _pctToInvest = .38M;
+                }
+                else if (_pctToInvest == .38M)
+                {
+                    _pctToInvest = 1M;
+                }
+
+                //_pctToInvest = 1M;
 
 
                 //if (_pctToInvest == 0)
@@ -213,7 +205,6 @@ namespace QuantTrade.Core.Algorithm
                 {
                     action = Action.Sell;
                     _pctToInvest = 0;
-                    //_holdingStock = false;
                     _sellStopPrice = 0;
                 }
                 //Sell - last trading day and we want to close out positons to calc returns
@@ -221,7 +212,6 @@ namespace QuantTrade.Core.Algorithm
                 {
                     action = Action.Sell;
                     _pctToInvest = 0;
-                    //_holdingStock = false;
                     _sellStopPrice = 0;
                 }
                 //Sell - stopped out
@@ -229,7 +219,6 @@ namespace QuantTrade.Core.Algorithm
                 {
                     action = Action.Sell;
                     _pctToInvest = 0;
-                    //_holdingStock = false;
                     _sellStopPrice = 0;
                     _comment = "stopped out";
                 }
@@ -251,18 +240,14 @@ namespace QuantTrade.Core.Algorithm
         {
             Action action = Action.Hold;
        
-            if (_holdingStock == false &&
-                _isLastTradingDay == false)
+            if (Broker.IsHoldingStock(_symbol) == false && _isLastTradingDay == false)
             {
                 action = Action.Buy;
-                _holdingStock = true;
                 _pctToInvest = 1M;
             }
-            else if (_holdingStock == true &&
-                 _isLastTradingDay)
+            else if (Broker.IsHoldingStock(_symbol) == true && _isLastTradingDay)
             {
                 action = Action.Sell;
-                _holdingStock = false;
                 _pctToInvest = 0M;
             }
             return action;
@@ -279,7 +264,7 @@ namespace QuantTrade.Core.Algorithm
             string status = action.ToString();
 
 
-            if (_holdingStock == false && action== Action.Hold)
+            if (Broker.IsHoldingStock(_symbol) == false && action== Action.Hold)
             {
                 status = "";
             }
