@@ -126,13 +126,14 @@ namespace QuantTrade.Tests
             string x = "";
         }
 
+        [TestMethod()]
         public void BrokerMOOTest()
         {
             //
-            TradeBar tradeBar = new TradeBar()
+            TradeBar tradeBar1 = new TradeBar()
             {
                 Close = 25.21m,
-                Day = DateTime.Today,
+                Day = DateTime.Today.AddDays(-2),
                 High = 26m,
                 Low = 24m,
                 Open = 24.49m,
@@ -141,6 +142,29 @@ namespace QuantTrade.Tests
                 Volume = 10000
             };
 
+            TradeBar tradeBar2 = new TradeBar()
+            {
+                Close = 26.21m,
+                Day = DateTime.Today.AddDays(-1),
+                High = 27m,
+                Low = 25m,
+                Open = 25.49m,
+                Symbol = "SPY",
+                TradeResolution = Resolution.Daily,
+                Volume = 10000
+            };
+
+            TradeBar tradeBar3 = new TradeBar()
+            {
+                Close = 27.21m,
+                Day = DateTime.Today,
+                High = 28m,
+                Low = 26m,
+                Open = 26.49m,
+                Symbol = "SPY",
+                TradeResolution = Resolution.Daily,
+                Volume = 10000
+            };
             //
             Broker broker = new Broker(10000m, 7m);
 
@@ -149,23 +173,35 @@ namespace QuantTrade.Tests
             Assert.IsTrue(broker.OrderHistory.Count == 0);
             broker.OnOrder += processMOOOrder;
 
-            //Buy stock  
-            broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Buy, 100); //execute
+            //Buy stock - order gets queued becuase it is MOO 
+            broker.ExecuteOrder(tradeBar1, OrderType.MOO, Core.Action.Buy, 100); //execute
+            Assert.IsTrue(broker.PendingOrderQueue.Count == 1);
+            Assert.IsTrue(broker.OrderHistory.Count == 0);
+            Assert.IsTrue(broker.Holdings.Count == 0);
+            Assert.IsTrue(broker.TotalTrades == 0);
+            Assert.IsTrue(broker.TotalTransactionFees == 0);
+            Assert.IsTrue(broker.AvailableCash == 10000);
+
+          //Process orders in teh QUEUE
+            broker.ProcessPendingOrderQueue(tradeBar2);
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 1);
-            Assert.IsTrue(broker.Holdings.Count == 1);
             Assert.IsTrue(broker.TotalTrades == 1);
+            Assert.IsTrue(broker.Holdings[0].AverageFillPrice == tradeBar2.Open);
+            Assert.IsTrue(broker.Holdings[0].TotalInvested == 2549);
+            Assert.IsTrue(broker.Holdings.Count == 1);
             Assert.IsTrue(broker.TotalTransactionFees == 7);
-            Assert.IsTrue(broker.AvailableCash == 7472);
+            Assert.IsTrue(broker.TotalTradesCancelled == 0);
+            Assert.IsTrue(broker.AvailableCash == 7444);
+
+            //Sell stock - order gets queued becuase it is MOO 
 
             string x = "";
         }
 
         private void processMOOOrder(Order data, EventArgs e)
         {
-            Assert.IsTrue(data.FillDate == DateTime.Today);
-            Assert.IsTrue(data.FillPrice == 25.21m);
-            Assert.IsTrue(data.DateSubmitted == DateTime.Today);
+            Assert.IsTrue(data.FillPrice == 25.49m);
             Assert.IsTrue(data.Quantity == 100);
             Assert.IsTrue(data.Status == OrderStatus.Filled);
             Assert.IsTrue(data.OrderType == OrderType.Market);

@@ -1,5 +1,6 @@
 ﻿{
   "data-directory": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads",
   "default-alogrithm": "RSI2Alogrithm",
-  "api-key":  "1CP91IVE5IWVQE4A"
+  "api-key": "1CP91IVE5IWVQE4A",
+  "transaction-log":  "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\transactions.csv"
 }

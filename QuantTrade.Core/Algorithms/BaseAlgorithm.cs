@@ -101,7 +101,7 @@ namespace QuantTrade.Core.Algorithm
             Logger.Log($"Dates: {StartDate} - {EndDate}");
             Logger.Log($"Starting Cash: {startingCash}");
             Logger.Log($"Ending Cash: {endingCash}");
-            Logger.Log($"Total Profitability: {profitability}%");
+            Logger.Log($"Net Profit: {profitability}%");
             Logger.Log($"Total Fees: ${Broker.TotalTransactionFees}");
             Logger.Log($"Total Trades: {Broker.TotalTrades}");
             Logger.Log($"Trades Cancelled: {Broker.TotalTradesCancelled} (Insufficient funds)");
@@ -136,7 +136,10 @@ namespace QuantTrade.Core.Algorithm
             {
                 item.UpdateIndicator(data.Close);
             }
-       
+
+            //Update queued orders in the broker queue
+            Broker.ProcessPendingOrderQueue(data);
+
             //Update the inheriting class OnData events
             if (OnTradeBarEvent != null)
             {

@@ -19,7 +19,7 @@ namespace QuantTrade.Core.Securities
         /// <summary>
         /// The date the actual order was placed but
         /// </summary>
-        public DateTime DateSubmitted { get; private set; }
+        public DateTime DateSubmitted { get;  set; }
 
         public int Quantity { get; set; }
         
@@ -32,7 +32,7 @@ namespace QuantTrade.Core.Securities
         public Order()
         {
             OrderID = Guid.NewGuid();
-            DateSubmitted = DateTime.Today;
+            Status = OrderStatus.New;
         }
 
         

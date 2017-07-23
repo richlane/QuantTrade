@@ -46,22 +46,34 @@ namespace QuantTrade.Core.Securities
         public Decimal TotalTrades { get; private set; }
 
         public decimal TotalTransactionFees { get; private set; }
-        
+
         public List<Stock> Holdings { get; private set; }
-        
+
+    
         #endregion
 
 
         /// <summary>
-        /// Constructor
+        /// 
         /// </summary>
-        public Broker(decimal startingCash, decimal transactionFee)
+        /// <returns></returns>
+    public bool IsHoldingStock(string symbol)
+    {
+            return Holdings.Exists(p => p.Symbol == symbol);
+    }
+
+   
+
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    public Broker(decimal startingCash, decimal transactionFee)
         {
             StartingCash = startingCash;
             AvailableCash = startingCash;
             TransactionFee = transactionFee;
 
-            Holdings  = new List<Stock>();
+            Holdings = new List<Stock>();
 
             OrderHistory = new List<Order>();
             PendingOrderQueue = new List<Order>();
@@ -75,7 +87,7 @@ namespace QuantTrade.Core.Securities
         {
             throw new ApplicationException("Not implemented");
         }
-        
+
         /// <summary>
         /// Updated holdings when an order gets filled.
         /// </summary>
@@ -83,7 +95,7 @@ namespace QuantTrade.Core.Securities
         {
             //Only process filled orders
             if (order.Status != OrderStatus.Filled) return;
-                            
+
             OrderHistory.Add(order);
             TotalTrades++;
 
@@ -156,7 +168,7 @@ namespace QuantTrade.Core.Securities
             {
                 if (AvailableCash < (order.Quantity * order.FillPrice))
                 {
-                   // Logger.Log($"{order.FillDate} - Unable to process Buy order: Insufficient funds.");
+                    // Logger.Log($"{order.FillDate} - Unable to process Buy order: Insufficient funds.");
                     isValid = false;
                 }
             }
@@ -164,16 +176,16 @@ namespace QuantTrade.Core.Securities
             else if (order.Action == Action.Sell)
             {
                 //Make sure we have the stock
-               if(!Holdings.Exists(p => p.Symbol == order.Symbol && p.Quantity >= order.Quantity))
+                if (!Holdings.Exists(p => p.Symbol == order.Symbol && p.Quantity >= order.Quantity))
                 {
-                   
-                   // Logger.Log($"{order.FillDate} - Unable to process Sell order: {order.Symbol} not in Porfolio or qty exceeded.");
+
+                    // Logger.Log($"{order.FillDate} - Unable to process Sell order: {order.Symbol} not in Porfolio or qty exceeded.");
                     isValid = false;
                 }
             }
 
             //Cancel order
-            if(isValid == false)
+            if (isValid == false)
             {
                 order.Status = OrderStatus.Cancelled;
                 order.FillPrice = 0;
@@ -198,7 +210,7 @@ namespace QuantTrade.Core.Securities
                 //Pick up MOO orders placed yesterday
                 if (order.OrderType == OrderType.MOO &&
                     order.Status == OrderStatus.Pending &&
-                    tradeBar.Day.AddDays(-1) == order.DateSubmitted)
+                    tradeBar.Day.AddDays(-1).ToShortDateString() == order.DateSubmitted.ToShortDateString())
                 {
                     fillOrder(tradeBar, order);
 
@@ -213,23 +225,33 @@ namespace QuantTrade.Core.Securities
         /// </summary>
         private void fillOrder(TradeBar tradeBar, Order order)
         {
-            //Process MOC & Markets orders
-            if (order.OrderType == OrderType.MOC || order.OrderType == OrderType.Market)
+            //Makes sure we are supposed to be here
+            if (order.Status != OrderStatus.New && order.Status != OrderStatus.Pending)
+                return; 
+           
+            //put MOO orders in the QUEUE
+            if (order.OrderType == OrderType.MOO && order.Status == OrderStatus.New) 
             {
-                order.FillPrice = tradeBar.Close;
+                order.Status = OrderStatus.Pending;
+                PendingOrderQueue.Add(order);
+                return;
             }
-            //Process MOO Orders
-            else if (order.OrderType == OrderType.MOO)
+
+            //Process ready orders 
+            //Which price to use for fill?
+            order.FillPrice = tradeBar.Close;
+
+            if(order.OrderType == OrderType.MOO)
             {
                 order.FillPrice = tradeBar.Open;
             }
-
-            //VALIDATION REQUIRED!!!!
-            if (validateOrder(order) == false) return;
-
+          
+           //VALIDATION REQUIRED - make sure we can afford to buy the stock
+           if (validateOrder(order) == false) return;
+      
             //Update porfolio
             order.OrderType = OrderType.Market;
-            order.FillDate = DateTime.Today;
+            order.FillDate = tradeBar.Day;
             order.Status = OrderStatus.Filled;
 
             updateHoldingsForFilledOrder(order);
@@ -254,7 +276,8 @@ namespace QuantTrade.Core.Securities
                 Symbol = tradeBar.Symbol,
                 Action = action,
                 OrderType = orderType,
-                Quantity = quantity
+                Quantity = quantity,
+                DateSubmitted = tradeBar.Day
             };
 
             fillOrder(tradeBar, order);
