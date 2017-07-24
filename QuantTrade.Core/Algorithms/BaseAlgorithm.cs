@@ -105,8 +105,8 @@ namespace QuantTrade.Core.Algorithm
         {
             double totalRunTime = (_endRun - _startRun).Milliseconds;
 
-            decimal profitability = Math.Round( ((Broker.AvailableCash - Broker.StartingCash)/ Broker.StartingCash) *100, 2);
-            string endingCash = string.Format("{0:c}", Broker.AvailableCash);
+            decimal profitability = Math.Round( ((Broker.AvailableCash + Broker.CurrentPortfolioValue - Broker.StartingCash)/ Broker.StartingCash) *100, 2);
+            string endingCash = string.Format("{0:c}", Broker.AvailableCash + Broker.CurrentPortfolioValue);
             string startingCash = string.Format("{0:c}", Broker.StartingCash);
 
             Logger.Log(" ");
@@ -118,6 +118,8 @@ namespace QuantTrade.Core.Algorithm
             Logger.Log($"Starting Cash: {startingCash}");
             Logger.Log($"Ending Cash: {endingCash}");
             Logger.Log($"Net Profit: {profitability}%");
+            Logger.Log($"Win Rate: {Broker.WinRate}%");
+            Logger.Log($"Loss Rate: {Broker.LossRate}%");
             Logger.Log($"Total Fees: ${Broker.TotalTransactionFees}");
             Logger.Log($"Total Trades: {Broker.TotalTrades}");
             Logger.Log($"Trades Cancelled: {Broker.TotalTradesCancelled}");
@@ -154,7 +156,7 @@ namespace QuantTrade.Core.Algorithm
             }
 
             //Update queued orders in the broker queue
-            Broker.ProcessPendingOrderQueue(data);
+            Broker.UpdatePortfolio(data);
 
             //Update the inheriting class OnData events
             if (OnTradeBarEvent != null)

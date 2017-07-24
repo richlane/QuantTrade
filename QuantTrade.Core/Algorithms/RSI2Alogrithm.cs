@@ -40,11 +40,11 @@ namespace QuantTrade.Core.Algorithm
 
         #region Misc
 
-        bool _isLastTradingDay;
         decimal _sellStopPrice;
         decimal _pctToInvest;
         bool _firstRun;
         string _comment;
+       
 
         #endregion
 
@@ -90,8 +90,6 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         public void OnOrderEvent(Order data, EventArgs e)
         {
-            //Logger.Log("-->" + data.Action.ToString());
-
             //set sell stop price
             if (data.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
             {
@@ -110,13 +108,6 @@ namespace QuantTrade.Core.Algorithm
                 return;
             }
                 
-            //Watch for last trading day so we can liquidate portfolio
-            if (data.Day >= EndDate.AddDays(-5).Date)
-            {
-                _isLastTradingDay = true;
-            }
-              
-
             //Buy, Sell, or Hold?
             Action action = getBuySellHoldDecision(data);
 
@@ -160,7 +151,6 @@ namespace QuantTrade.Core.Algorithm
             //Buy Logic
             /////////////////////////////////////////
             if ( _rsi.Value  < _rsiBuyLevel &&
-                _isLastTradingDay == false &&
                 _pctToInvest < 1M)
             {
                 action = Action.Buy;
@@ -207,13 +197,6 @@ namespace QuantTrade.Core.Algorithm
                     _pctToInvest = 0;
                     _sellStopPrice = 0;
                 }
-                //Sell - last trading day and we want to close out positons to calc returns
-                else if (_isLastTradingDay)
-                {
-                    action = Action.Sell;
-                    _pctToInvest = 0;
-                    _sellStopPrice = 0;
-                }
                 //Sell - stopped out
                 else if (_sellStopPrice > 0 && data.Close < _sellStopPrice)
                 {
@@ -240,12 +223,12 @@ namespace QuantTrade.Core.Algorithm
         {
             Action action = Action.Hold;
        
-            if (Broker.IsHoldingStock(_symbol) == false && _isLastTradingDay == false)
+            if (Broker.IsHoldingStock(_symbol) == false)
             {
                 action = Action.Buy;
                 _pctToInvest = 1M;
             }
-            else if (Broker.IsHoldingStock(_symbol) == true && _isLastTradingDay)
+            else if (Broker.IsHoldingStock(_symbol) == true)
             {
                 action = Action.Sell;
                 _pctToInvest = 0M;
@@ -260,7 +243,9 @@ namespace QuantTrade.Core.Algorithm
         /// <param name="action"></param>
         private void logTransacton(TradeBar data, Action action)
         {
-            return ;
+            return;
+
+
             string logData = "";
             string status = action.ToString();
 
@@ -270,11 +255,11 @@ namespace QuantTrade.Core.Algorithm
                 status = "";
             }
 
-                if (_firstRun)
-                {
-                    logData = "Date,Symbol,Action,Open,Close,RSI,SMA,Comment";
-                    Logger.LogTransaction(logData);
-                }
+            if (_firstRun)
+            {
+                logData = "Date,Symbol,Action,Open,Close,RSI,SMA,Comment";
+                Logger.LogTransaction(logData);
+            }
 
             logData = string.Format
                 ("{0},{1},{2},{3},{4},{5},{6},{7}",

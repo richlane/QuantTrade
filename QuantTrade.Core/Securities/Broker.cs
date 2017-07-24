@@ -24,7 +24,6 @@ namespace QuantTrade.Core.Securities
 
         #endregion
 
-
         #region Portfolio
 
         private bool _allowMargin;
@@ -33,9 +32,25 @@ namespace QuantTrade.Core.Securities
 
         private decimal _totalLosses;
 
-        public decimal WinRate { get; private set; }
+        private int _totalSellTrades;
 
-        public decimal LossRate { get; private set; }
+        public int WinRate
+        {
+            get
+            {
+                decimal rate = _totalWins / _totalSellTrades;
+                return Convert.ToInt32(Math.Round(rate * 100));
+            }
+        }
+
+        public int LossRate
+        {
+            get
+            {
+                decimal rate =  _totalLosses / _totalSellTrades;
+                return Convert.ToInt32(Math.Round(rate * 100));
+            }
+        }
 
         public decimal StartingCash { get; private set; }
 
@@ -55,11 +70,14 @@ namespace QuantTrade.Core.Securities
         {
             get
             {
+                decimal totalValue = 0;
+
                 foreach (Stock stock in StockPortfolio)
                 {
-                   
+                    totalValue += stock.CurrentPrice * stock.Quantity;
                 }
-                return 0m;
+
+                return totalValue;
             }
         }
 
@@ -98,7 +116,7 @@ namespace QuantTrade.Core.Securities
         /// <summary>
         /// Updated holdings when an order gets filled.
         /// </summary>
-        private void finalizeOrder(Order order)
+        private void processOrder(Order order)
         {
             //Only process filled orders
             if (order.Status != OrderStatus.Filled) return;
@@ -110,7 +128,7 @@ namespace QuantTrade.Core.Securities
             TotalTransactionFees += TransactionFee;
             AvailableCash -= TransactionFee;
 
-            decimal totalInvested = order.Quantity * order.FillPrice;
+            decimal orderTotal = order.Quantity * order.FillPrice;
 
             ///////////////////////////////
             //Buying
@@ -119,14 +137,14 @@ namespace QuantTrade.Core.Securities
             {
                 //Buying
                 case Action.Buy:
-                    AvailableCash -= totalInvested;
+                    AvailableCash -= orderTotal;
 
                     //Find existing stock in holdings
                     if (IsHoldingStock(order.Symbol))
                     {
                         Stock stock = StockPortfolio.Find(p => p.Symbol == order.Symbol);
                         stock.Quantity += order.Quantity;
-                        stock.TotalInvested += totalInvested;
+                        stock.TotalInvested += orderTotal;
                         stock.CurrentPrice = order.FillPrice;
                     }
                     //Create a new stock object and add to holdings
@@ -136,7 +154,7 @@ namespace QuantTrade.Core.Securities
                         {
                             Symbol = order.Symbol,
                             Quantity = order.Quantity,
-                            TotalInvested = totalInvested,
+                            TotalInvested = orderTotal,
                             CurrentPrice = order.FillPrice
                         };
 
@@ -148,14 +166,28 @@ namespace QuantTrade.Core.Securities
                 //Selling
                 ///////////////////////
                 case Action.Sell:
-                    AvailableCash += (order.Quantity * order.FillPrice);
+                    AvailableCash += orderTotal;
+                    _totalSellTrades++;
 
-                    if (StockPortfolio.Exists(p => p.Symbol == order.Symbol))
+                    if (IsHoldingStock(order.Symbol))
                     {
+                      
                         Stock stock = StockPortfolio.Find(p => p.Symbol == order.Symbol);
-                        stock.Quantity -= order.Quantity;
-                        stock.TotalInvested -= totalInvested;
+                        
+                        //Is this a win or loss?
+                        if (orderTotal > (stock.AverageFillPrice * order.Quantity))
+                        {
+                            _totalWins++;
+                        }
+                        else
+                        {
+                            _totalLosses++;
+                        }
 
+                        stock.TotalInvested -= stock.AverageFillPrice * order.Quantity;  
+                        stock.Quantity -= order.Quantity;
+                
+                        //remove the stock from the portfolio if no longer holding any.
                         if (stock.Quantity <= 0)
                         {
                             StockPortfolio.Remove(stock);
@@ -207,40 +239,9 @@ namespace QuantTrade.Core.Securities
         }
 
         /// <summary>
-        /// Processing order sitting in the queue when a new trade bar comes in (i.e. MOO orders).
-        /// Called from base algo.
-        /// </summary>
-        public void ProcessPendingOrderQueue(TradeBar tradeBar)
-        {
-         
-            for (int i = 0; i < PendingOrderQueue.Count; i++)
-            {
-                Order order = PendingOrderQueue[i];
-
-                //I removed the date check becuase I was not taking into consideration weekends
-                // tradeBar.Day.AddDays(-1).ToShortDateString() == order.DateSubmitted.ToShortDateString())
-                
-                //Pick up MOO orders placed yesterday
-                if (order.OrderType == OrderType.MOO &&
-                    order.Status == OrderStatus.Pending)
-                {
-                    fillOrder(tradeBar, order);
-
-                    PendingOrderQueue.RemoveAt(i);
-                }
-            }
-
-            //Update current value of portfolio
-            if (IsHoldingStock(tradeBar.Symbol))
-            {
-                StockPortfolio.Find(p => p.Symbol == tradeBar.Symbol).CurrentPrice = tradeBar.Close;
-            }
-        }
-
-        /// <summary>
         /// Fills the order.
         /// </summary>
-        private void fillOrder(TradeBar tradeBar, Order order)
+        private void buildOrder(TradeBar tradeBar, Order order)
         {
             //Makes sure we are supposed to be here
             if (order.Status != OrderStatus.New && order.Status != OrderStatus.Pending)
@@ -271,7 +272,7 @@ namespace QuantTrade.Core.Securities
             order.FillDate = tradeBar.Day;
             order.Status = OrderStatus.Filled;
 
-            finalizeOrder(order);
+            processOrder(order);
     
             //Throw event
             if (OnOrder != null)
@@ -285,7 +286,7 @@ namespace QuantTrade.Core.Securities
         /// </summary>
         public void ExecuteOrder(TradeBar tradeBar, OrderType orderType, Action action, int quantity)
         {
-            //Create order object
+            //Create order object then build, validate, and process.
             Order order = order = new Order()
             {
                 Symbol = tradeBar.Symbol,
@@ -295,9 +296,41 @@ namespace QuantTrade.Core.Securities
                 DateSubmitted = tradeBar.Day
             };
 
-            fillOrder(tradeBar, order);
-            
+            buildOrder(tradeBar, order);
         }
+
+        /// <summary>
+        /// Processing order sitting in the queue when a new trade bar comes in (i.e. MOO orders)
+        /// and updates the current proces of stocks on our portfolio.
+        /// Called from base algo.
+        /// </summary>
+        public void UpdatePortfolio(TradeBar tradeBar)
+        {
+
+            for (int i = 0; i < PendingOrderQueue.Count; i++)
+            {
+                Order order = PendingOrderQueue[i];
+
+                //I removed the date check becuase I was not taking into consideration weekends
+                // tradeBar.Day.AddDays(-1).ToShortDateString() == order.DateSubmitted.ToShortDateString())
+
+                //Pick up MOO orders placed yesterday
+                if (order.OrderType == OrderType.MOO &&
+                    order.Status == OrderStatus.Pending)
+                {
+                    buildOrder(tradeBar, order);
+
+                    PendingOrderQueue.RemoveAt(i);
+                }
+            }
+
+            //Update current value of portfolio
+            if (IsHoldingStock(tradeBar.Symbol))
+            {
+                StockPortfolio.Find(p => p.Symbol == tradeBar.Symbol).CurrentPrice = tradeBar.Close;
+            }
+        }
+
 
     }
 }

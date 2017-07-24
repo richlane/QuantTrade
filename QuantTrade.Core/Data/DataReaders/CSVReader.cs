@@ -84,55 +84,6 @@ namespace QuantTrade.Core.Data
                 }
             }
 
-
-            //Read the file
-            //using (StreamReader fileReader = new StreamReader(inputFile))
-            //{
-            //    while (!fileReader.EndOfStream) 
-            //    {
-            //        index++;
-            //        var csv = fileReader.ReadLine().Split(',');
-
-            //        bool skipLine = false;
-            //        DateTime transactionDate = DateTime.Parse(csv[0]);
-
-            //        //Filter dates if applicable
-            //        if (startDate != null && endDate != null)
-            //        {
-            //            if(transactionDate < startDate || transactionDate > endDate)
-            //            {
-            //                skipLine = true;
-            //            }
-            //        }
-
-            //        if (skipLine) continue;
-
-            //        //Time, Open, High, Low, Close, Volume
-            //        TradeBar bar = new TradeBar()
-            //        {
-            //            TradeResolution = resolution,
-            //            Symbol = symbol,
-            //            Day = DateTime.Parse(csv[0]),
-            //            Open = decimal.Parse(csv[1]),
-            //            High = decimal.Parse(csv[2]),
-            //            Low = decimal.Parse(csv[3]),
-            //            Close = decimal.Parse(csv[4]),
-            //            Volume = decimal.Parse(csv[5]),
-            //            SampleNumber = index
-            //        };
-
-            //        //Throw Event to the alogos
-            //        if (OnTradeBar != null)
-            //        {
-            //            OnTradeBar(bar, e);
-            //        }
-
-
-            //    }
-
-
-            //}
-
         }
 
     }
