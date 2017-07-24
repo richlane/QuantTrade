@@ -20,6 +20,9 @@ namespace QuantTrade.Core.Algorithm
 
         private TradeBar _currentTradebar;
 
+        private DateTime _startRun;
+        private DateTime _endRun;
+
         private bool _allowMargin;
 
         public Broker Broker { get; set; }
@@ -79,6 +82,8 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         public void RunTest()
         {
+            _startRun = DateTime.Now;
+
             bool allowMargin = Convert.ToBoolean(Configuration.Config.GetToken("allow-margin"));
             Broker = new Broker(StartingCash, TransactionFee, allowMargin);
             Broker.OnOrder += this.OnOrder;
@@ -86,7 +91,11 @@ namespace QuantTrade.Core.Algorithm
             Logger.Log("Staring Run...............");
             _dataReader.ReadData(Symbol, Resolution, StartDate, EndDate);
 
+            _endRun = DateTime.Now;
+
             generateReport();
+
+            
         }
 
         /// <summary>
@@ -94,6 +103,8 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         private void generateReport()
         {
+            double totalRunTime = (_endRun - _startRun).Milliseconds;
+
             decimal profitability = Math.Round( ((Broker.AvailableCash - Broker.StartingCash)/ Broker.StartingCash) *100, 2);
             string endingCash = string.Format("{0:c}", Broker.AvailableCash);
             string startingCash = string.Format("{0:c}", Broker.StartingCash);
@@ -101,6 +112,8 @@ namespace QuantTrade.Core.Algorithm
             Logger.Log(" ");
             Logger.Log("---------------------------------------------------");
             Logger.Log($"Symbol: {Symbol}");
+            Logger.Log($"Test: {this.GetType().Name}");
+            Logger.Log($"Runtime: {totalRunTime} ms");
             Logger.Log($"Dates: {StartDate} - {EndDate}");
             Logger.Log($"Starting Cash: {startingCash}");
             Logger.Log($"Ending Cash: {endingCash}");

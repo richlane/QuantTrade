@@ -71,9 +71,11 @@ namespace QuantTrade.Tests
             broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Buy, 100); //execute
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 1);
-            Assert.IsTrue(broker.Holdings.Count == 1);
-            Assert.IsTrue(broker.Holdings[0].AverageFillPrice == tradeBar.Close);
-            Assert.IsTrue(broker.Holdings[0].TotalInvested == 2521m);
+            Assert.IsTrue(broker.StockPortfolio.Count == 1);
+            Assert.IsTrue(broker.StockPortfolio[0].AverageFillPrice == tradeBar.Close);
+            Assert.IsTrue(broker.StockPortfolio[0].TotalInvested == 2521m);
+            Assert.IsTrue(broker.StockPortfolio[0].CurrentPrice == 25.21m);
+            Assert.IsTrue(broker.StockPortfolio[0].TotalCurrentValue == 2521m);
             Assert.IsTrue(broker.TotalTrades ==1);
             Assert.IsTrue(broker.TotalTransactionFees == 7);
             Assert.IsTrue(broker.AvailableCash == 7472);
@@ -83,11 +85,12 @@ namespace QuantTrade.Tests
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 2);
             Assert.IsTrue(broker.TotalTrades == 2);
-            Assert.IsTrue(broker.Holdings[0].TotalInvested == 5042);
-            Assert.IsTrue(broker.Holdings[0].AverageFillPrice == tradeBar.Close);
-            Assert.IsTrue(broker.Holdings.Count == 1);
+            Assert.IsTrue(broker.StockPortfolio[0].TotalInvested == 5042);
+            Assert.IsTrue(broker.StockPortfolio[0].AverageFillPrice == tradeBar.Close);
+            Assert.IsTrue(broker.StockPortfolio.Count == 1);
             Assert.IsTrue(broker.TotalTransactionFees == 14);
             Assert.IsTrue(broker.TotalTradesCancelled == 0);
+            Assert.IsTrue(broker.StockPortfolio[0].TotalCurrentValue == 5042);
             Assert.IsTrue(broker.AvailableCash == 4944);
 
             //Exceed buy qty
@@ -95,10 +98,10 @@ namespace QuantTrade.Tests
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 3);
             Assert.IsTrue(broker.TotalTrades == 2);
-            Assert.IsTrue(broker.Holdings.Count == 1);
-            Assert.IsTrue(broker.Holdings[0].AverageFillPrice == tradeBar.Close);
+            Assert.IsTrue(broker.StockPortfolio.Count == 1);
+            Assert.IsTrue(broker.StockPortfolio[0].AverageFillPrice == tradeBar.Close);
             Assert.IsTrue(broker.TotalTransactionFees == 14);
-            Assert.IsTrue(broker.Holdings[0].TotalInvested == 5042);
+            Assert.IsTrue(broker.StockPortfolio[0].TotalInvested == 5042);
             Assert.IsTrue(broker.TotalTradesCancelled == 1);
             Assert.IsTrue(broker.AvailableCash == 4944);
 
@@ -106,10 +109,10 @@ namespace QuantTrade.Tests
             broker.ExecuteOrder(tradeBar, OrderType.MOC, Core.Action.Sell, 100); //execute
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 4);
-            Assert.IsTrue(broker.Holdings[0].TotalInvested == 2521);
-            Assert.IsTrue(broker.Holdings[0].AverageFillPrice == tradeBar.Close);
+            Assert.IsTrue(broker.StockPortfolio[0].TotalInvested == 2521);
+            Assert.IsTrue(broker.StockPortfolio[0].AverageFillPrice == tradeBar.Close);
             Assert.IsTrue(broker.TotalTrades == 3);
-            Assert.IsTrue(broker.Holdings.Count == 1);
+            Assert.IsTrue(broker.StockPortfolio.Count == 1);
             Assert.IsTrue(broker.TotalTransactionFees == 21);
             Assert.IsTrue(broker.AvailableCash == 7458);
 
@@ -118,7 +121,7 @@ namespace QuantTrade.Tests
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.TotalTrades == 4);
             Assert.IsTrue(broker.OrderHistory.Count == 5);
-            Assert.IsTrue(broker.Holdings.Count == 0);
+            Assert.IsTrue(broker.StockPortfolio.Count == 0);
             Assert.IsTrue(broker.TotalTransactionFees == 28);
             Assert.IsTrue(broker.AvailableCash == 9972m);
             Assert.IsTrue(broker.StartingCash == 10000m);
@@ -177,22 +180,25 @@ namespace QuantTrade.Tests
             broker.ExecuteOrder(tradeBar1, OrderType.MOO, Core.Action.Buy, 100); //execute
             Assert.IsTrue(broker.PendingOrderQueue.Count == 1);
             Assert.IsTrue(broker.OrderHistory.Count == 0);
-            Assert.IsTrue(broker.Holdings.Count == 0);
+            Assert.IsTrue(broker.StockPortfolio.Count == 0);
             Assert.IsTrue(broker.TotalTrades == 0);
             Assert.IsTrue(broker.TotalTransactionFees == 0);
             Assert.IsTrue(broker.AvailableCash == 10000);
+           
 
-          //Process orders in teh QUEUE
+            //Process orders in the QUEUE by sending in a new order
             broker.ProcessPendingOrderQueue(tradeBar2);
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 1);
             Assert.IsTrue(broker.TotalTrades == 1);
-            Assert.IsTrue(broker.Holdings[0].AverageFillPrice == tradeBar2.Open);
-            Assert.IsTrue(broker.Holdings[0].TotalInvested == 2549);
-            Assert.IsTrue(broker.Holdings.Count == 1);
+            Assert.IsTrue(broker.StockPortfolio[0].AverageFillPrice == tradeBar2.Open);
+            Assert.IsTrue(broker.StockPortfolio[0].TotalInvested == 2549);
+            Assert.IsTrue(broker.StockPortfolio.Count == 1);
             Assert.IsTrue(broker.TotalTransactionFees == 7);
             Assert.IsTrue(broker.TotalTradesCancelled == 0);
             Assert.IsTrue(broker.AvailableCash == 7444);
+            Assert.IsTrue(broker.StockPortfolio[0].CurrentPrice == 26.21m);
+            Assert.IsTrue(broker.StockPortfolio[0].TotalCurrentValue == 2621m);
 
             //Sell stock - order gets queued becuase it is MOO 
 

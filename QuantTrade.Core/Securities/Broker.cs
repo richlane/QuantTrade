@@ -49,53 +49,56 @@ namespace QuantTrade.Core.Securities
 
         public decimal TotalTransactionFees { get; private set; }
 
-        public List<Stock> Holdings { get; private set; }
+        public List<Stock> StockPortfolio { get; private set; }
 
-    
+        public Decimal CurrentPortfolioValue
+        {
+            get
+            {
+                foreach (Stock stock in StockPortfolio)
+                {
+                   
+                }
+                return 0m;
+            }
+        }
+
+
         #endregion
 
 
         /// <summary>
-        /// 
+        /// Constructor
         /// </summary>
-        /// <returns></returns>
-    public bool IsHoldingStock(string symbol)
-    {
-            return Holdings.Exists(p => p.Symbol == symbol);
-    }
+        public Broker(decimal startingCash, decimal transactionFee, bool allowMargin)
+            {
+                StartingCash = startingCash;
+                AvailableCash = startingCash;
+                TransactionFee = transactionFee;
 
-   
+                StockPortfolio = new List<Stock>();
 
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    public Broker(decimal startingCash, decimal transactionFee, bool allowMargin)
-        {
-            StartingCash = startingCash;
-            AvailableCash = startingCash;
-            TransactionFee = transactionFee;
+                OrderHistory = new List<Order>();
+                PendingOrderQueue = new List<Order>();
 
-            Holdings = new List<Stock>();
-
-            OrderHistory = new List<Order>();
-            PendingOrderQueue = new List<Order>();
-
-            _allowMargin = allowMargin;
-        }
+                _allowMargin = allowMargin;
+            }
 
         /// <summary>
-        /// Updates holdings w/new trade bar data. Called from base alogo.
+        /// 
         /// </summary>
-        /// <param name="tradeBar"></param>
-        public void UpdateHoldingsValue(TradeBar tradeBar)
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public bool IsHoldingStock(string symbol)
         {
-            throw new ApplicationException("Not implemented");
+            return StockPortfolio.Exists(p => p.Symbol == symbol);
         }
+              
 
         /// <summary>
         /// Updated holdings when an order gets filled.
         /// </summary>
-        private void updateHoldingsForFilledOrder(Order order)
+        private void finalizeOrder(Order order)
         {
             //Only process filled orders
             if (order.Status != OrderStatus.Filled) return;
@@ -119,11 +122,12 @@ namespace QuantTrade.Core.Securities
                     AvailableCash -= totalInvested;
 
                     //Find existing stock in holdings
-                    if (Holdings.Exists(p => p.Symbol == order.Symbol))
+                    if (IsHoldingStock(order.Symbol))
                     {
-                        Stock stock = Holdings.Find(p => p.Symbol == order.Symbol);
+                        Stock stock = StockPortfolio.Find(p => p.Symbol == order.Symbol);
                         stock.Quantity += order.Quantity;
                         stock.TotalInvested += totalInvested;
+                        stock.CurrentPrice = order.FillPrice;
                     }
                     //Create a new stock object and add to holdings
                     else
@@ -132,10 +136,11 @@ namespace QuantTrade.Core.Securities
                         {
                             Symbol = order.Symbol,
                             Quantity = order.Quantity,
-                            TotalInvested = totalInvested
+                            TotalInvested = totalInvested,
+                            CurrentPrice = order.FillPrice
                         };
 
-                        Holdings.Add(newStock);
+                        StockPortfolio.Add(newStock);
                     }
                     break;
 
@@ -145,15 +150,15 @@ namespace QuantTrade.Core.Securities
                 case Action.Sell:
                     AvailableCash += (order.Quantity * order.FillPrice);
 
-                    if (Holdings.Exists(p => p.Symbol == order.Symbol))
+                    if (StockPortfolio.Exists(p => p.Symbol == order.Symbol))
                     {
-                        Stock stock = Holdings.Find(p => p.Symbol == order.Symbol);
+                        Stock stock = StockPortfolio.Find(p => p.Symbol == order.Symbol);
                         stock.Quantity -= order.Quantity;
                         stock.TotalInvested -= totalInvested;
 
                         if (stock.Quantity <= 0)
                         {
-                            Holdings.Remove(stock);
+                            StockPortfolio.Remove(stock);
                         }
                     }
                     break;
@@ -180,7 +185,7 @@ namespace QuantTrade.Core.Securities
             else if (order.Action == Action.Sell)
             {
                 //Make sure we have the stock
-                if (!Holdings.Exists(p => p.Symbol == order.Symbol && p.Quantity >= order.Quantity))
+                if (!StockPortfolio.Exists(p => p.Symbol == order.Symbol && p.Quantity >= order.Quantity))
                 {
 
                     // Logger.Log($"{order.FillDate} - Unable to process Sell order: {order.Symbol} not in Porfolio or qty exceeded.");
@@ -207,10 +212,12 @@ namespace QuantTrade.Core.Securities
         /// </summary>
         public void ProcessPendingOrderQueue(TradeBar tradeBar)
         {
+         
             for (int i = 0; i < PendingOrderQueue.Count; i++)
             {
                 Order order = PendingOrderQueue[i];
 
+                //I removed the date check becuase I was not taking into consideration weekends
                 // tradeBar.Day.AddDays(-1).ToShortDateString() == order.DateSubmitted.ToShortDateString())
                 
                 //Pick up MOO orders placed yesterday
@@ -222,8 +229,13 @@ namespace QuantTrade.Core.Securities
                     PendingOrderQueue.RemoveAt(i);
                 }
             }
-        }
 
+            //Update current value of portfolio
+            if (IsHoldingStock(tradeBar.Symbol))
+            {
+                StockPortfolio.Find(p => p.Symbol == tradeBar.Symbol).CurrentPrice = tradeBar.Close;
+            }
+        }
 
         /// <summary>
         /// Fills the order.
@@ -259,16 +271,14 @@ namespace QuantTrade.Core.Securities
             order.FillDate = tradeBar.Day;
             order.Status = OrderStatus.Filled;
 
-            updateHoldingsForFilledOrder(order);
-            //Logger.Log($"{order.FillDate} - {order.Action} Order Complete");
-
+            finalizeOrder(order);
+    
             //Throw event
             if (OnOrder != null)
             {
                 OnOrder(order, e);
             }
         }
-
 
         /// <summary>
         /// Called by the base alogrithm.

@@ -20,7 +20,18 @@ namespace QuantTrade.Core.Securities
             }
         }
 
-        public Decimal TotalInvested { get; set; }
-      
+        public decimal TotalInvested { get; set; }
+
+        public decimal CurrentPrice { get; set; }
+
+        public decimal TotalCurrentValue
+        {
+            get
+            {
+                return CurrentPrice * Quantity;
+            }
+        }
+
+
     }
 }

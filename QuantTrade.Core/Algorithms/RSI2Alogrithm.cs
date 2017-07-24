@@ -23,7 +23,7 @@ namespace QuantTrade.Core.Algorithm
 
         //Date Ranges
         private int _startYear = 2009;
-        private int _endYear = 2009;
+        private int _endYear = 2016;
 
         //Sell Stop
         bool _useSellStop = false;
@@ -95,7 +95,7 @@ namespace QuantTrade.Core.Algorithm
             //set sell stop price
             if (data.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
             {
-                _sellStopPrice = Broker.Holdings.Find(p => p.Symbol == _symbol).AverageFillPrice * (1 - _sellStopMultiplier);
+                _sellStopPrice = Broker.StockPortfolio.Find(p => p.Symbol == _symbol).AverageFillPrice * (1 - _sellStopMultiplier);
             }
         }
 
@@ -131,7 +131,7 @@ namespace QuantTrade.Core.Algorithm
                 case Action.Sell:
                     if(Broker.IsHoldingStock(_symbol))
                     {
-                        int sellQty = Broker.Holdings.Find(p => p.Symbol == _symbol).Quantity;
+                        int sellQty = Broker.StockPortfolio.Find(p => p.Symbol == _symbol).Quantity;
                         base.ExecuteOrder(Action.Sell, _orderType, sellQty);
                     }
                     break;
@@ -260,6 +260,7 @@ namespace QuantTrade.Core.Algorithm
         /// <param name="action"></param>
         private void logTransacton(TradeBar data, Action action)
         {
+            return ;
             string logData = "";
             string status = action.ToString();
 
