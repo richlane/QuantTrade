@@ -17,23 +17,21 @@ namespace QuantTrade
         {
             try
             {
-               
-                //Get the default algo to run from the config.json file
-                string algoToRun = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
-                Type type = Type.GetType($"{algoToRun}, QuantTrade.Core");
+                Console.WindowHeight = Console.LargestWindowHeight;
+                Console.WriteLine("Starting application" + Environment.NewLine);
 
-                //Run buy and hold on the spy!
-                IAlogorithm algo = Activator.CreateInstance(type) as IAlogorithm;
-                algo.Initialize("SPY", true, "Buy and hold");
-
-                //Now Read stock list from config.json & run throught the algo
-                string[] symbols = Config.GetToken("symbols").Split(' ');
-
-                foreach (var symbol in symbols)
+                //Run benchmark test
+                bool runBenchmark = Convert.ToBoolean(Config.GetToken("run-benchmark"));
+            
+                if (runBenchmark)
                 {
-                    algo = Activator.CreateInstance(type) as IAlogorithm;
-                    algo.Initialize(symbol, false);
+                    string benchmarkSymbols = Config.GetToken("benchmark-symbols");
+                    runAlgorithm(benchmarkSymbols, true);
                 }
+
+                //Run Standard tests
+                string symbols = Config.GetToken("symbols");
+                runAlgorithm(symbols, false);
             }
             catch (Exception ex)
             {
@@ -45,8 +43,32 @@ namespace QuantTrade
                 Console.WriteLine("Hit any Enter to exit");
                 Console.ReadLine();
             }
-                
            
+        }
+
+        /// <summary>
+        /// Run benchmark stocks for comparison
+        /// </summary>
+        /// <param name="alogoType"></param>
+        private static void runAlgorithm(string symbols, bool buyAndHold)
+        {
+            if (string.IsNullOrEmpty(symbols)) return;
+            
+            //Get the default algo to run from the config.json file
+            string defaultAlgo = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
+            Type defaultAlgoType = Type.GetType($"{defaultAlgo}, QuantTrade.Core");
+
+            ////////////////////////////////////////////////
+            //Loops the stocks and run the alogo
+            ////////////////////////////////////////////////
+            string[] symbolsArray = symbols.Split(' ');
+
+            foreach (var symbol in symbolsArray)
+            {
+                IAlogorithm algo = Activator.CreateInstance(defaultAlgoType) as IAlogorithm;
+                algo.Initialize(symbol, buyAndHold);
+            }
+
         }
     }
 }

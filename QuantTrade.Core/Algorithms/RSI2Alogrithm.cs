@@ -3,10 +3,7 @@ using QuantTrade.Core.Indicators;
 using QuantTrade.Core.Securities;
 using QuantTrade.Core.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace QuantTrade.Core.Algorithm
 {
@@ -16,9 +13,8 @@ namespace QuantTrade.Core.Algorithm
         int _rsiLookBackPeriod = 2;
         int _rsiBuyLevel = 30;
         int _rsiSellLevel = 70;
-        OrderType _orderType = OrderType.MOO;
         bool _buyAndHold = false;
-
+        OrderType _orderType = OrderType.MOO;
 
         //Date Ranges
         private int _startYear = 2010;
@@ -26,7 +22,7 @@ namespace QuantTrade.Core.Algorithm
 
         //Sell Stop
         bool _useSellStop = true;
-        decimal _sellStopMultiplier = .25M;
+        decimal _sellStopMultiplier = .3m;
 
         //Account Settings
         private decimal _transactionFee = 7M;
@@ -41,7 +37,7 @@ namespace QuantTrade.Core.Algorithm
 
         decimal _sellStopPrice;
         decimal _pctToInvest;
-        bool _firstRun;
+        bool _firstRun=true;
         string _comment;
      
         #endregion
@@ -59,13 +55,10 @@ namespace QuantTrade.Core.Algorithm
         /// <summary>
         /// Launch Algo.
         /// </summary>
-        public void Initialize(string symbol, bool buyAndHold, string comments = "")
+        public void Initialize(string symbol, bool buyAndHold)
         {
             Symbol = symbol;
-            Comments = comments;
             _buyAndHold = buyAndHold;
-
-            _firstRun = true;
 
             //Update base class proprties 
             SetStartDate(_startYear-1, 11, 15); //Set Start Date --> Need 45 days for the warmup period so start in November
@@ -93,7 +86,8 @@ namespace QuantTrade.Core.Algorithm
             //set sell stop price
             if (data.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
             {
-                _sellStopPrice = Broker.StockPortfolio.Find(p => p.Symbol == Symbol).AverageFillPrice * (1 - _sellStopMultiplier);
+                _sellStopPrice = 
+                    Broker.StockPortfolio.Find(p => p.Symbol == Symbol).AverageFillPrice * (1 - _sellStopMultiplier);
             }
         }
 
@@ -132,20 +126,21 @@ namespace QuantTrade.Core.Algorithm
             _firstRun = false;
         }
 
-       
-
         /// <summary>
         /// Should we buy, sell or hold?
         /// </summary>
         private Action getBuySellHoldDecision(TradeBar data)
         {
+            //Check for buy and hold
             if (_buyAndHold)
+            {
                 return getLongTermBuyAndHold(data);
+            }
+               
 
             Action action = Action.Hold;
             bool buying = false;
             _comment = "";
-
 
             /////////////////////////////////////////
             //Buy Logic

@@ -110,17 +110,24 @@ namespace QuantTrade.Core.Algorithm
 
             StringBuilder report = new StringBuilder();
 
-            report.AppendLine($"Test: {this.GetType().Name}  Comments: {Comments}");
+            report.AppendLine($"Test: {this.GetType().Name}");
             report.AppendLine($"Test Dates: {StartDate} - {EndDate}");
             report.AppendLine($"Symbol: {Symbol}");
-             report.AppendLine($"Starting Account: {startingCash}");
+            report.AppendLine($"Starting Account: {startingCash}");
             report.AppendLine($"Ending Account: {endingCash}");
             report.AppendLine($"Net Profit: {profitability}%");
             report.AppendLine($"Win Rate: {Broker.WinRate}%");
             report.AppendLine($"Loss Rate: {Broker.LossRate}%");
+            report.AppendLine($"Max Drawdown: {Broker.MaxDrawdown}%");
             report.AppendLine($"Total Fees: ${Broker.TotalTransactionFees}");
             report.AppendLine($"Total Trades: {Broker.TotalTrades}");
-            report.AppendLine($"Execution Time: {totalRunTime} ms");
+
+            //foreach (var item in Indicators)
+            //{
+            //    report.AppendLine($"   Indicator: {item.GetType()}");
+            //}
+
+            //report.AppendLine($"Execution Time: {totalRunTime} ms");
             //Logger.Log($"     Trades Cancelled: {Broker.TotalTradesCancelled}");
             report.AppendLine("---------------------------------------------------");
 
@@ -148,18 +155,19 @@ namespace QuantTrade.Core.Algorithm
          /// </summary> 
         public virtual void OnTradeBar(TradeBar data, EventArgs e)
         {
+            //Note do not change the order of events
             _currentTradebar = data;
 
-            //Update indicators
+            //Step 1: Update indicators
             foreach (IIndicator item in Indicators)
             {
                 item.UpdateIndicator(data.Close);
             }
 
-            //Update queued orders in the broker queue
-            Broker.UpdatePortfolio(data);
+            //Step 2: Update queued orders in the broker queue
+            Broker.ProcessNewTradebar(data);
 
-            //Update the inheriting class OnData events
+            //Step 3: Update the inheriting class OnData events
             if (OnTradeBarEvent != null)
             {
                 OnTradeBarEvent(data, e);

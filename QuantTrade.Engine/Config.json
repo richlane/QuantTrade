@@ -5,6 +5,8 @@
   "transaction-log": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\transactions.csv",
   "results-log": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\results.log",
   "allow-margin": "true",
-  "symbols" :  "SPXL TQQQ UDOW"
+  "run-benchmark": "true",
+  "benchmark-symbols": "SPY",
+  "symbols" :  "SOXX SOXL"
   
 }

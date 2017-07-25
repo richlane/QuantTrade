@@ -25,6 +25,9 @@ namespace QuantTrade.Core.Securities
         #endregion
 
         #region Portfolio
+        private decimal _highestPrice;
+
+        private decimal _lowestPrice;
 
         private bool _allowMargin;
 
@@ -45,7 +48,7 @@ namespace QuantTrade.Core.Securities
                 return Convert.ToInt32(Math.Round(rate * 100));
             }
         }
-
+       
         public int LossRate
         {
             get
@@ -87,6 +90,13 @@ namespace QuantTrade.Core.Securities
             }
         }
 
+        //public Decimal MaxDrawdown
+        //{
+        //    get
+        //    {
+        //     return   _lowestPrice - _highestPrice / _highestPrice;
+        //    }
+        //}
 
         #endregion
 
@@ -117,8 +127,7 @@ namespace QuantTrade.Core.Securities
         {
             return StockPortfolio.Exists(p => p.Symbol == symbol);
         }
-              
-
+             
         /// <summary>
         /// Updated holdings when an order gets filled.
         /// </summary>
@@ -308,9 +317,8 @@ namespace QuantTrade.Core.Securities
         /// and updates the current proces of stocks on our portfolio.
         /// Called from base algo.
         /// </summary>
-        public void UpdatePortfolio(TradeBar tradeBar)
+        public void ProcessNewTradebar(TradeBar tradeBar)
         {
-
             for (int i = 0; i < PendingOrderQueue.Count; i++)
             {
                 Order order = PendingOrderQueue[i];
@@ -333,8 +341,28 @@ namespace QuantTrade.Core.Securities
             {
                 StockPortfolio.Find(p => p.Symbol == tradeBar.Symbol).CurrentPrice = tradeBar.Close;
             }
+
+            //Calculate drawdown
+            //calcDrawdown(tradeBar);
         }
 
+        /// <summary>
+        /// Calculates max drawdown
+        /// </summary>
+        /// <param name="tradebar"></param>
+        //private void calcDrawdown(TradeBar tradebar)
+        //{
+        //    if (tradebar.High >= _highestPrice)
+        //    {
+        //        _highestPrice = tradebar.High;
+        //    }
+
+
+        //    if (tradebar.Low <= _lowestPrice)
+        //    {
+        //        _lowestPrice = tradebar.Low ;
+        //    }
+        //}
 
     }
 }

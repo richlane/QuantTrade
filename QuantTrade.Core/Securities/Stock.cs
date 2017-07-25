@@ -16,7 +16,14 @@ namespace QuantTrade.Core.Securities
         {
             get
             {
-                return TotalInvested/Quantity;
+                if (TotalInvested == 0 || Quantity == 0)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return TotalInvested / Quantity;
+                }
             }
         }
 

@@ -193,7 +193,7 @@ namespace QuantTrade.Tests
 
 
             //Process orders in the QUEUE by sending in a new order
-            broker.UpdatePortfolio(tradeBar2);
+            broker.ProcessNewTradebar(tradeBar2);
             Assert.IsTrue(broker.PendingOrderQueue.Count == 0);
             Assert.IsTrue(broker.OrderHistory.Count == 1);
             Assert.IsTrue(broker.TotalTrades == 1);
