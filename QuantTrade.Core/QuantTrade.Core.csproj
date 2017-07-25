@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Downloads\Daily_DONOTDELETE.csv" />
+    <None Include="Downloads\Daily_SPY.csv" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

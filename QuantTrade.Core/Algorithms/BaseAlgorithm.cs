@@ -25,6 +25,8 @@ namespace QuantTrade.Core.Algorithm
 
         private bool _allowMargin;
 
+        public string Comments { get; set; }
+
         public Broker Broker { get; set; }
 
         public DateTime StartDate { get; set; }
@@ -88,14 +90,11 @@ namespace QuantTrade.Core.Algorithm
             Broker = new Broker(StartingCash, TransactionFee, allowMargin);
             Broker.OnOrder += this.OnOrder;
 
-            Logger.Log("Staring Run...............");
             _dataReader.ReadData(Symbol, Resolution, StartDate, EndDate);
 
             _endRun = DateTime.Now;
 
             generateReport();
-
-            
         }
 
         /// <summary>
@@ -109,22 +108,24 @@ namespace QuantTrade.Core.Algorithm
             string endingCash = string.Format("{0:c}", Broker.AvailableCash + Broker.CurrentPortfolioValue);
             string startingCash = string.Format("{0:c}", Broker.StartingCash);
 
-            Logger.Log(" ");
-            Logger.Log("---------------------------------------------------");
-            Logger.Log($"Symbol: {Symbol}");
-            Logger.Log($"Test: {this.GetType().Name}");
-            Logger.Log($"Runtime: {totalRunTime} ms");
-            Logger.Log($"Dates: {StartDate} - {EndDate}");
-            Logger.Log($"Starting Cash: {startingCash}");
-            Logger.Log($"Ending Cash: {endingCash}");
-            Logger.Log($"Net Profit: {profitability}%");
-            Logger.Log($"Win Rate: {Broker.WinRate}%");
-            Logger.Log($"Loss Rate: {Broker.LossRate}%");
-            Logger.Log($"Total Fees: ${Broker.TotalTransactionFees}");
-            Logger.Log($"Total Trades: {Broker.TotalTrades}");
-            Logger.Log($"Trades Cancelled: {Broker.TotalTradesCancelled}");
-            Logger.Log("---------------------------------------------------");
-            Logger.Log(" ");
+            StringBuilder report = new StringBuilder();
+
+            report.AppendLine($"Test: {this.GetType().Name}  Comments: {Comments}");
+            report.AppendLine($"Test Dates: {StartDate} - {EndDate}");
+            report.AppendLine($"Symbol: {Symbol}");
+             report.AppendLine($"Starting Account: {startingCash}");
+            report.AppendLine($"Ending Account: {endingCash}");
+            report.AppendLine($"Net Profit: {profitability}%");
+            report.AppendLine($"Win Rate: {Broker.WinRate}%");
+            report.AppendLine($"Loss Rate: {Broker.LossRate}%");
+            report.AppendLine($"Total Fees: ${Broker.TotalTransactionFees}");
+            report.AppendLine($"Total Trades: {Broker.TotalTrades}");
+            report.AppendLine($"Execution Time: {totalRunTime} ms");
+            //Logger.Log($"     Trades Cancelled: {Broker.TotalTradesCancelled}");
+            report.AppendLine("---------------------------------------------------");
+
+            Logger.Log(report.ToString());
+            Logger.LogResults(report.ToString());
         }
 
         /// <summary>

@@ -8,7 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using QuantTrade.Core;
-
+using QuantTrade.Core.Utilities;
 
 namespace QuantTrade.Core.Data
 {
@@ -62,6 +62,8 @@ namespace QuantTrade.Core.Data
         /// </summary>
         private void callWebsite(string requestString)
         {
+            Logger.Log("Downloading data......." + Environment.NewLine, ConsoleColor.Red);
+
             string data = "";
 
             WebRequest request = WebRequest.Create(requestString);

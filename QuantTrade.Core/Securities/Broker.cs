@@ -38,6 +38,9 @@ namespace QuantTrade.Core.Securities
         {
             get
             {
+                if (_totalWins == 0 && _totalSellTrades == 0)
+                    return 0;
+
                 decimal rate = _totalWins / _totalSellTrades;
                 return Convert.ToInt32(Math.Round(rate * 100));
             }
@@ -47,6 +50,9 @@ namespace QuantTrade.Core.Securities
         {
             get
             {
+                if (_totalLosses == 0 && _totalSellTrades == 0)
+                    return 0;
+
                 decimal rate =  _totalLosses / _totalSellTrades;
                 return Convert.ToInt32(Math.Round(rate * 100));
             }
@@ -171,9 +177,8 @@ namespace QuantTrade.Core.Securities
 
                     if (IsHoldingStock(order.Symbol))
                     {
-                      
                         Stock stock = StockPortfolio.Find(p => p.Symbol == order.Symbol);
-                        
+
                         //Is this a win or loss?
                         if (orderTotal > (stock.AverageFillPrice * order.Quantity))
                         {
@@ -183,7 +188,6 @@ namespace QuantTrade.Core.Securities
                         {
                             _totalLosses++;
                         }
-
                         stock.TotalInvested -= stock.AverageFillPrice * order.Quantity;  
                         stock.Quantity -= order.Quantity;
                 

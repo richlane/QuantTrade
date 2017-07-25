@@ -17,12 +17,23 @@ namespace QuantTrade
         {
             try
             {
-                //Get the default alo to run from the config.json ile
+               
+                //Get the default algo to run from the config.json file
                 string algoToRun = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
                 Type type = Type.GetType($"{algoToRun}, QuantTrade.Core");
-                IAlogorithm algo = Activator.CreateInstance(type) as IAlogorithm;
 
-                algo.Initialize();
+                //Run buy and hold on the spy!
+                IAlogorithm algo = Activator.CreateInstance(type) as IAlogorithm;
+                algo.Initialize("SPY", true, "Buy and hold");
+
+                //Now Read stock list from config.json & run throught the algo
+                string[] symbols = Config.GetToken("symbols").Split(' ');
+
+                foreach (var symbol in symbols)
+                {
+                    algo = Activator.CreateInstance(type) as IAlogorithm;
+                    algo.Initialize(symbol, false);
+                }
             }
             catch (Exception ex)
             {

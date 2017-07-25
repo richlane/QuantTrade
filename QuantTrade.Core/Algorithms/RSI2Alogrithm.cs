@@ -12,22 +12,21 @@ namespace QuantTrade.Core.Algorithm
 {
     public class RSI2Alogrithm : BaseAlgorithm, IAlogorithm
     {
-        private string _symbol = "SPXL";
-        bool _buyAndHold = false;
-
-        int _smaLookBackPeriod = 30;
+        int _smaLookBackPeriod = 25;
         int _rsiLookBackPeriod = 2;
         int _rsiBuyLevel = 30;
         int _rsiSellLevel = 70;
         OrderType _orderType = OrderType.MOO;
+        bool _buyAndHold = false;
+
 
         //Date Ranges
-        private int _startYear = 2009;
+        private int _startYear = 2010;
         private int _endYear = 2016;
 
         //Sell Stop
-        bool _useSellStop = false;
-        decimal _sellStopMultiplier = .05M;
+        bool _useSellStop = true;
+        decimal _sellStopMultiplier = .25M;
 
         //Account Settings
         private decimal _transactionFee = 7M;
@@ -44,8 +43,7 @@ namespace QuantTrade.Core.Algorithm
         decimal _pctToInvest;
         bool _firstRun;
         string _comment;
-       
-
+     
         #endregion
 
         /// <summary>
@@ -58,12 +56,15 @@ namespace QuantTrade.Core.Algorithm
             base.OnOrderEvent += this.OnOrderEvent;
         }
         
-        
         /// <summary>
         /// Launch Algo.
         /// </summary>
-        public void Initialize()
+        public void Initialize(string symbol, bool buyAndHold, string comments = "")
         {
+            Symbol = symbol;
+            Comments = comments;
+            _buyAndHold = buyAndHold;
+
             _firstRun = true;
 
             //Update base class proprties 
@@ -73,7 +74,6 @@ namespace QuantTrade.Core.Algorithm
             StartingCash = _availableCash;
             TransactionFee = _transactionFee;
             Resolution = _resolution;
-            Symbol = _symbol;
             subscribeToEvents();
 
             //Setup Indictors
@@ -93,7 +93,7 @@ namespace QuantTrade.Core.Algorithm
             //set sell stop price
             if (data.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
             {
-                _sellStopPrice = Broker.StockPortfolio.Find(p => p.Symbol == _symbol).AverageFillPrice * (1 - _sellStopMultiplier);
+                _sellStopPrice = Broker.StockPortfolio.Find(p => p.Symbol == Symbol).AverageFillPrice * (1 - _sellStopMultiplier);
             }
         }
 
@@ -120,9 +120,9 @@ namespace QuantTrade.Core.Algorithm
                     break;
 
                 case Action.Sell:
-                    if(Broker.IsHoldingStock(_symbol))
+                    if(Broker.IsHoldingStock(Symbol))
                     {
-                        int sellQty = Broker.StockPortfolio.Find(p => p.Symbol == _symbol).Quantity;
+                        int sellQty = Broker.StockPortfolio.Find(p => p.Symbol == Symbol).Quantity;
                         base.ExecuteOrder(Action.Sell, _orderType, sellQty);
                     }
                     break;
@@ -158,20 +158,20 @@ namespace QuantTrade.Core.Algorithm
 
                 //Calculate how much we want to invest using the 2%, 3%, 5% strategy
 
-                if (_pctToInvest == 0)
-                {
-                    _pctToInvest = .2M;
-                }
-                else if (_pctToInvest == .2M)
-                {
-                    _pctToInvest = .38M;
-                }
-                else if (_pctToInvest == .38M)
-                {
-                    _pctToInvest = 1M;
-                }
+                //if (_pctToInvest == 0)
+                //{
+                //    _pctToInvest = .2M;
+                //}
+                //else if (_pctToInvest == .2M)
+                //{
+                //    _pctToInvest = .38M;
+                //}
+                //else if (_pctToInvest == .38M)
+                //{
+                //    _pctToInvest = 1M;
+                //}
 
-                //_pctToInvest = 1M;
+                 _pctToInvest = 1M;
 
 
                 //if (_pctToInvest == 0)
@@ -187,7 +187,7 @@ namespace QuantTrade.Core.Algorithm
             /////////////////////////////////////////
             //Sell and Hold Logic
             /////////////////////////////////////////
-            if (Broker.IsHoldingStock(_symbol) && buying == false)
+            if (Broker.IsHoldingStock(Symbol) && buying == false)
             {
                 //Sell - we hit our oversold RSI and SMA levels
                 if ( _rsi.Value > _rsiSellLevel
@@ -214,8 +214,7 @@ namespace QuantTrade.Core.Algorithm
 
             return action;
         }
-
-
+        
         /// <summary>
         /// Used for buy and hold only!
         /// </summary>
@@ -223,34 +222,27 @@ namespace QuantTrade.Core.Algorithm
         {
             Action action = Action.Hold;
        
-            if (Broker.IsHoldingStock(_symbol) == false)
+            if (Broker.IsHoldingStock(Symbol) == false)
             {
                 action = Action.Buy;
                 _pctToInvest = 1M;
             }
-            else if (Broker.IsHoldingStock(_symbol) == true)
-            {
-                action = Action.Sell;
-                _pctToInvest = 0M;
-            }
+        
             return action;
         }
 
         /// <summary>
         /// Logs the transaction into a csv for review
         /// </summary>
-        /// <param name="data"></param>
-        /// <param name="action"></param>
         private void logTransacton(TradeBar data, Action action)
         {
             return;
-
 
             string logData = "";
             string status = action.ToString();
 
 
-            if (Broker.IsHoldingStock(_symbol) == false && action== Action.Hold)
+            if (Broker.IsHoldingStock(Symbol) == false && action== Action.Hold)
             {
                 status = "";
             }
@@ -264,7 +256,7 @@ namespace QuantTrade.Core.Algorithm
             logData = string.Format
                 ("{0},{1},{2},{3},{4},{5},{6},{7}",
                 data.Day,
-                _symbol,
+                Symbol,
                 status,
                 Math.Round(data.Open, 2),
                 Math.Round(data.Close, 2),

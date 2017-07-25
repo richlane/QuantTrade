@@ -8,6 +8,7 @@ namespace QuantTrade.Core.Algorithm
 {
     public interface IAlogorithm
     {
-        void Initialize();
+        void Initialize(string symbol, bool buyAndHold, string comments = "");
+      
     }
 }
