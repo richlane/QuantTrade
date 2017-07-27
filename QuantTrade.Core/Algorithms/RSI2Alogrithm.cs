@@ -9,11 +9,15 @@ namespace QuantTrade.Core.Algorithm
 {
     public class RSI2Alogrithm : BaseAlgorithm, IAlogorithm
     {
+        //Indicators & related settings
+        private Resolution _resolution = Resolution.Daily;
+        private RelativeStrengthIndex _rsi;
+        private SimpleMovingAverage _sma;
+
         int _smaLookBackPeriod = 25;
         int _rsiLookBackPeriod = 2;
         int _rsiBuyLevel = 30;
         int _rsiSellLevel = 70;
-        bool _buyAndHold = false;
         OrderType _orderType = OrderType.MOO;
 
         //Date Ranges
@@ -22,24 +26,22 @@ namespace QuantTrade.Core.Algorithm
 
         //Sell Stop
         bool _useSellStop = true;
-        decimal _sellStopMultiplier = .3m;
+        decimal _sellStopPercentage = .3m;
 
         //Account Settings
         private decimal _transactionFee = 7M;
-        private decimal _availableCash = 10000M;
+        private decimal _startingCash = 10000M;
 
-        //Indicators
-        private Resolution _resolution = Resolution.Daily;
-        private RelativeStrengthIndex _rsi;
-        private SimpleMovingAverage _sma;
+      
 
         #region Misc
 
         decimal _sellStopPrice;
         decimal _pctToInvest;
-        bool _firstRun=true;
-        string _comment;
-     
+        bool _buyAndHold = false;
+
+        //bool _firstRun=true;
+
         #endregion
 
         /// <summary>
@@ -51,11 +53,11 @@ namespace QuantTrade.Core.Algorithm
             base.OnTradeBarEvent += this.OnTradeBarEvent;
             base.OnOrderEvent += this.OnOrderEvent;
         }
-        
+
         /// <summary>
         /// Launch Algo.
         /// </summary>
-        public void Initialize(string symbol, bool buyAndHold)
+        public void Initialize(string symbol = "SPY", bool buyAndHold = false)
         {
             Symbol = symbol;
             _buyAndHold = buyAndHold;
@@ -64,7 +66,7 @@ namespace QuantTrade.Core.Algorithm
             SetStartDate(_startYear-1, 11, 15); //Set Start Date --> Need 45 days for the warmup period so start in November
             SetEndDate(_endYear, 12, 31);
 
-            StartingCash = _availableCash;
+            StartingCash = _startingCash;
             TransactionFee = _transactionFee;
             Resolution = _resolution;
             subscribeToEvents();
@@ -87,7 +89,7 @@ namespace QuantTrade.Core.Algorithm
             if (data.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
             {
                 _sellStopPrice = 
-                    Broker.StockPortfolio.Find(p => p.Symbol == Symbol).AverageFillPrice * (1 - _sellStopMultiplier);
+                    Broker.StockPortfolio.Find(p => p.Symbol == Symbol).AverageFillPrice * (1 - _sellStopPercentage);
             }
         }
 
@@ -114,7 +116,7 @@ namespace QuantTrade.Core.Algorithm
                     break;
 
                 case Action.Sell:
-                    if(Broker.IsHoldingStock(Symbol))
+                    if(Broker.IsHoldingStock(Symbol)) //make sure we are hoding the stock before selling
                     {
                         int sellQty = Broker.StockPortfolio.Find(p => p.Symbol == Symbol).Quantity;
                         base.ExecuteOrder(Action.Sell, _orderType, sellQty);
@@ -122,8 +124,8 @@ namespace QuantTrade.Core.Algorithm
                     break;
             }
 
-            logTransacton(data, action);
-            _firstRun = false;
+            //logTransacton(data, action);
+            //_firstRun = false;
         }
 
         /// <summary>
@@ -131,22 +133,25 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         private Action getBuySellHoldDecision(TradeBar data)
         {
-            //Check for buy and hold
-            if (_buyAndHold)
-            {
-                return getLongTermBuyAndHold(data);
-            }
-               
-
             Action action = Action.Hold;
             bool buying = false;
-            _comment = "";
+     
+            //Here is the buy and hold logic
+            if (_buyAndHold)
+            {
+                if (Broker.IsHoldingStock(Symbol) == false)
+                {
+                    action = Action.Buy;
+                    _pctToInvest = 1M;
+                }
+                return action;
+            }
+           
 
             /////////////////////////////////////////
             //Buy Logic
             /////////////////////////////////////////
-            if ( _rsi.Value  < _rsiBuyLevel &&
-                _pctToInvest < 1M)
+            if ( _rsi.Value  < _rsiBuyLevel && _pctToInvest < 1M)
             {
                 action = Action.Buy;
                 buying = true;
@@ -198,7 +203,6 @@ namespace QuantTrade.Core.Algorithm
                     action = Action.Sell;
                     _pctToInvest = 0;
                     _sellStopPrice = 0;
-                    _comment = "stopped out";
                 }
                 //Hold
                 else
@@ -209,57 +213,45 @@ namespace QuantTrade.Core.Algorithm
 
             return action;
         }
-        
-        /// <summary>
-        /// Used for buy and hold only!
-        /// </summary>
-        private Action getLongTermBuyAndHold(TradeBar data)
-        {
-            Action action = Action.Hold;
-       
-            if (Broker.IsHoldingStock(Symbol) == false)
-            {
-                action = Action.Buy;
-                _pctToInvest = 1M;
-            }
-        
-            return action;
-        }
+
+        #region used for verbose logging
 
         /// <summary>
         /// Logs the transaction into a csv for review
         /// </summary>
-        private void logTransacton(TradeBar data, Action action)
-        {
-            return;
+        //private void logTransacton(TradeBar data, Action action)
+        //{
+        //    return;
 
-            string logData = "";
-            string status = action.ToString();
+        //    string logData = "";
+        //    string status = action.ToString();
 
 
-            if (Broker.IsHoldingStock(Symbol) == false && action== Action.Hold)
-            {
-                status = "";
-            }
+        //    if (Broker.IsHoldingStock(Symbol) == false && action== Action.Hold)
+        //    {
+        //        status = "";
+        //    }
 
-            if (_firstRun)
-            {
-                logData = "Date,Symbol,Action,Open,Close,RSI,SMA,Comment";
-                Logger.LogTransaction(logData);
-            }
+        //    if (_firstRun)
+        //    {
+        //        logData = "Date,Symbol,Action,Open,Close,RSI,SMA,Comment";
+        //        Logger.LogTransaction(logData);
+        //    }
 
-            logData = string.Format
-                ("{0},{1},{2},{3},{4},{5},{6},{7}",
-                data.Day,
-                Symbol,
-                status,
-                Math.Round(data.Open, 2),
-                Math.Round(data.Close, 2),
-                Math.Round(_rsi.Value),
-                Math.Round(_sma.Value),
-                _comment);
+        //    logData = string.Format
+        //        ("{0},{1},{2},{3},{4},{5},{6},{7}",
+        //        data.Day,
+        //        Symbol,
+        //        status,
+        //        Math.Round(data.Open, 2),
+        //        Math.Round(data.Close, 2),
+        //        Math.Round(_rsi.Value),
+        //        Math.Round(_sma.Value),
+        //        _comment);
 
-            Logger.LogTransaction(logData);
-        }
+        //    Logger.LogTransaction(logData);
+        //}
+
+        #endregion
     }
 }

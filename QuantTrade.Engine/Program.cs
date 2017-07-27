@@ -9,6 +9,9 @@ namespace QuantTrade
 {
     class Program
     {
+        private static string _defaultAlgo;
+        private static Type _defaultAlgoType;  
+
         /// <summary>
         /// 
         /// </summary>
@@ -20,18 +23,15 @@ namespace QuantTrade
                 Console.WindowHeight = Console.LargestWindowHeight;
                 Console.WriteLine("Starting application" + Environment.NewLine);
 
-                //Run benchmark test
-                bool runBenchmark = Convert.ToBoolean(Config.GetToken("run-benchmark"));
-            
-                if (runBenchmark)
-                {
-                    string benchmarkSymbols = Config.GetToken("benchmark-symbols");
-                    runAlgorithm(benchmarkSymbols, true);
-                }
+                //Get the default algo to run from the config.json file
+                _defaultAlgo = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
+                _defaultAlgoType = Type.GetType($"{_defaultAlgo}, QuantTrade.Core");
 
-                //Run Standard tests
-                string symbols = Config.GetToken("symbols");
-                runAlgorithm(symbols, false);
+                //Run buy and hold stocks - used to benchmark 
+                runAlgorithm(Config.GetToken("buyandhold-stocks"), true);
+           
+                //Run swing trade stocks
+                runAlgorithm(Config.GetToken("swingtrade-stocks"), false);
             }
             catch (Exception ex)
             {
@@ -47,25 +47,18 @@ namespace QuantTrade
         }
 
         /// <summary>
-        /// Run benchmark stocks for comparison
+        /// Loops the stocks and run the alogo
         /// </summary>
-        /// <param name="alogoType"></param>
         private static void runAlgorithm(string symbols, bool buyAndHold)
         {
             if (string.IsNullOrEmpty(symbols)) return;
             
-            //Get the default algo to run from the config.json file
-            string defaultAlgo = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
-            Type defaultAlgoType = Type.GetType($"{defaultAlgo}, QuantTrade.Core");
-
-            ////////////////////////////////////////////////
             //Loops the stocks and run the alogo
-            ////////////////////////////////////////////////
             string[] symbolsArray = symbols.Split(' ');
 
             foreach (var symbol in symbolsArray)
             {
-                IAlogorithm algo = Activator.CreateInstance(defaultAlgoType) as IAlogorithm;
+                IAlogorithm algo = Activator.CreateInstance(_defaultAlgoType) as IAlogorithm;
                 algo.Initialize(symbol, buyAndHold);
             }
 

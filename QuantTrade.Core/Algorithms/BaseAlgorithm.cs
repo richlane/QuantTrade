@@ -86,6 +86,8 @@ namespace QuantTrade.Core.Algorithm
         {
             _startRun = DateTime.Now;
 
+            Symbol = Symbol.ToUpper();
+
             bool allowMargin = Convert.ToBoolean(Configuration.Config.GetToken("allow-margin"));
             Broker = new Broker(StartingCash, TransactionFee, allowMargin);
             Broker.OnOrder += this.OnOrder;
@@ -118,7 +120,7 @@ namespace QuantTrade.Core.Algorithm
             report.AppendLine($"Net Profit: {profitability}%");
             report.AppendLine($"Win Rate: {Broker.WinRate}%");
             report.AppendLine($"Loss Rate: {Broker.LossRate}%");
-            report.AppendLine($"Max Drawdown: {Broker.MaxDrawdown}%");
+           // report.AppendLine($"Max Drawdown: {Broker.MaxDrawdown}%");
             report.AppendLine($"Total Fees: ${Broker.TotalTransactionFees}");
             report.AppendLine($"Total Trades: {Broker.TotalTrades}");
 
