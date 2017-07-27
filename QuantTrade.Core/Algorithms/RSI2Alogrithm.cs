@@ -14,10 +14,12 @@ namespace QuantTrade.Core.Algorithm
         private RelativeStrengthIndex _rsi;
         private SimpleMovingAverage _sma;
 
-        int _smaLookBackPeriod = 25;
-        int _rsiLookBackPeriod = 2;
-        int _rsiBuyLevel = 30;
-        int _rsiSellLevel = 70;
+
+        //Program.cs is going to feed these in
+        public int _smaLookBackPeriod = 50;
+        public int _rsiLookBackPeriod = 2;
+        public int _rsiBuyLevel = 30;
+        public int _rsiSellLevel = 70;
         OrderType _orderType = OrderType.MOO;
 
         //Date Ranges
@@ -38,8 +40,7 @@ namespace QuantTrade.Core.Algorithm
 
         decimal _sellStopPrice;
         decimal _pctToInvest;
-        bool _buyAndHold = false;
-
+    
         //bool _firstRun=true;
 
         #endregion
@@ -57,10 +58,11 @@ namespace QuantTrade.Core.Algorithm
         /// <summary>
         /// Launch Algo.
         /// </summary>
-        public void Initialize(string symbol = "SPY", bool buyAndHold = false)
+        public void Initialize(string symbol = "SPY", bool buyAndHold = false, string comments = "")
         {
             Symbol = symbol;
-            _buyAndHold = buyAndHold;
+            BuyAndHold = buyAndHold;
+            Comments = comments;
 
             //Update base class proprties 
             SetStartDate(_startYear-1, 11, 15); //Set Start Date --> Need 45 days for the warmup period so start in November
@@ -72,8 +74,8 @@ namespace QuantTrade.Core.Algorithm
             subscribeToEvents();
 
             //Setup Indictors
-            _rsi = GenerateRelativeStrengthIndexIndicator(_rsiLookBackPeriod, MovingAverageType.Wilders);
-            _sma = GenerateSimpleMovingAverageIndicator(_smaLookBackPeriod);
+            _rsi = CreateRelativeStrengthIndexIndicator(_rsiLookBackPeriod, MovingAverageType.Wilders);
+            _sma = CreateSimpleMovingAverageIndicator(_smaLookBackPeriod);
         
             //Execute Tests
             RunTest();
@@ -137,7 +139,7 @@ namespace QuantTrade.Core.Algorithm
             bool buying = false;
      
             //Here is the buy and hold logic
-            if (_buyAndHold)
+            if (BuyAndHold)
             {
                 if (Broker.IsHoldingStock(Symbol) == false)
                 {
@@ -158,20 +160,20 @@ namespace QuantTrade.Core.Algorithm
 
                 //Calculate how much we want to invest using the 2%, 3%, 5% strategy
 
-                //if (_pctToInvest == 0)
-                //{
-                //    _pctToInvest = .2M;
-                //}
-                //else if (_pctToInvest == .2M)
-                //{
-                //    _pctToInvest = .38M;
-                //}
-                //else if (_pctToInvest == .38M)
-                //{
-                //    _pctToInvest = 1M;
-                //}
+                if (_pctToInvest == 0)
+                {
+                    _pctToInvest = .2M;
+                }
+                else if (_pctToInvest == .2M)
+                {
+                    _pctToInvest = .38M;
+                }
+                else if (_pctToInvest == .38M)
+                {
+                    _pctToInvest = 1M;
+                }
 
-                 _pctToInvest = 1M;
+                // _pctToInvest = 1M;
 
 
                 //if (_pctToInvest == 0)

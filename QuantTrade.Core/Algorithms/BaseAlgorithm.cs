@@ -37,6 +37,8 @@ namespace QuantTrade.Core.Algorithm
 
         public String Symbol { get; set; }
 
+        public bool BuyAndHold { get; set; }
+
         public List<IIndicator> Indicators { get; set; }
 
         public decimal StartingCash  { get; set; }
@@ -112,7 +114,7 @@ namespace QuantTrade.Core.Algorithm
 
             StringBuilder report = new StringBuilder();
 
-            report.AppendLine($"Test: {this.GetType().Name}");
+            report.AppendLine($"Test: {this.GetType().Name}  Buy & Hold: {BuyAndHold}");
             report.AppendLine($"Test Dates: {StartDate} - {EndDate}");
             report.AppendLine($"Symbol: {Symbol}");
             report.AppendLine($"Starting Account: {startingCash}");
@@ -124,13 +126,14 @@ namespace QuantTrade.Core.Algorithm
             report.AppendLine($"Total Fees: ${Broker.TotalTransactionFees}");
             report.AppendLine($"Total Trades: {Broker.TotalTrades}");
 
-            //foreach (var item in Indicators)
-            //{
-            //    report.AppendLine($"   Indicator: {item.GetType()}");
-            //}
+            if(!string.IsNullOrEmpty(Comments))
+            {
+                report.AppendLine($"Comments: {Comments}");
+            }
 
             //report.AppendLine($"Execution Time: {totalRunTime} ms");
             //Logger.Log($"     Trades Cancelled: {Broker.TotalTradesCancelled}");
+
             report.AppendLine("---------------------------------------------------");
 
             Logger.Log(report.ToString());
@@ -185,14 +188,14 @@ namespace QuantTrade.Core.Algorithm
 
         #region Indicator Factories
 
-        public RelativeStrengthIndex GenerateRelativeStrengthIndexIndicator(int period, MovingAverageType movingAverageType)
+        public RelativeStrengthIndex CreateRelativeStrengthIndexIndicator(int period, MovingAverageType movingAverageType)
         {
             RelativeStrengthIndex indicator = new RelativeStrengthIndex(period, movingAverageType);
             Indicators.Add(indicator);
             return indicator;
         }
         
-        public SimpleMovingAverage GenerateSimpleMovingAverageIndicator(int period)
+        public SimpleMovingAverage CreateSimpleMovingAverageIndicator(int period)
         {
             SimpleMovingAverage indicator = new SimpleMovingAverage(period);
             Indicators.Add(indicator);
