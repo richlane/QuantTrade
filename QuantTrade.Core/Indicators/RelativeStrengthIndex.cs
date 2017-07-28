@@ -14,7 +14,7 @@ namespace QuantTrade.Core.Indicators
         
         private ExponentialMovingAverage _avgGain;
         private ExponentialMovingAverage _avgLoss;
-        private decimal ? _previousValue;
+        private decimal ? _previousPrice;
         
         public override bool IsReady
         {
@@ -30,29 +30,32 @@ namespace QuantTrade.Core.Indicators
         public RelativeStrengthIndex(int period, MovingAverageType movingAverageType)
         {
             Period = period;
-            
-            //Creating a Wilders EMA
-            if(movingAverageType == MovingAverageType.Wilders)
-            { 
-                 _avgGain = new ExponentialMovingAverage(Period, 1m / Period);
-                 _avgLoss = new ExponentialMovingAverage(Period, 1m / Period);
-            }
-            //Creating a Standard EMA
-            else
-            {
-                _avgGain = new ExponentialMovingAverage(Period, (decimal)period + 1.0m);
-                _avgLoss = new ExponentialMovingAverage(Period, (decimal)period + 1.0m);
 
-            }
+            _avgGain = new ExponentialMovingAverage(period, movingAverageType);
+            _avgLoss = new ExponentialMovingAverage(period, movingAverageType);
+
+            //Creating a Wilders EMA
+            //if(movingAverageType == MovingAverageType.Wilders)
+            //{
+            //    _avgGain =  new ExponentialMovingAverage(Period, 1m / Period);
+            //     _avgLoss = new ExponentialMovingAverage(Period, 1m / Period);
+            //}
+            ////Creating a Standard EMA
+            //else
+            //{
+            //    _avgGain = new ExponentialMovingAverage(Period, 2/((decimal)period + 1.0m));
+            //    _avgLoss = new ExponentialMovingAverage(Period, 2/((decimal)period + 1.0m));
+
+            //}
         }
 
         /// <summary>
         /// Gets called from other indicators
         /// </summary>
-        /// <param name="data"></param>
-        public void UpdateIndicator (decimal data)
+        /// <param name="price"></param>
+        public void UpdateIndicator (decimal price)
         {
-            calculate(data);
+            calculateValue(price);
         }
 
 
@@ -61,26 +64,26 @@ namespace QuantTrade.Core.Indicators
         /// </summary>
         public void UpdateIndicator(TradeBar data)
         {
-            calculate(data.Close);
+            calculateValue(data.Close);
             
         }
 
-        private void calculate(decimal input)
+        private void calculateValue(decimal price)
         {
             Samples++;
 
-            if (_previousValue != null && input >= _previousValue.Value)
+            if (_previousPrice != null && price >= _previousPrice.Value)
             {
-                _avgGain.UpdateIndicator(input - _previousValue.Value);
+                _avgGain.UpdateIndicator(price - _previousPrice.Value);
                 _avgLoss.UpdateIndicator(0m);
             }
-            else if (_previousValue != null && input < _previousValue.Value)
+            else if (_previousPrice != null && price < _previousPrice.Value)
             {
                 _avgGain.UpdateIndicator(0m);
-                _avgLoss.UpdateIndicator(_previousValue.Value - input);
+                _avgLoss.UpdateIndicator(_previousPrice.Value - price);
             }
 
-            _previousValue = input;
+            _previousPrice = price;
 
             if (_avgLoss.Value == 0m)
             {

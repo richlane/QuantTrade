@@ -10,15 +10,15 @@ using QuantTrade.Core.Securities;
 
 namespace QuantTrade.Core.Indicators
 {
-    public class SimpleMovingAverage : BaseIndicator, IIndicator
+    public class MACD : BaseIndicator, IIndicator
     {
-        private List<decimal> _rollingSum;
-
+      
         public override bool IsReady
         {
             get
             {
-                return _rollingSum.Count >= Period;
+                return false;
+                //return _rollingSum.Count >= Period;
             }
         }
 
@@ -26,10 +26,10 @@ namespace QuantTrade.Core.Indicators
         /// <summary>
         /// Constructor - Creating standard SMA
         /// </summary>
-        public SimpleMovingAverage(int period)
+        public MACD(int period)
         {
             Period = period;
-            _rollingSum = new List<decimal>();
+           // _rollingSum = new List<decimal>();
         }
 
 
@@ -37,9 +37,9 @@ namespace QuantTrade.Core.Indicators
         /// Gets called from other indicators
         /// </summary>
         /// <param name="data"></param>
-        public void UpdateIndicator(decimal price)
+        public void UpdateIndicator(decimal data)
         {
-            calculateValue(price);
+            calculate(data);
         }
 
         /// <summary>
@@ -47,23 +47,23 @@ namespace QuantTrade.Core.Indicators
         /// </summary>
         public void UpdateIndicator(TradeBar data)
         {
-            calculateValue(data.Close);
+            calculate(data.Close);
         }
 
-        private void calculateValue(decimal price)
+        private void calculate(decimal input)
         {
-            Samples++;
+            //Samples++;
 
-            //Make sure the last closing price is at the top
-            _rollingSum.Insert(0, price);
+            ////Make sure the last closing price is at the top
+            //_rollingSum.Insert(0, input);
 
-            //Trim the buffer by remove the oldest price from the running numbers
-            if (_rollingSum.Count > Period)
-            {
-                _rollingSum.RemoveAt(_rollingSum.Count - 1);
-            }
+            ////Trim the buffer by remove the oldest price from the running numbers
+            //if (_rollingSum.Count > Period)
+            //{
+            //    _rollingSum.RemoveAt(_rollingSum.Count - 1);
+            //}
 
-            Value = _rollingSum.Average();
+            //Value = _rollingSum.Average();
             
 
            

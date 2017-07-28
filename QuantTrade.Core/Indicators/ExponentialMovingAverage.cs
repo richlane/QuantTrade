@@ -13,7 +13,7 @@ namespace QuantTrade.Core.Indicators
     {
         private decimal _smoothingFactor;
         private decimal _smaTotal;
-        private decimal _previousValue;
+        private decimal _previousEMAValue;
 
         public override bool IsReady
         {
@@ -27,14 +27,14 @@ namespace QuantTrade.Core.Indicators
         /// <summary>
         /// Constructor - Creating standard EMA
         /// </summary>
-        public ExponentialMovingAverage(int period)
-        {
-            Period = period;
-            _smoothingFactor = 2.0m / ((decimal)period + 1.0m); //default smooting
-        }
+        //public ExponentialMovingAverage(int period)
+        //{
+        //    Period = period;
+        //    _smoothingFactor = 2.0m / ((decimal)period + 1.0m); //default smooting
+        //}
 
         /// <summary>
-        /// Constructor - Creating a Wilders EMA
+        /// Constructor - can define the smoothing factor
         /// </summary>
         public ExponentialMovingAverage(int period, decimal smoothingFactor)
         {
@@ -42,13 +42,34 @@ namespace QuantTrade.Core.Indicators
             _smoothingFactor = smoothingFactor;
         }
 
+        /// <summary>
+        /// Constructor - can define the moving average typr factor
+        /// </summary>
+        public ExponentialMovingAverage(int period,  MovingAverageType movingAverageType)
+        {
+            Period = period;
+
+            //Wilders EMA
+            if (movingAverageType ==   MovingAverageType.Wilders)
+            {
+                _smoothingFactor = 1m / Period;
+
+            }
+            //Creating a Standard EMA
+            else
+            {
+                _smoothingFactor= 2m /((decimal)period + 1.0m);
+            }
+            
+        }
+
         // <summary>
         /// Gets called from other indicators
         /// </summary>
         /// <param name="data"></param>
-        public void UpdateIndicator(decimal data)
+        public void UpdateIndicator(decimal price)
         {
-            calculate(data);
+            calculateValue(price);
         }
 
         /// <summary>
@@ -56,30 +77,30 @@ namespace QuantTrade.Core.Indicators
         /// </summary>
         public void UpdateIndicator(TradeBar data)
         {
-            calculate(data.Close);
+            calculateValue(data.Close);
         }
 
-        private void calculate(decimal input)
+        private void calculateValue(decimal price)
         {
             Samples++;
 
             // Save values for SMA calculation
             if (Samples < Period)
             {
-                _smaTotal += input;
+                _smaTotal += price;
             }
             //Calc the SMA 
             else if (Samples == Period)
             {
-                _smaTotal += input;
+                _smaTotal += price;
                 Value = _smaTotal / Period;
-                _previousValue = Value;
+                _previousEMAValue = Value;
             }
             //Calc EMA
             else
             {
-                Value = input * _smoothingFactor + _previousValue * (1 - _smoothingFactor);
-                _previousValue = Value;
+                Value = price * _smoothingFactor + _previousEMAValue * (1 - _smoothingFactor);
+                _previousEMAValue = Value;
             }
 
        

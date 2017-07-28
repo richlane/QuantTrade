@@ -7,7 +7,7 @@ using System;
 
 namespace QuantTrade.Core.Algorithm
 {
-    public class RSI2Alogrithm : BaseAlgorithm, IAlogorithm
+    public class RSI2Algorithm : BaseAlgorithm, IAlogorithm
     {
         //Indicators & related settings
         private Resolution _resolution = Resolution.Daily;
@@ -16,7 +16,7 @@ namespace QuantTrade.Core.Algorithm
 
 
         //Program.cs is going to feed these in
-        public int _smaLookBackPeriod = 50;
+        public int _smaLookBackPeriod = 30;
         public int _rsiLookBackPeriod = 2;
         public int _rsiBuyLevel = 30;
         public int _rsiSellLevel = 70;
@@ -28,13 +28,12 @@ namespace QuantTrade.Core.Algorithm
 
         //Sell Stop
         bool _useSellStop = true;
-        decimal _sellStopPercentage = .3m;
+        decimal _sellStopPercentage = .05m;
 
         //Account Settings
         private decimal _transactionFee = 7M;
         private decimal _startingCash = 10000M;
-
-      
+        
 
         #region Misc
 
@@ -85,10 +84,10 @@ namespace QuantTrade.Core.Algorithm
         /// <summary>
         /// Event handler for a newly executed order
         /// </summary>
-        public void OnOrderEvent(Order data, EventArgs e)
+        public void OnOrderEvent(Order order, EventArgs e)
         {
             //set sell stop price
-            if (data.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
+            if (order.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
             {
                 _sellStopPrice = 
                     Broker.StockPortfolio.Find(p => p.Symbol == Symbol).AverageFillPrice * (1 - _sellStopPercentage);
@@ -98,7 +97,7 @@ namespace QuantTrade.Core.Algorithm
         /// <summary>
         /// Event Handing new trade bar
         /// </summary>
-        public void OnTradeBarEvent(TradeBar data, EventArgs e)
+        public void OnTradeBarEvent(TradeBar tradebar, EventArgs e)
         {
             //Make sure indicators are ready
             if (!_rsi.IsReady || !_sma.IsReady)
@@ -107,13 +106,13 @@ namespace QuantTrade.Core.Algorithm
             }
                 
             //Buy, Sell, or Hold?
-            Action action = getBuySellHoldDecision(data);
+            Action action = getBuySellHoldDecision(tradebar);
 
             switch (action)
             {
                 case Action.Buy:
                     decimal dollarAmt = (Broker.AvailableCash * _pctToInvest);
-                    int buyQty = Convert.ToInt32(Math.Round(dollarAmt / data.Close));
+                    int buyQty = Convert.ToInt32(Math.Round(dollarAmt / tradebar.Close));
                     base.ExecuteOrder(Action.Buy, _orderType, buyQty);
                     break;
 
@@ -133,7 +132,7 @@ namespace QuantTrade.Core.Algorithm
         /// <summary>
         /// Should we buy, sell or hold?
         /// </summary>
-        private Action getBuySellHoldDecision(TradeBar data)
+        private Action getBuySellHoldDecision(TradeBar tradebar)
         {
             Action action = Action.Hold;
             bool buying = false;
@@ -193,14 +192,14 @@ namespace QuantTrade.Core.Algorithm
             {
                 //Sell - we hit our oversold RSI and SMA levels
                 if ( _rsi.Value > _rsiSellLevel
-                   && data.Close > _sma.Value)
+                   && tradebar.Close > _sma.Value)
                 {
                     action = Action.Sell;
                     _pctToInvest = 0;
                     _sellStopPrice = 0;
                 }
                 //Sell - stopped out
-                else if (_sellStopPrice > 0 && data.Close < _sellStopPrice)
+                else if (_sellStopPrice > 0 && tradebar.Close < _sellStopPrice)
                 {
                     action = Action.Sell;
                     _pctToInvest = 0;

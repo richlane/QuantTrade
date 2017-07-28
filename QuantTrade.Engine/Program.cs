@@ -77,7 +77,7 @@ namespace QuantTrade
           
             for (int i = 1; i < 100; i++)
             {
-                RSI2Alogrithm algo = new RSI2Alogrithm();
+                RSI2Algorithm algo = new RSI2Algorithm();
                 algo._smaLookBackPeriod = i;
             
                 algo.Initialize(symbol, false, "i = " + i);

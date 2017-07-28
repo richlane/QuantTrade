@@ -45,8 +45,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\BaseAlgorithm.cs" />
+    <Compile Include="Algorithms\SMA20Algorithm.cs" />
+    <Compile Include="Indicators\MACD.cs" />
     <Compile Include="Interfaces\IAlogorithm.cs" />
-    <Compile Include="Algorithms\RSI2Alogrithm.cs" />
+    <Compile Include="Algorithms\RSI2Algorithm.cs" />
     <Compile Include="Configuration\Config.cs" />
     <Compile Include="Data\DataGenerators\AlphaAdvantage.cs" />
     <Compile Include="Interfaces\IGenerator.cs" />
