@@ -19,11 +19,8 @@ namespace QuantTrade.Core.Algorithm
         #region Properties 
 
         private TradeBar _currentTradebar;
-
         private DateTime _startRun;
         private DateTime _endRun;
-
-        private bool _allowMargin;
 
         public string Comments { get; set; }
 

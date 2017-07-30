@@ -110,7 +110,7 @@ namespace QuantTrade.Tests
 
             IDataReader reader = new CSVReader();
             reader.OnTradeBar += Reader_OnData;
-            reader.ReadData(symbol, Resolution.Daily);
+            reader.ReadData(symbol, Resolution.Daily, null, null);
             
         }
 

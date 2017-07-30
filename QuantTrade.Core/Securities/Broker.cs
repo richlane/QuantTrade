@@ -129,9 +129,9 @@ namespace QuantTrade.Core.Securities
         }
              
         /// <summary>
-        /// Updated holdings when an order gets filled.
+        /// Updates holdings for filled orders.
         /// </summary>
-        private void processOrder(Order order)
+        private void updateHoldings(Order order)
         {
             //Only process filled orders
             if (order.Status != OrderStatus.Filled) return;
@@ -252,15 +252,15 @@ namespace QuantTrade.Core.Securities
         }
 
         /// <summary>
-        /// Fills the order.
+        /// Determintes how to process the order (i.e. MOC, MOO, etc).
         /// </summary>
-        private void buildOrder(TradeBar tradeBar, Order order)
+        private void fillOrder(TradeBar tradeBar, Order order)
         {
             //Makes sure we are supposed to be here
             if (order.Status != OrderStatus.New && order.Status != OrderStatus.Pending)
                 return; 
            
-            //put MOO orders in the QUEUE
+            //Put MOO orders in the QUEUE and exit the method. We will process them tommorow.
             if (order.OrderType == OrderType.MOO && order.Status == OrderStatus.New) 
             {
                 order.Status = OrderStatus.Pending;
@@ -268,24 +268,27 @@ namespace QuantTrade.Core.Securities
                 return;
             }
 
-            //Process ready orders 
             //Which price to use for fill?
-            order.FillPrice = tradeBar.Close;
-
             if(order.OrderType == OrderType.MOO)
             {
+                //Use the current opening price of the tradebar
                 order.FillPrice = tradeBar.Open;
             }
-          
-           //VALIDATION REQUIRED - make sure we can afford to buy the stock
-           if (validateOrder(order) == false) return;
+            else
+            {
+                //Use the current closing price of the tradebar
+                order.FillPrice = tradeBar.Close;
+            }
+
+            //VALIDATION REQUIRED - make sure we can afford to buy the stock
+            if (validateOrder(order) == false) return;
       
             //Update porfolio
-            order.OrderType = OrderType.Market;
+            order.OrderType = OrderType.Market; // Convert all order to market orders
             order.FillDate = tradeBar.Day;
             order.Status = OrderStatus.Filled;
 
-            processOrder(order);
+            updateHoldings(order);
     
             //Throw event
             if (OnOrder != null)
@@ -309,7 +312,7 @@ namespace QuantTrade.Core.Securities
                 DateSubmitted = tradeBar.Day
             };
 
-            buildOrder(tradeBar, order);
+            fillOrder(tradeBar, order);
         }
 
         /// <summary>
@@ -330,7 +333,7 @@ namespace QuantTrade.Core.Securities
                 if (order.OrderType == OrderType.MOO &&
                     order.Status == OrderStatus.Pending)
                 {
-                    buildOrder(tradeBar, order);
+                    fillOrder(tradeBar, order);
 
                     PendingOrderQueue.RemoveAt(i);
                 }

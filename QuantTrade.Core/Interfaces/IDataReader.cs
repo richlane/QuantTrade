@@ -16,7 +16,6 @@ namespace QuantTrade.Core.Data
                       Resolution resolution, 
                       DateTime? startDate,
                       DateTime? endDate);
-
-        void ReadData(string symbol, Resolution resolution);
+         
     }
 }

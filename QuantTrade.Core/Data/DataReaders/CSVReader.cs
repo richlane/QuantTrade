@@ -8,6 +8,7 @@ using QuantTrade.Core.Configuration;
 using QuantTrade.Core;
 using QuantTrade.Core.Indicators;
 using QuantTrade.Core.Securities;
+using QuantTrade.Core.Utilities;
 
 namespace QuantTrade.Core.Data
 {
@@ -20,15 +21,8 @@ namespace QuantTrade.Core.Data
 
         #endregion
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public void ReadData(string symbol, Resolution resolution)
-        {
-            ReadData(symbol, resolution,  null, null);
-        }
+        private TradeBar _previousTradebar;
 
- 
         /// <summary>
         /// 
         /// </summary>
@@ -63,7 +57,7 @@ namespace QuantTrade.Core.Data
 
                 if (skipLine) continue;
 
-                //Time, Open, High, Low, Close, Volume
+                //CSV Data: Time, Open, High, Low, Close, Volume
                 TradeBar bar = new TradeBar()
                 {
                     TradeResolution = resolution,
@@ -77,11 +71,24 @@ namespace QuantTrade.Core.Data
                     SampleNumber = index
                 };
 
+                
+                //Watch for a massive  price drop due to sotck splits or some other strange event!!!.
+                if(_previousTradebar != null)
+                {
+                   decimal variance = Math.Round((bar.Close - _previousTradebar.Close)/ _previousTradebar.Close,2);  
+                   if( Math.Abs(variance) > .25m)  ///25% price difference between todays and yesteradys close
+                    {
+                        Logger.Log($"Unusual price variance on {bar.Symbol} on {bar.Day.ToShortDateString()}: {_previousTradebar.Close} vs {bar.Close}", ConsoleColor.Red);
+                    }
+                }
+
                 //Throw Event to the alogos
                 if (OnTradeBar != null)
                 {
                     OnTradeBar(bar, e);
                 }
+
+                _previousTradebar = bar;
             }
 
         }

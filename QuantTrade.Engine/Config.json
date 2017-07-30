@@ -2,10 +2,11 @@
   "data-directory": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads",
   "default-alogrithm": "RSI2Algorithm",
   "api-key": "1CP91IVE5IWVQE4A",
-  "transaction-log": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\transactions.csv",
+  "transaction-log-location": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\",
   "results-log": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\results.log",
   "allow-margin": "true",
-  "buyandhold-stocks": "SPY",
-  "swingtrade-stocks" :  "SPXL TQQQ UPRO BIB SOXL"
+  "buyandhold-stocks": "",
+  "swingtrade-stocks": "UDOW",
+  "Comments": "SPXL TQQQ UDOW BIB SOXL"
   
 }
