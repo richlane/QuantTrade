@@ -25,9 +25,7 @@ namespace QuantTrade.Core.Securities
         #endregion
 
         #region Portfolio
-        private decimal _highestPrice;
-
-        private decimal _lowestPrice;
+        private SortedDictionary<DateTime, decimal> _tradesBars;
 
         private bool _allowMargin;
 
@@ -48,7 +46,7 @@ namespace QuantTrade.Core.Securities
                 return Convert.ToInt32(Math.Round(rate * 100));
             }
         }
-       
+
         public int LossRate
         {
             get
@@ -56,13 +54,13 @@ namespace QuantTrade.Core.Securities
                 if (_totalLosses == 0 && _totalSellTrades == 0)
                     return 0;
 
-                decimal rate =  _totalLosses / _totalSellTrades;
+                decimal rate = _totalLosses / _totalSellTrades;
                 return Convert.ToInt32(Math.Round(rate * 100));
             }
         }
 
         public decimal StartingCash { get; private set; }
-
+        
         public Decimal TransactionFee { get; private set; }
 
         public Decimal TotalTradesCancelled { get; private set; }
@@ -70,6 +68,7 @@ namespace QuantTrade.Core.Securities
         public Decimal AvailableCash { get; private set; }
 
         public Decimal TotalTrades { get; private set; }
+
 
         public decimal TotalTransactionFees { get; private set; }
 
@@ -100,23 +99,44 @@ namespace QuantTrade.Core.Securities
 
         #endregion
 
-
         /// <summary>
-        /// Constructor
+        /// Constructor - called by the unti test. Values are passed in as opposed to read from the json config file.
         /// </summary>
         public Broker(decimal startingCash, decimal transactionFee, bool allowMargin)
-            {
-                StartingCash = startingCash;
-                AvailableCash = startingCash;
-                TransactionFee = transactionFee;
+        {
+            _allowMargin = allowMargin;
+            StartingCash = startingCash;
+            AvailableCash = StartingCash;
+            TransactionFee = transactionFee;
 
-                StockPortfolio = new List<Stock>();
+            initCollections();
+        }
 
-                OrderHistory = new List<Order>();
-                PendingOrderQueue = new List<Order>();
 
-                _allowMargin = allowMargin;
-            }
+        /// <summary>
+        /// Constructor - called by the BaseAlgorithm class. Values are read from the json config file.
+        /// </summary>
+        public Broker()
+        {
+            _allowMargin = Convert.ToBoolean(Configuration.Config.GetToken("allow-margin"));
+            TransactionFee = Convert.ToDecimal(Configuration.Config.GetToken("transaction-fee"));
+            StartingCash = Convert.ToDecimal(Configuration.Config.GetToken("starting-cash"));
+            AvailableCash = StartingCash;
+
+            initCollections();
+        }
+
+        /// <summary>
+        /// Initializes the collections.
+        /// </summary>
+        private void initCollections()
+        {
+            StockPortfolio = new List<Stock>();
+            _tradesBars = new SortedDictionary<DateTime, decimal>();
+            OrderHistory = new List<Order>();
+            PendingOrderQueue = new List<Order>();
+
+        }
 
         /// <summary>
         /// 
@@ -127,7 +147,7 @@ namespace QuantTrade.Core.Securities
         {
             return StockPortfolio.Exists(p => p.Symbol == symbol);
         }
-             
+
         /// <summary>
         /// Updates holdings for filled orders.
         /// </summary>
@@ -197,9 +217,9 @@ namespace QuantTrade.Core.Securities
                         {
                             _totalLosses++;
                         }
-                        stock.TotalInvested -= stock.AverageFillPrice * order.Quantity;  
+                        stock.TotalInvested -= stock.AverageFillPrice * order.Quantity;
                         stock.Quantity -= order.Quantity;
-                
+
                         //remove the stock from the portfolio if no longer holding any.
                         if (stock.Quantity <= 0)
                         {
@@ -222,7 +242,7 @@ namespace QuantTrade.Core.Securities
             {
                 if (AvailableCash < (order.Quantity * order.FillPrice))
                 {
-                    if( !_allowMargin )
+                    if (!_allowMargin)
                         isValid = false;
                 }
             }
@@ -258,10 +278,10 @@ namespace QuantTrade.Core.Securities
         {
             //Makes sure we are supposed to be here
             if (order.Status != OrderStatus.New && order.Status != OrderStatus.Pending)
-                return; 
-           
+                return;
+
             //Put MOO orders in the QUEUE and exit the method. We will process them tommorow.
-            if (order.OrderType == OrderType.MOO && order.Status == OrderStatus.New) 
+            if (order.OrderType == OrderType.MOO && order.Status == OrderStatus.New)
             {
                 order.Status = OrderStatus.Pending;
                 PendingOrderQueue.Add(order);
@@ -269,7 +289,7 @@ namespace QuantTrade.Core.Securities
             }
 
             //Which price to use for fill?
-            if(order.OrderType == OrderType.MOO)
+            if (order.OrderType == OrderType.MOO)
             {
                 //Use the current opening price of the tradebar
                 order.FillPrice = tradeBar.Open;
@@ -282,14 +302,14 @@ namespace QuantTrade.Core.Securities
 
             //VALIDATION REQUIRED - make sure we can afford to buy the stock
             if (validateOrder(order) == false) return;
-      
+
             //Update porfolio
             order.OrderType = OrderType.Market; // Convert all order to market orders
             order.FillDate = tradeBar.Day;
             order.Status = OrderStatus.Filled;
 
             updateHoldings(order);
-    
+
             //Throw event
             if (OnOrder != null)
             {
@@ -329,12 +349,10 @@ namespace QuantTrade.Core.Securities
                 //I removed the date check becuase I was not taking into consideration weekends
                 // tradeBar.Day.AddDays(-1).ToShortDateString() == order.DateSubmitted.ToShortDateString())
 
-                //Pick up MOO orders placed yesterday
-                if (order.OrderType == OrderType.MOO &&
-                    order.Status == OrderStatus.Pending)
+                //Pick up pending MOO orders placed yesterday
+                if (order.OrderType == OrderType.MOO &&  order.Status == OrderStatus.Pending)
                 {
                     fillOrder(tradeBar, order);
-
                     PendingOrderQueue.RemoveAt(i);
                 }
             }

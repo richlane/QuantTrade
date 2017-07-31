@@ -32,9 +32,9 @@ namespace QuantTrade.Core.Data
             if (isDataNeeded())
             {
                 //See https://www.alphavantage.co/documentation/ for docs!
-                string requestString = $"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={apiKey}&datatype=csv&outputsize=full";
+                string requestString = $"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={symbol}&apikey={apiKey}&datatype=csv&outputsize=full";
 
-                callWebsite(requestString);
+                callWebsite(requestString, symbol);
             }
 
             return _csvFileName;
@@ -60,9 +60,9 @@ namespace QuantTrade.Core.Data
         /// <summary>
         /// 
         /// </summary>
-        private void callWebsite(string requestString)
+        private void callWebsite(string requestString, string symbol)
         {
-            Logger.Log("Downloading data......." + Environment.NewLine, ConsoleColor.Red);
+            Logger.Log($"Downloading {symbol} data......." + Environment.NewLine, ConsoleColor.Red);
 
             string data = "";
 

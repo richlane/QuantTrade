@@ -59,9 +59,6 @@ namespace QuantTrade.Core.Algorithm
             //Update base class proprties 
             SetStartDate(_startYear-1, 11, 15); //Set Start Date --> Need 45 days for the warmup period so start in November
             SetEndDate(_endYear, 12, 31);
-
-            StartingCash = _startingCash;
-            TransactionFee = _transactionFee;
             Resolution = _resolution;
             subscribeToEvents();
 

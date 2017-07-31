@@ -38,9 +38,9 @@ namespace QuantTrade.Core.Algorithm
 
         public List<IIndicator> Indicators { get; set; }
 
-        public decimal StartingCash  { get; set; }
+        //public decimal StartingCash  { get; set; }
 
-        public decimal TransactionFee { get; set; }
+       // public decimal TransactionFee { get; set; }
 
         private IDataReader _dataReader;
 
@@ -86,9 +86,8 @@ namespace QuantTrade.Core.Algorithm
             _startRun = DateTime.Now;
 
             Symbol = Symbol.ToUpper();
-
-            bool allowMargin = Convert.ToBoolean(Configuration.Config.GetToken("allow-margin"));
-            Broker = new Broker(StartingCash, TransactionFee, allowMargin);
+            
+            Broker = new Broker();
             Broker.OnOrder += this.OnOrder;
 
             _dataReader.ReadData(Symbol, Resolution, StartDate, EndDate);

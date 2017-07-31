@@ -8,6 +8,9 @@ namespace QuantTrade.Core.Securities
 {
     public class TradeBar
     {
+        public decimal SplitCoefficient { get; set; }
+        public decimal Dividend { get; set; }
+
         public string Symbol { get; set; }
 
         public decimal High { get; set; }

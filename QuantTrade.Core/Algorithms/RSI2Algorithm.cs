@@ -18,11 +18,11 @@ namespace QuantTrade.Core.Algorithm
         public int _rsiLookBackPeriod = 2;
         public int _rsiBuyLevel = 30;
         public int _rsiSellLevel = 70;
-        OrderType _orderType = OrderType.MOO;
+        OrderType _orderType = OrderType.MOC;
 
         //Date Ranges
-        private int _startYear = 2012;
-        private int _endYear = 2012;
+        private int _startYear = 2010;
+        private int _endYear = 2017;
 
         //Sell Stop
         bool _useSellStop = true;
@@ -30,11 +30,6 @@ namespace QuantTrade.Core.Algorithm
         decimal _sellStopPrice;
         decimal _pctToInvest;
       
-
-        //Account Settings
-        private decimal _transactionFee = 7M;
-        private decimal _startingCash = 10000M;
-
         //Custom Transaction Logging
         bool _enableTransactionLogging =true;
         StringBuilder _transactionLogBuilder;
@@ -64,8 +59,8 @@ namespace QuantTrade.Core.Algorithm
             SetStartDate(_startYear-1, 11, 15); //Set Start Date --> Need 45 days for the warmup period so start in November
             SetEndDate(_endYear, 12, 31);
 
-            StartingCash = _startingCash;
-            TransactionFee = _transactionFee;
+            //StartingCash = _startingCash;
+            //TransactionFee = _transactionFee;
             Resolution = _resolution;
             subscribeToEvents();
 

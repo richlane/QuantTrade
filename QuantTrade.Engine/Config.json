@@ -5,8 +5,10 @@
   "transaction-log-location": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\",
   "results-log": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\results.log",
   "allow-margin": "true",
+  "transaction-fee": "7",
+  "starting-cash": "10000",
   "buyandhold-stocks": "",
-  "swingtrade-stocks": "UDOW",
+  "swingtrade-stocks": "BIB",
   "Comments": "SPXL TQQQ UDOW BIB SOXL"
   
 }

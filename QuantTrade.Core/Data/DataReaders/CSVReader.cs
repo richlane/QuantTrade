@@ -23,6 +23,83 @@ namespace QuantTrade.Core.Data
 
         private TradeBar _previousTradebar;
 
+        private List<TradeBar> _tradeBars;
+
+        private string _symbol;
+
+        private Resolution _resolution;
+
+        private string _csvFile;
+
+        /// <summary>
+        /// Reads CSV into a tradebar collection
+        /// </summary>
+        private void readCSV()
+        {
+            int index = 0;
+
+            //Read CSV file into RAM & create new tradbar collection
+            _tradeBars = new List<TradeBar>();
+            string[] data = File.ReadAllLines(_csvFile);
+
+            //Loop the csv
+            for (int i = 0; i < data.Length; i++)
+            {
+                index++;
+                var csv = data[i].Split(',');
+
+                //Daily CSV Data: date, open, high, low, close, split/dividend-adjusted close, volume, dividend amount, split coefficient
+                TradeBar bar = new TradeBar()
+                {
+                    TradeResolution = _resolution,
+                    Symbol = _symbol,
+                    Day = DateTime.Parse(csv[0]),
+                    Open = decimal.Parse(csv[1]),
+                    High = decimal.Parse(csv[2]),
+                    Low = decimal.Parse(csv[3]),
+                    Close = decimal.Parse(csv[4]),
+                    Volume = decimal.Parse(csv[6]),
+                    Dividend = decimal.Parse(csv[7]),
+                    SplitCoefficient = decimal.Parse(csv[8]),
+                    SampleNumber = index
+                };
+
+                _tradeBars.Add(bar);
+            }
+        }
+
+
+        /// <summary>
+        /// Adjust tradebars for splits 
+        /// </summary>
+        private void adjustTradeBarsForSplits()
+        {
+            //Reverse tradebar order - Newest to Oldest
+            _tradeBars.Reverse();
+
+            decimal splitDevisor = 1m;
+
+            foreach (var item in _tradeBars)
+            {
+                //Step 1: Adjust for splits if needed
+                if(splitDevisor > 1)
+                {
+                    item.Close = item.Close / splitDevisor;
+                    item.Open = item.Open / splitDevisor;
+                    item.High = item.High / splitDevisor;
+                    item.Low = item.Low / splitDevisor;
+                }
+
+                //Step 2: Update the splitDevisor if needed
+                if (item.SplitCoefficient > 1)
+                    splitDevisor = splitDevisor * item.SplitCoefficient;
+            }
+
+            //Reverse tradebar order - Oldest to Newest
+            _tradeBars.Reverse();
+           
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -31,49 +108,36 @@ namespace QuantTrade.Core.Data
             DateTime ? startDate, 
             DateTime ? endDate)
         {
-            //Make sure we have data to read
+
+            _symbol = symbol;
+            _resolution = resolution;
+
+            //Download CSV
             IGenerator dataGenerator = new AlphaAdvantage();
-            string inputFile= dataGenerator.GenerateData(symbol, resolution);
-            int index = 0;
+            _csvFile = dataGenerator.GenerateData(symbol, resolution);
 
-            string[] data = File.ReadAllLines(inputFile);
+            //Create Tradebars
+            readCSV();
+            adjustTradeBarsForSplits();
 
-            for (int i = 0; i < data.Length; i++)
+            foreach (TradeBar bar in _tradeBars)
             {
-                index++;
-                var csv = data[i].Split(',');
-
+                
                 bool skipLine = false;
-                DateTime transactionDate = DateTime.Parse(csv[0]);
-
+          
                 //Filter dates if applicable
                 if (startDate != null && endDate != null)
                 {
-                    if (transactionDate < startDate || transactionDate > endDate)
+                    if (bar.Day < startDate || bar.Day > endDate)
                     {
                         skipLine = true;
                     }
                 }
 
                 if (skipLine) continue;
-
-                //CSV Data: Time, Open, High, Low, Close, Volume
-                TradeBar bar = new TradeBar()
-                {
-                    TradeResolution = resolution,
-                    Symbol = symbol,
-                    Day = DateTime.Parse(csv[0]),
-                    Open = decimal.Parse(csv[1]),
-                    High = decimal.Parse(csv[2]),
-                    Low = decimal.Parse(csv[3]),
-                    Close = decimal.Parse(csv[4]),
-                    Volume = decimal.Parse(csv[5]),
-                    SampleNumber = index
-                };
-
                 
                 //Watch for a massive  price drop due to sotck splits or some other strange event!!!.
-                if(_previousTradebar != null)
+                if (_previousTradebar != null)
                 {
                    decimal variance = Math.Round((bar.Close - _previousTradebar.Close)/ _previousTradebar.Close,2);  
                    if( Math.Abs(variance) > .25m)  ///25% price difference between todays and yesteradys close
