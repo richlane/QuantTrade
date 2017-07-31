@@ -21,8 +21,7 @@ namespace QuantTrade
             try
             {
                 Console.WindowHeight = Console.LargestWindowHeight;
-                Console.WriteLine("Starting application" + Environment.NewLine);
-
+                Logger.Log("Starting run..." + Environment.NewLine, ConsoleColor.Green);
 
                 //TESTING TESTING TESTING
                 //runCustomRSI2Alog("TQQQ");
@@ -44,7 +43,7 @@ namespace QuantTrade
             }
             finally
             {
-                Console.WriteLine("Hit any Enter to exit");
+                Logger.Log("Run complete. Hit any Enter to exit... ", ConsoleColor.Green);
                 Console.ReadLine();
             }
            
@@ -72,18 +71,15 @@ namespace QuantTrade
         /// <summary>
         /// Here I am trying to have to software set a slew of parameters and tell me what generates the best results.
         /// </summary>
-        private static void runCustomRSI2Alog(string symbol)
+        private static void runCustomRSI2Alogo(string symbol)
         {
-          
             for (int i = 1; i < 100; i++)
             {
                 RSI2Algorithm algo = new RSI2Algorithm();
                 algo._smaLookBackPeriod = i;
             
                 algo.Initialize(symbol, false, "i = " + i);
-                
             }
-            
         }
     }
 }

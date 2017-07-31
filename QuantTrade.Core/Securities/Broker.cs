@@ -16,13 +16,7 @@ namespace QuantTrade.Core.Securities
 
         #endregion
 
-
-
-        #region Properties
-
-        // public List<Order> OrderHistory { get; private set; }
-
-        private bool _allowMargin;
+        #region Statistics
 
         private decimal _totalWins;
 
@@ -37,16 +31,13 @@ namespace QuantTrade.Core.Securities
                 //Number of years in this dataset:
                 double years = (EquityOverTime.Keys.LastOrDefault() - EquityOverTime.Keys.FirstOrDefault()).TotalDays / 365;
 
-                return Math.Round((Math.Pow((double)TotalEquity / (double)StartingCash, (1 / (double)years)) - 1) * 100,2);
+                return Math.Round((Math.Pow((double)TotalEquity / (double)StartingCash, (1 / (double)years)) - 1) * 100, 2);
             }
 
         }
 
-        public List<Order> PendingOrderQueue { get; private set; }
-
         public SortedDictionary<DateTime, decimal> EquityOverTime { get; private set; }
-        
-        
+
         public int WinRate
         {
             get
@@ -71,6 +62,35 @@ namespace QuantTrade.Core.Securities
             }
         }
 
+        public Decimal MaxDrawdownPercent
+        {
+            get
+            {
+                var prices = EquityOverTime.Values.ToList();
+                if (prices.Count == 0) return 0;
+
+                var drawdowns = new List<decimal>();
+                var high = prices[0];
+                foreach (var price in prices)
+                {
+                    if (price > high) high = price;
+                    if (high > 0) drawdowns.Add(price / high - 1);
+                }
+
+                return Math.Round(Math.Abs(drawdowns.Min() * 100), 2);
+            }
+        }
+
+
+        #endregion
+
+
+        #region Properties
+
+        private bool _allowMargin;
+     
+        public List<Order> PendingOrderQueue { get; private set; }
+        
         public decimal StartingCash { get; private set; }
         
         public Decimal TransactionFee { get; private set; }
@@ -109,25 +129,7 @@ namespace QuantTrade.Core.Securities
             }
         }
 
-        public Decimal MaxDrawdownPercent
-        {
-            get
-            {
-                var prices = EquityOverTime.Values.ToList();
-                if (prices.Count == 0) return 0;
-
-                var drawdowns = new List<decimal>();
-                var high = prices[0];
-                foreach (var price in prices)
-                {
-                    if (price > high) high = price;
-                    if (high > 0) drawdowns.Add(price / high - 1);
-                }
-
-                return Math.Round(Math.Abs(drawdowns.Min() * 100), 0);
-            }
-        }
-
+     
         #endregion
 
         /// <summary>

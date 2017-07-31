@@ -104,7 +104,7 @@ namespace QuantTrade.Core.Algorithm
         {
             double totalRunTime = (_endRun - _startRun).Milliseconds;
 
-            decimal profitability = Math.Round( ((Broker.AvailableCash + Broker.PortfolioValue - Broker.StartingCash)/ Broker.StartingCash) *100, 0);
+            decimal profitability = Math.Round( ((Broker.AvailableCash + Broker.PortfolioValue - Broker.StartingCash)/ Broker.StartingCash) *100);
             string endingCash = string.Format("{0:c}", Math.Round(Broker.TotalEquity));
             string startingCash = string.Format("{0:c}", Math.Round(Broker.StartingCash));
 
@@ -119,7 +119,7 @@ namespace QuantTrade.Core.Algorithm
             report.AppendLine($"Annual Return: {Broker.CompoundingAnnualPerformance}%");
             report.AppendLine($"Win Rate: {Broker.WinRate}%");
             report.AppendLine($"Loss Rate: {Broker.LossRate}%");
-            report.AppendLine($"Max Drawdown: {Broker.MaxDrawdownPercent}%");
+            report.AppendLine($"Max Drawdown: {Math.Round(Broker.MaxDrawdownPercent)}%");
             report.AppendLine($"Total Fees: ${Broker.TotalTransactionFees}");
             report.AppendLine($"Total Trades: {Broker.TotalTrades}");
 
