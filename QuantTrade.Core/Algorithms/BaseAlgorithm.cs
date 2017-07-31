@@ -104,9 +104,9 @@ namespace QuantTrade.Core.Algorithm
         {
             double totalRunTime = (_endRun - _startRun).Milliseconds;
 
-            decimal profitability = Math.Round( ((Broker.AvailableCash + Broker.CurrentPortfolioValue - Broker.StartingCash)/ Broker.StartingCash) *100, 2);
-            string endingCash = string.Format("{0:c}", Broker.AvailableCash + Broker.CurrentPortfolioValue);
-            string startingCash = string.Format("{0:c}", Broker.StartingCash);
+            decimal profitability = Math.Round( ((Broker.AvailableCash + Broker.PortfolioValue - Broker.StartingCash)/ Broker.StartingCash) *100, 0);
+            string endingCash = string.Format("{0:c}", Math.Round(Broker.TotalEquity));
+            string startingCash = string.Format("{0:c}", Math.Round(Broker.StartingCash));
 
             StringBuilder report = new StringBuilder();
 
@@ -116,9 +116,10 @@ namespace QuantTrade.Core.Algorithm
             report.AppendLine($"Starting Account: {startingCash}");
             report.AppendLine($"Ending Account: {endingCash}");
             report.AppendLine($"Net Profit: {profitability}%");
+            report.AppendLine($"Annual Return: {Broker.CompoundingAnnualPerformance}%");
             report.AppendLine($"Win Rate: {Broker.WinRate}%");
             report.AppendLine($"Loss Rate: {Broker.LossRate}%");
-           // report.AppendLine($"Max Drawdown: {Broker.MaxDrawdown}%");
+            report.AppendLine($"Max Drawdown: {Broker.MaxDrawdownPercent}%");
             report.AppendLine($"Total Fees: ${Broker.TotalTransactionFees}");
             report.AppendLine($"Total Trades: {Broker.TotalTrades}");
 
@@ -126,9 +127,6 @@ namespace QuantTrade.Core.Algorithm
             {
                 report.AppendLine($"Comments: {Comments}");
             }
-
-            //report.AppendLine($"Execution Time: {totalRunTime} ms");
-            //Logger.Log($"     Trades Cancelled: {Broker.TotalTradesCancelled}");
 
             report.AppendLine("---------------------------------------------------");
 

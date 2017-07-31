@@ -69,8 +69,8 @@
     <Compile Include="Utilities\Logger.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Downloads\Daily_DONOTDELETE.csv" />
     <None Include="Downloads\Daily_SPY.csv" />
-    <None Include="Downloads\DONOTDELETE.csv" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

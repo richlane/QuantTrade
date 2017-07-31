@@ -16,16 +16,11 @@ namespace QuantTrade.Core.Securities
 
         #endregion
 
-        #region Order Queues
 
-        public List<Order> OrderHistory { get; private set; }
 
-        public List<Order> PendingOrderQueue { get; private set; }
+        #region Properties
 
-        #endregion
-
-        #region Portfolio
-        private SortedDictionary<DateTime, decimal> _tradesBars;
+        // public List<Order> OrderHistory { get; private set; }
 
         private bool _allowMargin;
 
@@ -35,6 +30,23 @@ namespace QuantTrade.Core.Securities
 
         private int _totalSellTrades;
 
+        public double CompoundingAnnualPerformance
+        {
+            get
+            {
+                //Number of years in this dataset:
+                double years = (EquityOverTime.Keys.LastOrDefault() - EquityOverTime.Keys.FirstOrDefault()).TotalDays / 365;
+
+                return Math.Round((Math.Pow((double)TotalEquity / (double)StartingCash, (1 / (double)years)) - 1) * 100,2);
+            }
+
+        }
+
+        public List<Order> PendingOrderQueue { get; private set; }
+
+        public SortedDictionary<DateTime, decimal> EquityOverTime { get; private set; }
+        
+        
         public int WinRate
         {
             get
@@ -68,13 +80,12 @@ namespace QuantTrade.Core.Securities
         public Decimal AvailableCash { get; private set; }
 
         public Decimal TotalTrades { get; private set; }
-
-
+        
         public decimal TotalTransactionFees { get; private set; }
 
         public List<Stock> StockPortfolio { get; private set; }
 
-        public Decimal CurrentPortfolioValue
+        public Decimal PortfolioValue
         {
             get
             {
@@ -89,13 +100,33 @@ namespace QuantTrade.Core.Securities
             }
         }
 
-        //public Decimal MaxDrawdown
-        //{
-        //    get
-        //    {
-        //     return   _lowestPrice - _highestPrice / _highestPrice;
-        //    }
-        //}
+        public Decimal TotalEquity
+        {
+            get
+            {
+               return  PortfolioValue + AvailableCash;
+          
+            }
+        }
+
+        public Decimal MaxDrawdownPercent
+        {
+            get
+            {
+                var prices = EquityOverTime.Values.ToList();
+                if (prices.Count == 0) return 0;
+
+                var drawdowns = new List<decimal>();
+                var high = prices[0];
+                foreach (var price in prices)
+                {
+                    if (price > high) high = price;
+                    if (high > 0) drawdowns.Add(price / high - 1);
+                }
+
+                return Math.Round(Math.Abs(drawdowns.Min() * 100), 0);
+            }
+        }
 
         #endregion
 
@@ -124,6 +155,7 @@ namespace QuantTrade.Core.Securities
             AvailableCash = StartingCash;
 
             initCollections();
+
         }
 
         /// <summary>
@@ -132,10 +164,9 @@ namespace QuantTrade.Core.Securities
         private void initCollections()
         {
             StockPortfolio = new List<Stock>();
-            _tradesBars = new SortedDictionary<DateTime, decimal>();
-            OrderHistory = new List<Order>();
+            EquityOverTime = new SortedDictionary<DateTime, decimal>();
+            //OrderHistory = new List<Order>();
             PendingOrderQueue = new List<Order>();
-
         }
 
         /// <summary>
@@ -156,7 +187,7 @@ namespace QuantTrade.Core.Securities
             //Only process filled orders
             if (order.Status != OrderStatus.Filled) return;
 
-            OrderHistory.Add(order);
+            //OrderHistory.Add(order);
             TotalTrades++;
 
             //Transaction fees
@@ -264,7 +295,7 @@ namespace QuantTrade.Core.Securities
                 order.Status = OrderStatus.Cancelled;
                 order.FillPrice = 0;
                 order.Quantity = 0;
-                OrderHistory.Add(order);
+                //OrderHistory.Add(order);
                 TotalTradesCancelled++;
             }
 
@@ -337,11 +368,13 @@ namespace QuantTrade.Core.Securities
 
         /// <summary>
         /// Processing order sitting in the queue when a new trade bar comes in (i.e. MOO orders)
-        /// and updates the current proces of stocks on our portfolio.
+        /// and updates the current value of stocks on our portfolio.
         /// Called from base algo.
         /// </summary>
         public void ProcessNewTradebar(TradeBar tradeBar)
         {
+            //Pick up pending MOO orders placed yesterday
+
             for (int i = 0; i < PendingOrderQueue.Count; i++)
             {
                 Order order = PendingOrderQueue[i];
@@ -349,7 +382,6 @@ namespace QuantTrade.Core.Securities
                 //I removed the date check becuase I was not taking into consideration weekends
                 // tradeBar.Day.AddDays(-1).ToShortDateString() == order.DateSubmitted.ToShortDateString())
 
-                //Pick up pending MOO orders placed yesterday
                 if (order.OrderType == OrderType.MOO &&  order.Status == OrderStatus.Pending)
                 {
                     fillOrder(tradeBar, order);
@@ -357,33 +389,17 @@ namespace QuantTrade.Core.Securities
                 }
             }
 
-            //Update current value of portfolio
+            //Update current stock price of stocks in the portfolio
             if (IsHoldingStock(tradeBar.Symbol))
             {
                 StockPortfolio.Find(p => p.Symbol == tradeBar.Symbol).CurrentPrice = tradeBar.Close;
             }
 
-            //Calculate drawdown
-            //calcDrawdown(tradeBar);
+            //Update equity over time
+            EquityOverTime.Add(tradeBar.Day, TotalEquity);
         }
 
-        /// <summary>
-        /// Calculates max drawdown
-        /// </summary>
-        /// <param name="tradebar"></param>
-        //private void calcDrawdown(TradeBar tradebar)
-        //{
-        //    if (tradebar.High >= _highestPrice)
-        //    {
-        //        _highestPrice = tradebar.High;
-        //    }
-
-
-        //    if (tradebar.Low <= _lowestPrice)
-        //    {
-        //        _lowestPrice = tradebar.Low ;
-        //    }
-        //}
+      
 
     }
 }

@@ -37,6 +37,7 @@ namespace QuantTrade.Core
     {
         Buy,
         Sell,
-        Hold
+        Hold,
+        na
     }
 }

@@ -18,17 +18,16 @@ namespace QuantTrade.Core.Algorithm
         public int _rsiLookBackPeriod = 2;
         public int _rsiBuyLevel = 30;
         public int _rsiSellLevel = 70;
-        OrderType _orderType = OrderType.MOC;
-
+     
         //Date Ranges
         private int _startYear = 2010;
-        private int _endYear = 2017;
+        private int _endYear = 2016;
 
         //Sell Stop
         bool _useSellStop = true;
-        public decimal _sellStopPercentage = .05m;
+        public decimal _sellStopPercentage = .1m;
         decimal _sellStopPrice;
-        decimal _pctToInvest;
+        decimal _pctToInvest;   //Using the 2%, 3%, 5% investment strategy
       
         //Custom Transaction Logging
         bool _enableTransactionLogging =true;
@@ -59,8 +58,6 @@ namespace QuantTrade.Core.Algorithm
             SetStartDate(_startYear-1, 11, 15); //Set Start Date --> Need 45 days for the warmup period so start in November
             SetEndDate(_endYear, 12, 31);
 
-            //StartingCash = _startingCash;
-            //TransactionFee = _transactionFee;
             Resolution = _resolution;
             subscribeToEvents();
 
@@ -109,14 +106,18 @@ namespace QuantTrade.Core.Algorithm
                 case Action.Buy:
                     decimal dollarAmt = (Broker.AvailableCash * _pctToInvest);
                     int buyQty = Convert.ToInt32(Math.Round(dollarAmt / tradebar.Close));
-                    base.ExecuteOrder(Action.Buy, _orderType, buyQty);
+
+                    //Buying MOC -> Prices are cheaper at MOC. The market tends to gap the next day; buy low/sell high
+                    base.ExecuteOrder(Action.Buy,  OrderType.MOC, buyQty);
                     break;
 
                 case Action.Sell:
                     if(Broker.IsHoldingStock(Symbol)) //make sure we are hoding the stock before selling
                     {
                         int sellQty = Broker.StockPortfolio.Find(p => p.Symbol == Symbol).Quantity;
-                        base.ExecuteOrder(Action.Sell, _orderType, sellQty);
+
+                        //Selling MOO -> Lets take advantage of the morning gap up!
+                        base.ExecuteOrder(Action.Sell, OrderType.MOO, sellQty);
                     }
                     break;
             }
@@ -131,11 +132,13 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         private Action getBuySellHoldDecision(TradeBar tradebar)
         {
-            Action action = Action.Hold;
+            Action action = Action.na;
             bool buying = false;
             _logComments = "";
 
+            /////////////////////////////////////////
             //Here is the buy and hold logic
+            /////////////////////////////////////////
             if (BuyAndHold)
             {
                 if (Broker.IsHoldingStock(Symbol) == false)
@@ -146,17 +149,9 @@ namespace QuantTrade.Core.Algorithm
                 return action;
             }
 
-            //If we got stopped out in the past 1 days, do not buy the next day
-            //if(_stoppedOutDate != null && _useSellStop)
-            //{
-            //    if (tradebar.Day < _stoppedOutDate.Value.AddDays(0))
-            //    {
-            //        return action;
-            //    }
-            //}
         
             /////////////////////////////////////////
-            //Buy Logic
+            //Swing trade buy Logic
             /////////////////////////////////////////
             if ( _rsi.Value  < _rsiBuyLevel && _pctToInvest < 1M)
             {
@@ -191,7 +186,7 @@ namespace QuantTrade.Core.Algorithm
             }
 
             /////////////////////////////////////////
-            //Sell and Hold Logic
+            //Swing trade sell and hold logic
             /////////////////////////////////////////
             if (Broker.IsHoldingStock(Symbol) && buying == false)
             {
@@ -227,31 +222,23 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         private void logTransacton(TradeBar data, Action action)
         {
-            string status = action.ToString();
-            if (Broker.IsHoldingStock(Symbol) == false && action == Action.Hold)
-                    status = "";
-            
-
             if (_transactionLogBuilder == null)
             {
                 _transactionLogBuilder = new StringBuilder();
                 _transactionLogBuilder.AppendLine("Date,Symbol,Action,Open,Close,RSI,SMA,Comments");
             }
 
-
             _transactionLogBuilder.AppendLine(string.Format
                 ("{0},{1},{2},{3},{4},{5},{6},{7}",
                  data.Day,
                 Symbol,
-                status,
+                action.ToString().Replace("na", ""),
                 Math.Round(data.Open, 2),
                 Math.Round(data.Close, 2),
                 Math.Round(_rsi.Value),
                 Math.Round(_sma.Value), 
                 _logComments
                ));
-
-           
         }
 
         #endregion
