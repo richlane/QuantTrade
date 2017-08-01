@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QuantTrade.Core.Securities
 {
+    /// <summary>
+    /// Stores tradebar information.
+    /// </summary>
     public class TradeBar
     {
         public decimal SplitCoefficient { get; set; }
+
         public decimal Dividend { get; set; }
 
         public string Symbol { get; set; }

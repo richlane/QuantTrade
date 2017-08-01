@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace QuantTrade.Core.Securities
 {
+    /// <summary>
+    /// Order Model
+    /// </summary>
     public class Order
     {
         public OrderStatus Status { get; set; }
@@ -16,9 +19,6 @@ namespace QuantTrade.Core.Securities
 
         public DateTime FillDate { get; set; }
 
-        /// <summary>
-        /// The date the actual order was placed but
-        /// </summary>
         public DateTime DateSubmitted { get;  set; }
 
         public int Quantity { get; set; }

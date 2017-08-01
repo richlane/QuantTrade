@@ -7,6 +7,9 @@ using System.Text;
 
 namespace QuantTrade.Core.Algorithm
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class RSI2Algorithm : BaseAlgorithm, IAlogorithm
     {
         //Indicators & related settings
@@ -70,7 +73,7 @@ namespace QuantTrade.Core.Algorithm
 
             //Custom logging
             if(_enableTransactionLogging)
-                Logger.LogTransaction(_transactionLogBuilder.ToString(), Symbol);
+                Logger.LogTransactionsToFile(_transactionLogBuilder.ToString(), Symbol);
         }
 
 

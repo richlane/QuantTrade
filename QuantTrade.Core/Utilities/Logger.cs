@@ -1,23 +1,29 @@
 ﻿using QuantTrade.Core.Configuration;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QuantTrade.Core.Utilities
 {
-   public static class Logger
+    /// <summary>
+    /// Logging utilities class
+    /// </summary>
+    public static class Logger
     {
+        #region Properties
+
         private static string _transactionLogLocation;
         private static string _resultsLogFile;
         private static readonly object _locker = new object();
 
+        #endregion
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         static Logger()
         {
-            if(string.IsNullOrEmpty(_transactionLogLocation))
+            //get log file locations
+            if(string.IsNullOrEmpty(_transactionLogLocation) || string.IsNullOrEmpty(_resultsLogFile))
             {
                 //Results Log file
                 _resultsLogFile = Config.GetToken("results-log");
@@ -26,7 +32,7 @@ namespace QuantTrade.Core.Utilities
                     File.Delete(_resultsLogFile);
                 }
 
-                //Transaction log
+                //Transaction log file
                 _transactionLogLocation = Config.GetToken("transaction-log-location");
                 if(!_transactionLogLocation.EndsWith(@"\"))
                     _transactionLogLocation = _transactionLogLocation + @"\";
@@ -35,10 +41,9 @@ namespace QuantTrade.Core.Utilities
         }
 
         /// <summary>
-        /// Write to the transaction log file
+        /// Writes transaction to a log file.
         /// </summary>
-        /// <param name="message"></param>
-        public static void LogTransaction(string message, string symbol)
+        public static void LogTransactionsToFile(string transactions, string symbol)
         {
             string fileName = $"{_transactionLogLocation}Trans_{symbol}.csv";
 
@@ -48,27 +53,25 @@ namespace QuantTrade.Core.Utilities
                 if (File.Exists(fileName))
                     File.Delete(fileName);
  
-                File.AppendAllText(fileName, message + Environment.NewLine);
+                File.AppendAllText(fileName, transactions + Environment.NewLine);
             }
         }
 
         /// <summary>
-        /// Logs the report outputs to log file
+        /// Logs the report output to log file.
         /// </summary>
-        /// <param name="message"></param>
-        public static void LogResults(string message)
+        public static void LogReportResultsToFile(string results)
         {
             lock (_locker)
             {
-                File.AppendAllText(_resultsLogFile, message + Environment.NewLine);
+                File.AppendAllText(_resultsLogFile, results + Environment.NewLine);
             }
         }
 
 
         /// <summary>
-        /// Writes to the console window
+        /// Writes to the console window.
         /// </summary>
-        /// <param name="message"></param>
         public static void Log(string message, ConsoleColor color = ConsoleColor.White)
         {
             Console.ForegroundColor = color;

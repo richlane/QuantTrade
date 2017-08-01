@@ -7,6 +7,9 @@ using System.Collections.Generic;
 
 namespace QuantTrade.Core.Algorithm
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class SMA20Algorithm : BaseAlgorithm, IAlogorithm
     {      
         //Indicators & related settings

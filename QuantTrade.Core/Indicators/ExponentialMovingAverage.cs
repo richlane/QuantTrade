@@ -9,8 +9,13 @@ using System.ComponentModel;
 
 namespace QuantTrade.Core.Indicators
 {
+    /// <summary>
+    /// ExponentialMovingAverage
+    /// </summary>
     public class ExponentialMovingAverage : BaseIndicator, IIndicator 
     {
+        #region Properties
+
         private decimal _smoothingFactor;
         private decimal _smaTotal;
         private decimal _previousEMAValue;
@@ -23,16 +28,9 @@ namespace QuantTrade.Core.Indicators
             }
         }
 
+        #endregion
 
-        /// <summary>
-        /// Constructor - Creating standard EMA
-        /// </summary>
-        //public ExponentialMovingAverage(int period)
-        //{
-        //    Period = period;
-        //    _smoothingFactor = 2.0m / ((decimal)period + 1.0m); //default smooting
-        //}
-
+        
         /// <summary>
         /// Constructor - can define the smoothing factor
         /// </summary>
@@ -80,6 +78,9 @@ namespace QuantTrade.Core.Indicators
             calculateValue(data.Close);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void calculateValue(decimal price)
         {
             Samples++;

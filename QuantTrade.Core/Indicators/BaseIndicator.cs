@@ -6,12 +6,17 @@ using System.Threading.Tasks;
 
 namespace QuantTrade.Core.Indicators
 {
-   public class BaseIndicator
+    /// <summary>
+    /// Base indicator class.
+    /// </summary>
+    public class BaseIndicator
     {
+        #region Properties
+
         public virtual bool IsReady { get; set; }
 
         public int Samples { get; set; }
-       
+
         public string Name
         {
             get
@@ -24,6 +29,6 @@ namespace QuantTrade.Core.Indicators
 
         public decimal Value { get; set; }
 
-
+        #endregion
     }
 }

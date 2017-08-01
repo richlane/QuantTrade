@@ -10,11 +10,18 @@ using QuantTrade.Core.Utilities;
 
 namespace QuantTrade.Core.Algorithm
 {
+    /// <summary>
+    /// Base algo
+    /// </summary>
     public class BaseAlgorithm
     {
+        #region Events
+
         public event OnDataHandler OnTradeBarEvent;  //Used by inheriting algorithm
         public event OnOrderHandler OnOrderEvent;  //Used by inheriting algorithm
         public EventArgs e = null;
+
+        #endregion
 
         #region Properties 
 
@@ -23,40 +30,13 @@ namespace QuantTrade.Core.Algorithm
         private DateTime _endRun;
 
         public string Comments { get; set; }
-
         public Broker Broker { get; set; }
-
         public DateTime StartDate { get; set; }
-
         public DateTime EndDate { get; set; }
-            
         public Resolution Resolution { get; set; }
-
         public String Symbol { get; set; }
-
         public bool BuyAndHold { get; set; }
-
         public List<IIndicator> Indicators { get; set; }
-
-        //public decimal StartingCash  { get; set; }
-
-       // public decimal TransactionFee { get; set; }
-
-        private IDataReader _dataReader;
-
-        #endregion
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public BaseAlgorithm()
-        {
-            Indicators = new List<IIndicator>() ;
-       
-            _dataReader = new CSVReader();
-            _dataReader.OnTradeBar += this.OnTradeBar;
-            
-        }
 
         /// <summary>
         /// 
@@ -78,8 +58,25 @@ namespace QuantTrade.Core.Algorithm
             EndDate = end;
         }
 
+        private IDataReader _dataReader;
+
+        #endregion
+
         /// <summary>
-        /// Read Data from data sources
+        /// Constructor
+        /// </summary>
+        public BaseAlgorithm()
+        {
+            Indicators = new List<IIndicator>() ;
+       
+            //Setup our data source
+            _dataReader = new CSVReader();
+            _dataReader.OnTradeBar += this.OnTradeBar;
+        }
+
+       
+        /// <summary>
+        /// Kicks off the test and reads data from data source
         /// </summary>
         public void RunTest()
         {
@@ -87,20 +84,23 @@ namespace QuantTrade.Core.Algorithm
 
             Symbol = Symbol.ToUpper();
             
+            //Get our broker and wire up the events
             Broker = new Broker();
             Broker.OnOrder += this.OnOrder;
 
+            //Kick of the reader!
             _dataReader.ReadData(Symbol, Resolution, StartDate, EndDate);
 
             _endRun = DateTime.Now;
 
-            generateReport();
+            //Create the results report
+            generateSummaryReport();
         }
 
         /// <summary>
-        /// 
+        /// Create summary report
         /// </summary>
-        private void generateReport()
+        private void generateSummaryReport()
         {
             double totalRunTime = (_endRun - _startRun).Milliseconds;
 
@@ -131,22 +131,20 @@ namespace QuantTrade.Core.Algorithm
             report.AppendLine("---------------------------------------------------");
 
             Logger.Log(report.ToString());
-            Logger.LogResults(report.ToString());
+            Logger.LogReportResultsToFile(report.ToString());
         }
 
         /// <summary>
-        /// Picks up order events from the transaction manager
+        /// Picks up order events from the Broker
         /// </summary>
         public virtual void OnOrder(Order data, EventArgs e)
         {
-            //update portfolio
-            if(data.Status== OrderStatus.Filled)
+            //Propogate the order event to the inheriting algo
+            if (OnOrderEvent != null)
             {
-                if (OnOrderEvent != null)
-                {
-                    OnOrderEvent(data, e);
-                }
+                OnOrderEvent(data, e);
             }
+           
         }
         
         /// <summary>
@@ -174,6 +172,9 @@ namespace QuantTrade.Core.Algorithm
 
         }
 
+        /// <summary>
+        /// Place a buy or sell order
+        /// </summary>
         public void ExecuteOrder(Core.Action action, OrderType orderType, int quantity)
         {
             //Place Order

@@ -9,9 +9,13 @@ using QuantTrade.Core.Securities;
 
 namespace QuantTrade.Core.Indicators
 {
+    /// <summary>
+    /// RelativeStrengthIndex
+    /// </summary>
     public class RelativeStrengthIndex : BaseIndicator, IIndicator
     {
-        
+        #region Properties
+
         private ExponentialMovingAverage _avgGain;
         private ExponentialMovingAverage _avgLoss;
         private decimal ? _previousPrice;
@@ -23,6 +27,8 @@ namespace QuantTrade.Core.Indicators
                 return _avgLoss.IsReady && _avgLoss.IsReady && (Samples >= Period * 5);
             }
         }
+
+        #endregion
 
         /// <summary>
         /// Constructor

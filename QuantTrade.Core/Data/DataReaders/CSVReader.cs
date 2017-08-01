@@ -12,6 +12,9 @@ using QuantTrade.Core.Utilities;
 
 namespace QuantTrade.Core.Data
 {
+    /// <summary>
+    /// Reads historical stock quotes and kicks off and event for each tradebar created. 
+    /// </summary>
     public class CSVReader : IDataReader
     {
         #region Event Handlers
@@ -20,6 +23,8 @@ namespace QuantTrade.Core.Data
         public EventArgs e = null;
 
         #endregion
+
+        #region Properties
 
         private TradeBar _previousTradebar;
 
@@ -30,6 +35,8 @@ namespace QuantTrade.Core.Data
         private Resolution _resolution;
 
         private string _csvFile;
+
+        #endregion
 
         /// <summary>
         /// Reads CSV into a tradebar collection
@@ -101,7 +108,7 @@ namespace QuantTrade.Core.Data
         }
 
         /// <summary>
-        /// 
+        /// Gets and reads historical stock quotes using AlphaAdvantage site.
         /// </summary>
         public void ReadData(string symbol, 
             Resolution resolution, 

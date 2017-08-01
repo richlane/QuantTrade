@@ -12,6 +12,9 @@ using QuantTrade.Core.Utilities;
 
 namespace QuantTrade.Core.Data
 {
+    /// <summary>
+    /// AlphaAdvantage
+    /// </summary>
     public class AlphaAdvantage : IGenerator
     {
 

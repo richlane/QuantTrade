@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace QuantTrade.Core.Securities
 {
+    /// <summary>
+    /// Model for stock information as it related to our portfolio.
+    /// </summary>
     public class Stock
     {
         public int Quantity { get; set; } 

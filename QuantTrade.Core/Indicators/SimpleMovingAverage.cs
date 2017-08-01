@@ -10,8 +10,13 @@ using QuantTrade.Core.Securities;
 
 namespace QuantTrade.Core.Indicators
 {
+    /// <summary>
+    /// SimpleMovingAverage
+    /// </summary>
     public class SimpleMovingAverage : BaseIndicator, IIndicator
     {
+        #region Properties
+
         private List<decimal> _rollingSum;
 
         public override bool IsReady
@@ -21,6 +26,8 @@ namespace QuantTrade.Core.Indicators
                 return _rollingSum.Count >= Period;
             }
         }
+
+        #endregion
 
 
         /// <summary>
@@ -36,7 +43,6 @@ namespace QuantTrade.Core.Indicators
         // <summary>
         /// Gets called from other indicators
         /// </summary>
-        /// <param name="data"></param>
         public void UpdateIndicator(decimal price)
         {
             calculateValue(price);
@@ -50,6 +56,9 @@ namespace QuantTrade.Core.Indicators
             calculateValue(data.Close);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void calculateValue(decimal price)
         {
             Samples++;
@@ -64,9 +73,6 @@ namespace QuantTrade.Core.Indicators
             }
 
             Value = _rollingSum.Average();
-            
-
-           
         }
     }
 }

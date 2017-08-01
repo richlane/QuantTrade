@@ -10,9 +10,13 @@ using QuantTrade.Core.Securities;
 
 namespace QuantTrade.Core.Indicators
 {
+    /// <summary>
+    /// MACD
+    /// </summary>
     public class MACD : BaseIndicator, IIndicator
     {
-      
+        #region Properties
+
         public override bool IsReady
         {
             get
@@ -22,6 +26,7 @@ namespace QuantTrade.Core.Indicators
             }
         }
 
+        #endregion
 
         /// <summary>
         /// Constructor - Creating standard SMA

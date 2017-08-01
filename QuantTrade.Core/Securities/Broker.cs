@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace QuantTrade.Core.Securities
 {
+    /// <summary>
+    /// This class is the manages our portfolio and handles everything related to buying and selling stocks. 
+    /// </summary>
     public class Broker
     {
         #region Events
@@ -167,7 +170,6 @@ namespace QuantTrade.Core.Securities
         {
             StockPortfolio = new List<Stock>();
             EquityOverTime = new SortedDictionary<DateTime, decimal>();
-            //OrderHistory = new List<Order>();
             PendingOrderQueue = new List<Order>();
         }
 
@@ -380,9 +382,6 @@ namespace QuantTrade.Core.Securities
             for (int i = 0; i < PendingOrderQueue.Count; i++)
             {
                 Order order = PendingOrderQueue[i];
-
-                //I removed the date check becuase I was not taking into consideration weekends
-                // tradeBar.Day.AddDays(-1).ToShortDateString() == order.DateSubmitted.ToShortDateString())
 
                 if (order.OrderType == OrderType.MOO &&  order.Status == OrderStatus.Pending)
                 {
