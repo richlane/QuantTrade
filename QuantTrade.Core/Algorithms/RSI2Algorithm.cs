@@ -8,7 +8,7 @@ using System.Text;
 namespace QuantTrade.Core.Algorithm
 {
     /// <summary>
-    /// 
+    /// Jack's RSI2 Strategy
     /// </summary>
     public class RSI2Algorithm : BaseAlgorithm, IAlogorithm
     {
@@ -17,14 +17,14 @@ namespace QuantTrade.Core.Algorithm
         private RelativeStrengthIndex _rsi;
         private SimpleMovingAverage _sma;
 
-        public int _smaLookBackPeriod = 30;
+        public int _smaLookBackPeriod = 20;
         public int _rsiLookBackPeriod = 2;
         public int _rsiBuyLevel = 30;
         public int _rsiSellLevel = 70;
      
         //Date Ranges
         private int _startYear = 2010;
-        private int _endYear = 2016;
+        private int _endYear = 2017;
 
         //Sell Stop
         bool _useSellStop = true;
@@ -115,13 +115,10 @@ namespace QuantTrade.Core.Algorithm
                     break;
 
                 case Action.Sell:
-                    if(Broker.IsHoldingStock(Symbol)) //make sure we are hoding the stock before selling
-                    {
-                        int sellQty = Broker.StockPortfolio.Find(p => p.Symbol == Symbol).Quantity;
+                    int sellQty = Broker.StockPortfolio.Find(p => p.Symbol == Symbol).Quantity;
 
-                        //Selling MOO -> Lets take advantage of the morning gap up!
-                        base.ExecuteOrder(Action.Sell, OrderType.MOO, sellQty);
-                    }
+                    //Selling MOO -> Lets take advantage of the morning gap up!
+                    base.ExecuteOrder(Action.Sell, OrderType.MOO, sellQty);
                     break;
             }
 
@@ -142,17 +139,14 @@ namespace QuantTrade.Core.Algorithm
             /////////////////////////////////////////
             //Here is the buy and hold logic
             /////////////////////////////////////////
-            if (BuyAndHold)
+            if (BuyAndHold && Broker.IsHoldingStock(Symbol) == false)
             {
-                if (Broker.IsHoldingStock(Symbol) == false)
-                {
-                    action = Action.Buy;
-                    _pctToInvest = 1M;
-                }
+                action = Action.Buy;
+                _pctToInvest = 1M;
                 return action;
             }
 
-        
+
             /////////////////////////////////////////
             //Swing trade buy Logic
             /////////////////////////////////////////

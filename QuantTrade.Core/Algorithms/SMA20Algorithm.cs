@@ -8,38 +8,31 @@ using System.Collections.Generic;
 namespace QuantTrade.Core.Algorithm
 {
     /// <summary>
-    /// 
+    ///  Buy when close is below SMA(50) and sell when close is above SMA(50)
     /// </summary>
     public class SMA20Algorithm : BaseAlgorithm, IAlogorithm
     {      
         //Indicators & related settings
         private Resolution _resolution = Resolution.Daily;
         private SimpleMovingAverage _sma;
-        
-        
-        //Program.cs is going to feed these in
-        public int _smaLookBackPeriod = 50;
-        OrderType _orderType = OrderType.MOO;
+
+        private int _smaLookBackPeriod = 10;
+        private OrderType _orderType = OrderType.MOC;
 
         //Date Ranges
-        private int _startYear = 2010;
+        private int _startYear = 2014;
         private int _endYear = 2016;
 
         //Sell Stop
         bool _useSellStop = false;
         decimal _sellStopPrice;
-        decimal _sellStopPercentage = .3m; //
+        decimal _sellStopPercentage = .3m; 
 
         //Account Settings
         private decimal _transactionFee = 7M;
         private decimal _startingCash = 10000M;
 
-        #region Misc
-
-    
-  
-        #endregion
-
+      
         /// <summary>
         /// Subscribe to base class events.
         /// </summary>
@@ -60,7 +53,7 @@ namespace QuantTrade.Core.Algorithm
             Comments = comments;
 
             //Update base class proprties 
-            SetStartDate(_startYear-1, 11, 15); //Set Start Date --> Need 45 days for the warmup period so start in November
+            SetStartDate(_startYear-1, 11, 15); //Need time to warm up indicators --> allowing 45 days 
             SetEndDate(_endYear, 12, 31);
             Resolution = _resolution;
             subscribeToEvents();
@@ -105,15 +98,14 @@ namespace QuantTrade.Core.Algorithm
                 case Action.Buy:
                     decimal dollarAmt = (Broker.AvailableCash);
                     int buyQty = Convert.ToInt32(Math.Round(dollarAmt / tradebar.Close));
+
                     base.ExecuteOrder(Action.Buy, _orderType, buyQty);
                     break;
 
                 case Action.Sell:
-                    if(Broker.IsHoldingStock(Symbol)) //make sure we are hoding the stock before selling
-                    {
-                        int sellQty = Broker.StockPortfolio.Find(p => p.Symbol == Symbol).Quantity;
-                        base.ExecuteOrder(Action.Sell, _orderType, sellQty);
-                    }
+                    int sellQty = Broker.StockPortfolio.Find(p => p.Symbol == Symbol).Quantity;
+
+                    base.ExecuteOrder(Action.Sell, _orderType, sellQty);
                     break;
             }
 
@@ -124,17 +116,14 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         private Action getBuySellHoldDecision(TradeBar tradebar)
         {
-            Action action = Action.Hold;
+            Action action = Action.na;
             bool buying = false;
             
             //Here is the buy and hold logic
-            if (BuyAndHold)
+            if (BuyAndHold && Broker.IsHoldingStock(Symbol) == false)
             {
-                if (Broker.IsHoldingStock(Symbol) == false)
-                {
-                    action = Action.Buy;
-                }
-                return action;
+               action = Action.Buy;
+               return action;
             }
 
 

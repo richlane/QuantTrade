@@ -1,14 +1,14 @@
 ﻿{
   "data-directory": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads",
   "default-alogrithm": "RSI2Algorithm",
-  "api-key": "1CP91IVE5IWVQE4A",
+  "alpha-api-key": "1CP91IVE5IWVQE4A",
   "transaction-log-location": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\",
   "results-log": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\results.log",
   "allow-margin": "true",
   "transaction-fee": "7",
   "starting-cash": "10000",
-  "buyandhold-stocks": "SPY",
-  "swingtrade-stocks": "SPXL SPY",
+  "buyandhold-stocks": "",
+  "swingtrade-stocks": "SPXL TQQQ UDOW BIB SOXL",
   "Comments": "SPXL TQQQ UDOW BIB SOXL"
   
 }

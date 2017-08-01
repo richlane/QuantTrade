@@ -28,7 +28,7 @@ namespace QuantTrade.Core.Data
         public string GenerateData(string symbol, Resolution resolution)
         {
             string outputDirectory = Config.GetToken("data-directory");
-            string apiKey = Config.GetToken("api-key");
+            string apiKey = Config.GetToken("alpha-api-key");
 
             _csvFileName = outputDirectory + @"\" + resolution + "_" + symbol + ".csv";
 

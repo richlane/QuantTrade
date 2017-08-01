@@ -275,6 +275,7 @@ namespace QuantTrade.Core.Securities
             //Buy side validation
             if (order.Action == Action.Buy)
             {
+                //See if we can afford the buy order
                 if (AvailableCash < (order.Quantity * order.FillPrice))
                 {
                     if (!_allowMargin)
@@ -284,11 +285,9 @@ namespace QuantTrade.Core.Securities
             //Sell side validation
             else if (order.Action == Action.Sell)
             {
-                //Make sure we have the stock
+                //Make sure we have the stock befoe we sell it
                 if (!StockPortfolio.Exists(p => p.Symbol == order.Symbol && p.Quantity >= order.Quantity))
                 {
-
-                    // Logger.Log($"{order.FillDate} - Unable to process Sell order: {order.Symbol} not in Porfolio or qty exceeded.");
                     isValid = false;
                 }
             }
@@ -299,7 +298,6 @@ namespace QuantTrade.Core.Securities
                 order.Status = OrderStatus.Cancelled;
                 order.FillPrice = 0;
                 order.Quantity = 0;
-                //OrderHistory.Add(order);
                 TotalTradesCancelled++;
             }
 
