@@ -8,8 +8,8 @@
   "allow-margin": "true",
   "transaction-fee": "7",
   "starting-cash": "10000",
-  "buyandhold-stocks": "SPY",
-  "swingtrade-stocks": "",
+  "buyandhold-stocks": "",
+  "swingtrade-stocks": "SPXL TQQQ UDOW BIB SOXL",
   "Comments": "SPXL TQQQ UDOW BIB SOXL"
   
 }

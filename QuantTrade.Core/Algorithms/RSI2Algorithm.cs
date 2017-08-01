@@ -17,7 +17,7 @@ namespace QuantTrade.Core.Algorithm
         private RelativeStrengthIndex _rsi;
         private SimpleMovingAverage _sma;
 
-        public int _smaLookBackPeriod = 20;
+        public int _smaLookBackPeriod = 30;
         public int _rsiLookBackPeriod = 2;
         public int _rsiBuyLevel = 30;
         public int _rsiSellLevel = 70;
@@ -28,7 +28,7 @@ namespace QuantTrade.Core.Algorithm
 
         //Sell Stop
         bool _useSellStop = true;
-        public decimal _sellStopPercentage = .1m;
+        public decimal _sellStopPercentage = .05m;
         decimal _sellStopPrice;
         decimal _pctToInvest;   //Using the 2%, 3%, 5% investment strategy
       
@@ -111,7 +111,7 @@ namespace QuantTrade.Core.Algorithm
                     int buyQty = Convert.ToInt32(Math.Round(dollarAmt / tradebar.Close));
 
                     //Buying MOC -> Prices are cheaper at MOC. The market tends to gap the next day; buy low/sell high
-                    base.ExecuteOrder(Action.Buy,  OrderType.MOC, buyQty);
+                    base.ExecuteOrder(Action.Buy,  OrderType.MOO, buyQty);
                     break;
 
                 case Action.Sell:
