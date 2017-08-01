@@ -120,13 +120,16 @@ namespace QuantTrade.Core.Algorithm
             bool buying = false;
             
             //Here is the buy and hold logic
-            if (BuyAndHold && Broker.IsHoldingStock(Symbol) == false)
+            if(BuyAndHold)
             {
-               action = Action.Buy;
-               return action;
+                if (Broker.IsHoldingStock(Symbol) == false)
+                {
+                    action = Action.Buy;
+                }
+                return action;
             }
-
-
+           
+            
             /////////////////////////////////////////
             //Buy Logic
             /////////////////////////////////////////

@@ -12,6 +12,7 @@ namespace QuantTrade.Core.Utilities
         #region Properties
 
         private static string _transactionLogLocation;
+        private static bool _enableTransactionLogging;
         private static string _resultsLogFile;
         private static readonly object _locker = new object();
 
@@ -33,10 +34,14 @@ namespace QuantTrade.Core.Utilities
                 }
 
                 //Transaction log file
+                _enableTransactionLogging = Convert.ToBoolean(Config.GetToken("enable-transaction-logging"));
                 _transactionLogLocation = Config.GetToken("transaction-log-location");
+
                 if(!_transactionLogLocation.EndsWith(@"\"))
+                {
                     _transactionLogLocation = _transactionLogLocation + @"\";
-                
+                }
+
             }
         }
 
@@ -45,14 +50,18 @@ namespace QuantTrade.Core.Utilities
         /// </summary>
         public static void LogTransactionsToFile(string transactions, string symbol)
         {
+            if (_enableTransactionLogging == false) return;
+
             string fileName = $"{_transactionLogLocation}Trans_{symbol}.csv";
 
             lock (_locker)
             {
                 //Clean old files
                 if (File.Exists(fileName))
+                {
                     File.Delete(fileName);
- 
+                }
+                  
                 File.AppendAllText(fileName, transactions + Environment.NewLine);
             }
         }

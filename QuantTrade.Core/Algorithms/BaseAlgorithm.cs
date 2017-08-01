@@ -104,7 +104,7 @@ namespace QuantTrade.Core.Algorithm
         {
             double totalRunTime = (_endRun - _startRun).Milliseconds;
 
-            decimal profitability = Math.Round( ((Broker.AvailableCash + Broker.PortfolioValue - Broker.StartingCash)/ Broker.StartingCash) *100);
+            decimal profitability = Math.Round( ((Broker.TotalEquity - Broker.StartingCash)/ Broker.StartingCash) *100);
             string endingCash = string.Format("{0:c}", Math.Round(Broker.TotalEquity));
             string startingCash = string.Format("{0:c}", Math.Round(Broker.StartingCash));
 

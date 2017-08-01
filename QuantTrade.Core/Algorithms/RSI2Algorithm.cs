@@ -139,10 +139,13 @@ namespace QuantTrade.Core.Algorithm
             /////////////////////////////////////////
             //Here is the buy and hold logic
             /////////////////////////////////////////
-            if (BuyAndHold && Broker.IsHoldingStock(Symbol) == false)
+            if (BuyAndHold)
             {
-                action = Action.Buy;
-                _pctToInvest = 1M;
+                if (Broker.IsHoldingStock(Symbol) == false)
+                {
+                    action = Action.Buy;
+                    _pctToInvest = 1M;
+                }
                 return action;
             }
 

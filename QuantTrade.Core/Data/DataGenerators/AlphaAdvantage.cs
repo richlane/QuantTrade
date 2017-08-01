@@ -65,7 +65,7 @@ namespace QuantTrade.Core.Data
         /// </summary>
         private void callWebsite(string requestString, string symbol)
         {
-            Logger.Log($"Downloading {symbol} data......." + Environment.NewLine, ConsoleColor.Red);
+            Logger.Log($"Downloading {symbol} data......." + Environment.NewLine, ConsoleColor.Green);
 
             string data = "";
 

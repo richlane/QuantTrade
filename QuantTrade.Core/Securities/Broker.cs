@@ -376,7 +376,6 @@ namespace QuantTrade.Core.Securities
         public void ProcessNewTradebar(TradeBar tradeBar)
         {
             //Pick up pending MOO orders placed yesterday
-
             for (int i = 0; i < PendingOrderQueue.Count; i++)
             {
                 Order order = PendingOrderQueue[i];
@@ -392,6 +391,7 @@ namespace QuantTrade.Core.Securities
             if (IsHoldingStock(tradeBar.Symbol))
             {
                 StockPortfolio.Find(p => p.Symbol == tradeBar.Symbol).CurrentPrice = tradeBar.Close;
+                //Logger.Log(tradeBar.Close.ToString());
             }
 
             //Update equity over time
