@@ -33,15 +33,14 @@ namespace QuantTrade.Core.Securities
             {
                 //Number of years in this dataset:
                 double years = (EquityOverTime.Keys.LastOrDefault() - EquityOverTime.Keys.FirstOrDefault()).TotalDays / 365;
-
-                return Math.Round((Math.Pow((double)TotalEquity / (double)StartingCash, (1 / (double)years)) - 1) * 100, 2);
+                return Math.Round((Math.Pow((double)TotalEquity / (double)StartingCash, (1 / (double)years)) - 1) , 2);
             }
 
         }
 
         public SortedDictionary<DateTime, decimal> EquityOverTime { get; private set; }
 
-        public int WinRate
+        public decimal WinRate
         {
             get
             {
@@ -49,11 +48,11 @@ namespace QuantTrade.Core.Securities
                     return 0;
 
                 decimal rate = _totalWins / _totalSellTrades;
-                return Convert.ToInt32(Math.Round(rate * 100));
+                return Math.Round(rate,2);
             }
         }
 
-        public int LossRate
+        public decimal LossRate
         {
             get
             {
@@ -61,7 +60,7 @@ namespace QuantTrade.Core.Securities
                     return 0;
 
                 decimal rate = _totalLosses / _totalSellTrades;
-                return Convert.ToInt32(Math.Round(rate * 100));
+                return Math.Round(rate,2);
             }
         }
 
@@ -80,10 +79,27 @@ namespace QuantTrade.Core.Securities
                     if (high > 0) drawdowns.Add(price / high - 1);
                 }
 
-                return Math.Round(Math.Abs(drawdowns.Min() * 100), 2);
+                return Math.Round(Math.Abs(drawdowns.Min()), 2);
             }
         }
 
+        public decimal NetProfit
+        {
+            get
+            {
+                return Math.Round(((TotalEquity - StartingCash) / StartingCash), 2);
+
+            }
+        }
+
+        public Decimal TotalEquity
+        {
+            get
+            {
+                return Math.Round(PortfolioValue + AvailableCash, 2);
+
+            }
+        }
 
         #endregion
 
@@ -98,11 +114,11 @@ namespace QuantTrade.Core.Securities
         
         public Decimal TransactionFee { get; private set; }
 
-        public Decimal TotalTradesCancelled { get; private set; }
+        public int TotalTradesCancelled { get; private set; }
 
         public Decimal AvailableCash { get; private set; }
 
-        public Decimal TotalTrades { get; private set; }
+        public int TotalTrades { get; private set; }
         
         public decimal TotalTransactionFees { get; private set; }
 
@@ -120,15 +136,6 @@ namespace QuantTrade.Core.Securities
                 }
 
                 return totalValue;
-            }
-        }
-
-        public Decimal TotalEquity
-        {
-            get
-            {
-               return  PortfolioValue + AvailableCash;
-          
             }
         }
 

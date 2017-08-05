@@ -108,7 +108,7 @@ namespace QuantTrade.Tests
         { 
             string symbol = "DONOTDELETE";
 
-            IDataReader reader = new CSVReader();
+            IDataReader reader = new CSVReader(new AlphaAdvantage());
             reader.OnTradeBar += Reader_OnData;
             reader.ReadData(symbol, Resolution.Daily, null, null);
             

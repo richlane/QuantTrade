@@ -36,7 +36,14 @@ namespace QuantTrade.Core.Data
 
         private string _csvFile;
 
+        private IDataSource _dataSource;
+
         #endregion
+
+        public CSVReader(IDataSource dataSource)
+        {
+            _dataSource = dataSource;
+        }
 
         /// <summary>
         /// Reads CSV into a tradebar collection
@@ -120,8 +127,8 @@ namespace QuantTrade.Core.Data
             _resolution = resolution;
 
             //Download CSV
-            IGenerator dataGenerator = new AlphaAdvantage();
-            _csvFile = dataGenerator.GenerateData(symbol, resolution);
+           // IDataSource dataGenerator = new AlphaAdvantage();
+            _csvFile = _dataSource.GenerateData(symbol, resolution);
 
             //Create Tradebars
             readCSV();

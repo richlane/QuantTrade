@@ -15,7 +15,7 @@ namespace QuantTrade.Core.Data
     /// <summary>
     /// AlphaAdvantage
     /// </summary>
-    public class AlphaAdvantage : IGenerator
+    public class AlphaAdvantage : IDataSource
     {
 
         private string _csvFileName;

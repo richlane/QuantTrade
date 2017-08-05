@@ -7,6 +7,8 @@ using QuantTrade.Core.Securities;
 using QuantTrade.Core.Indicators;
 using QuantTrade.Core.Data;
 using QuantTrade.Core.Utilities;
+using QuantTrade.Core.Configuration;
+using QuantTrade.Core.Reports;
 
 namespace QuantTrade.Core.Algorithm
 {
@@ -68,9 +70,13 @@ namespace QuantTrade.Core.Algorithm
         public BaseAlgorithm()
         {
             Indicators = new List<IIndicator>() ;
-       
+
             //Setup our data source
-            _dataReader = new CSVReader();
+            string dataSourceString = $"QuantTrade.Core.Data.{Config.GetToken("data-source")}";
+            Type dataSourceType = Type.GetType($"{dataSourceString}, QuantTrade.Core");
+            IDataSource dataSource = Activator.CreateInstance(dataSourceType) as IDataSource;
+            
+            _dataReader = new CSVReader(dataSource);
             _dataReader.OnTradeBar += this.OnTradeBar;
         }
 
@@ -102,36 +108,25 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         private void generateSummaryReport()
         {
-            double totalRunTime = (_endRun - _startRun).Milliseconds;
-
-            decimal profitability = Math.Round( ((Broker.TotalEquity - Broker.StartingCash)/ Broker.StartingCash) *100);
-            string endingCash = string.Format("{0:c}", Math.Round(Broker.TotalEquity));
-            string startingCash = string.Format("{0:c}", Math.Round(Broker.StartingCash));
-
-            StringBuilder report = new StringBuilder();
-
-            report.AppendLine($"Test: {this.GetType().Name}  Buy & Hold: {BuyAndHold}");
-            report.AppendLine($"Test Dates: {StartDate} - {EndDate}");
-            report.AppendLine($"Symbol: {Symbol}");
-            report.AppendLine($"Starting Account: {startingCash}");
-            report.AppendLine($"Ending Account: {endingCash}");
-            report.AppendLine($"Net Profit: {profitability}%");
-            report.AppendLine($"Annual Return: {Broker.CompoundingAnnualPerformance}%");
-            report.AppendLine($"Win Rate: {Broker.WinRate}%");
-            report.AppendLine($"Loss Rate: {Broker.LossRate}%");
-            report.AppendLine($"Max Drawdown: {Math.Round(Broker.MaxDrawdownPercent)}%");
-            report.AppendLine($"Total Fees: ${Broker.TotalTransactionFees}");
-            report.AppendLine($"Total Trades: {Broker.TotalTrades}");
-
-            if(!string.IsNullOrEmpty(Comments))
+            SummaryReport summaryReport = new SummaryReport()
             {
-                report.AppendLine($"Comments: {Comments}");
-            }
+                AlgorithmName = this.GetType().Name,
+                RunDates =  this.StartDate.ToShortDateString() + " - " + this.EndDate.ToShortDateString(),
+                Symbol = this.Symbol,
+                EndingAccount =  Broker.TotalEquity,
+                StartingAccount = Broker.StartingCash,
+                NetProfit = Broker.NetProfit,
+                AnnualReturn = Broker.CompoundingAnnualPerformance,
+                WinRate = Broker.WinRate,
+                LossRate = Broker.LossRate,
+                MaxDrawDown = Broker.MaxDrawdownPercent,
+                TotalFees = Broker.TotalTransactionFees,
+                TotalTrades = Broker.TotalTrades
+            };
 
-            report.AppendLine("---------------------------------------------------");
+            Logger.LogSummaryReport(summaryReport);
 
-            Logger.Log(report.ToString());
-            Logger.LogReportResultsToFile(report.ToString());
+            double totalRunTime = (_endRun - _startRun).Milliseconds;
         }
 
         /// <summary>

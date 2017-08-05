@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace QuantTrade.Core.Data
 {
-    public interface IGenerator
+    public interface IDataSource
     {
         string GenerateData(string symbol, Resolution resolution);
     }

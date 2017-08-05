@@ -35,6 +35,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -47,11 +48,12 @@
     <Compile Include="Algorithms\BaseAlgorithm.cs" />
     <Compile Include="Algorithms\SMA20Algorithm.cs" />
     <Compile Include="Indicators\MACD.cs" />
+    <Compile Include="Reports\SummaryReport.cs" />
     <Compile Include="Interfaces\IAlogorithm.cs" />
     <Compile Include="Algorithms\RSI2Algorithm.cs" />
     <Compile Include="Configuration\Config.cs" />
-    <Compile Include="Data\DataGenerators\AlphaAdvantage.cs" />
-    <Compile Include="Interfaces\IGenerator.cs" />
+    <Compile Include="Data\DataSource\AlphaAdvantage.cs" />
+    <Compile Include="Interfaces\ISymbolGenerator.cs" />
     <Compile Include="Data\DataReaders\CSVReader.cs" />
     <Compile Include="Interfaces\IDataReader.cs" />
     <Compile Include="Interfaces\Enums.cs" />

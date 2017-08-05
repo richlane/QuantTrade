@@ -1,6 +1,10 @@
 ﻿using QuantTrade.Core.Configuration;
+using QuantTrade.Core.Reports;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using System.Text;
 
 namespace QuantTrade.Core.Utilities
 {
@@ -13,7 +17,7 @@ namespace QuantTrade.Core.Utilities
 
         private static string _transactionLogLocation;
         private static bool _enableTransactionLogging;
-        private static string _resultsLogFile;
+        private static string _summaryReportLogFile;
         private static readonly object _locker = new object();
 
         #endregion
@@ -24,13 +28,13 @@ namespace QuantTrade.Core.Utilities
         static Logger()
         {
             //get log file locations
-            if(string.IsNullOrEmpty(_transactionLogLocation) || string.IsNullOrEmpty(_resultsLogFile))
+            if(string.IsNullOrEmpty(_transactionLogLocation) || string.IsNullOrEmpty(_summaryReportLogFile))
             {
                 //Results Log file
-                _resultsLogFile = Config.GetToken("results-log");
-                if (File.Exists(_resultsLogFile))
+                _summaryReportLogFile = Config.GetToken("summary-report-log");
+                if (File.Exists(_summaryReportLogFile))
                 {
-                    File.Delete(_resultsLogFile);
+                    File.Delete(_summaryReportLogFile);
                 }
 
                 //Transaction log file
@@ -67,14 +71,81 @@ namespace QuantTrade.Core.Utilities
         }
 
         /// <summary>
-        /// Logs the report output to log file.
+        /// Logs the summary report output to a file.
         /// </summary>
-        public static void LogReportResultsToFile(string results)
+        private static void logSummaryReportToFile(string results)
         {
             lock (_locker)
             {
-                File.AppendAllText(_resultsLogFile, results + Environment.NewLine);
+                File.AppendAllText(_summaryReportLogFile, results + Environment.NewLine);
             }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        public static Dictionary<string, object> GetPropertyAttributes(PropertyInfo property)
+        {
+            Dictionary<string, object> attribs = new Dictionary<string, object>();
+            // look for attributes that takes one constructor argument
+            foreach (CustomAttributeData attribData in property.GetCustomAttributesData())
+            {
+
+                if (attribData.ConstructorArguments.Count == 1)
+                {
+                    string typeName = attribData.Constructor.DeclaringType.Name;
+                    if (typeName.EndsWith("Attribute")) typeName = typeName.Substring(0, typeName.Length - 9);
+                    attribs[typeName] = attribData.ConstructorArguments[0].Value;
+                }
+                else if(attribData.NamedArguments.Count == 1)
+                {
+                    string typeName = attribData.Constructor.DeclaringType.Name;
+                    if (typeName.EndsWith("Attribute")) typeName = typeName.Substring(0, typeName.Length - 9);
+                    attribs[typeName] = attribData.NamedArguments[0].TypedValue.ToString();
+                }
+
+            }
+            return attribs;
+        }
+
+
+        public static void LogSummaryReport (SummaryReport report)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            StringBuilder sb = new StringBuilder();
+            
+            //Loop class properties
+            foreach (PropertyInfo pi in report.GetType().GetProperties())
+            {
+                //get custom attributes
+                var attributes = GetPropertyAttributes(pi);
+
+                //Get deiplay name and value
+                string displayName = attributes["DisplayName"].ToString();
+                var displayValue = pi.GetValue(report, null);
+                
+                //Get the display format, if availiable
+                object obj; 
+                attributes.TryGetValue("DisplayFormat", out obj);
+                if (obj != null)
+                {
+                    string displayFormat = obj.ToString();
+                    displayValue = string.Format(displayFormat, displayValue).Trim('"');
+                }
+                
+                if(displayValue != null) sb.AppendLine(displayName + ": " + displayValue.ToString());
+            }
+            
+            sb.AppendLine("--------------------------------");
+            sb.AppendLine("");
+
+            //Log Report
+            logSummaryReportToFile(sb.ToString());
+
+            //Display report to console
+            Console.Write(sb.ToString());
+
         }
 
 
