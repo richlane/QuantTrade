@@ -102,28 +102,6 @@ namespace QuantTrade.Tests
             }
 
         }
-
-        [TestMethod()]
-        public void ReadDataTest()
-        { 
-            string symbol = "DONOTDELETE";
-
-            IDataReader reader = new CSVReader(new AlphaAdvantage());
-            reader.OnTradeBar += Reader_OnData;
-            reader.ReadData(symbol, Resolution.Daily, null, null);
-            
-        }
-
-        [TestMethod()]
-        private void Reader_OnData(TradeBar data, EventArgs e)
-        {
-            Assert.IsTrue(data.High > 0, "high");
-            Assert.IsTrue(data.Low > 0, "low");
-            Assert.IsTrue(data.Symbol == "DONOTDELETE", "symbol");
-            Assert.IsTrue(data.TradeResolution == Resolution.Daily,  "traderes");
-            Assert.IsTrue(data.Volume > 0,  "volume");
-        }
-
         
     }
 

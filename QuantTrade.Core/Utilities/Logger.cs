@@ -80,12 +80,13 @@ namespace QuantTrade.Core.Utilities
                 File.AppendAllText(_summaryReportLogFile, results + Environment.NewLine);
             }
         }
+
         /// <summary>
-        /// 
+        /// Retieves report property attributes
         /// </summary>
         /// <param name="property"></param>
         /// <returns></returns>
-        public static Dictionary<string, object> GetPropertyAttributes(PropertyInfo property)
+        private static Dictionary<string, object> getPropertyAttributes(PropertyInfo property)
         {
             Dictionary<string, object> attribs = new Dictionary<string, object>();
             // look for attributes that takes one constructor argument
@@ -110,6 +111,10 @@ namespace QuantTrade.Core.Utilities
         }
 
 
+        /// <summary>
+        /// Logs summary report to console and flat file
+        /// </summary>
+        /// <param name="report"></param>
         public static void LogSummaryReport (SummaryReport report)
         {
             Console.ForegroundColor = ConsoleColor.White;
@@ -119,19 +124,19 @@ namespace QuantTrade.Core.Utilities
             foreach (PropertyInfo pi in report.GetType().GetProperties())
             {
                 //get custom attributes
-                var attributes = GetPropertyAttributes(pi);
+                var attributes = getPropertyAttributes(pi);
 
                 //Get deiplay name and value
                 string displayName = attributes["DisplayName"].ToString();
                 var displayValue = pi.GetValue(report, null);
                 
-                //Get the display format, if availiable
+                //Get the display format, if availiable, and apply it to the value
                 object obj; 
                 attributes.TryGetValue("DisplayFormat", out obj);
                 if (obj != null)
                 {
                     string displayFormat = obj.ToString();
-                    displayValue = string.Format(displayFormat, displayValue).Trim('"');
+                    displayValue = string.Format(displayFormat, displayValue).Trim('"').Replace(" ", "") ;
                 }
                 
                 if(displayValue != null) sb.AppendLine(displayName + ": " + displayValue.ToString());

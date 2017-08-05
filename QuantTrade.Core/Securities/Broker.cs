@@ -33,7 +33,7 @@ namespace QuantTrade.Core.Securities
             {
                 //Number of years in this dataset:
                 double years = (EquityOverTime.Keys.LastOrDefault() - EquityOverTime.Keys.FirstOrDefault()).TotalDays / 365;
-                return Math.Round((Math.Pow((double)TotalEquity / (double)StartingCash, (1 / (double)years)) - 1) , 2);
+                return Math.Round((Math.Pow((double)TotalEquity / (double)StartingCash, (1 / (double)years)) - 1) , 4);
             }
 
         }
@@ -92,6 +92,9 @@ namespace QuantTrade.Core.Securities
             }
         }
 
+        /// <summary>
+        /// Total value of cash on hand and stocks in the portfolio
+        /// </summary>
         public Decimal TotalEquity
         {
             get
@@ -124,6 +127,9 @@ namespace QuantTrade.Core.Securities
 
         public List<Stock> StockPortfolio { get; private set; }
 
+        /// <summary>
+        /// Total value of stock held in the portfolio
+        /// </summary>
         public Decimal PortfolioValue
         {
             get

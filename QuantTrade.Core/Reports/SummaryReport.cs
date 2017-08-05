@@ -33,7 +33,7 @@ namespace QuantTrade.Core.Reports
         public decimal NetProfit { get; set; }
 
         [DisplayName("Annual Return")]
-        [DisplayFormat(DataFormatString = "{0:P0}")]
+        [DisplayFormat(DataFormatString = "{0:P2}")]
         public double AnnualReturn { get; set; }
 
         [DisplayName("Win Rate")]
@@ -59,5 +59,5 @@ namespace QuantTrade.Core.Reports
         public string Comments { get; set; }
 
 
-}
+    }
 }

@@ -28,17 +28,19 @@ namespace QuantTrade.Core.Algorithm
         #region Properties 
 
         private TradeBar _currentTradebar;
-        private DateTime _startRun;
-        private DateTime _endRun;
-
+     
         public string Comments { get; set; }
-        public Broker Broker { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public Broker Broker { get; private set; }
+        public DateTime StartDate { get; private set; }
+        public DateTime EndDate { get; private set; }
         public Resolution Resolution { get; set; }
         public String Symbol { get; set; }
         public bool BuyAndHold { get; set; }
-        public List<IIndicator> Indicators { get; set; }
+        public List<IIndicator> Indicators { get; private set; }
+        public SummaryReport SummaryReport { get; private set; }
+        public decimal TotalRunTime { get; private set; }
+
+
 
         /// <summary>
         /// 
@@ -86,21 +88,24 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         public void RunTest()
         {
-            _startRun = DateTime.Now;
-
             Symbol = Symbol.ToUpper();
             
             //Get our broker and wire up the events
             Broker = new Broker();
             Broker.OnOrder += this.OnOrder;
 
+            //Start Timer
+            DateTime startRun = DateTime.Now;
+
             //Kick of the reader!
             _dataReader.ReadData(Symbol, Resolution, StartDate, EndDate);
-
-            _endRun = DateTime.Now;
-
+         
             //Create the results report
             generateSummaryReport();
+
+            //End Timer
+            DateTime endRun = DateTime.Now;
+            TotalRunTime = (endRun - startRun).Milliseconds;
         }
 
         /// <summary>
@@ -108,7 +113,7 @@ namespace QuantTrade.Core.Algorithm
         /// </summary>
         private void generateSummaryReport()
         {
-            SummaryReport summaryReport = new SummaryReport()
+            SummaryReport = new SummaryReport()
             {
                 AlgorithmName = this.GetType().Name,
                 RunDates =  this.StartDate.ToShortDateString() + " - " + this.EndDate.ToShortDateString(),
@@ -124,9 +129,9 @@ namespace QuantTrade.Core.Algorithm
                 TotalTrades = Broker.TotalTrades
             };
 
-            Logger.LogSummaryReport(summaryReport);
-
-            double totalRunTime = (_endRun - _startRun).Milliseconds;
+            //Log summary report
+            Logger.LogSummaryReport(SummaryReport);
+            
         }
 
         /// <summary>

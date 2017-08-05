@@ -52,6 +52,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BrokerTests.cs" />
+    <Compile Include="LoggerTests.cs" />
+    <Compile Include="DataTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IndicatorTests.cs" />
   </ItemGroup>
