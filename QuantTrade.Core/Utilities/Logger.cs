@@ -117,7 +117,7 @@ namespace QuantTrade.Core.Utilities
         /// <param name="report"></param>
         public static void LogSummaryReport (SummaryReport report)
         {
-            Console.ForegroundColor = ConsoleColor.White;
+            //Console.ForegroundColor = ConsoleColor.White;
             StringBuilder sb = new StringBuilder();
             
             //Loop class properties
@@ -162,6 +162,8 @@ namespace QuantTrade.Core.Utilities
             Console.ForegroundColor = color;
 
             Console.WriteLine(message);
+
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }

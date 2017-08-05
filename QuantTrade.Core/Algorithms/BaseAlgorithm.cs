@@ -118,6 +118,7 @@ namespace QuantTrade.Core.Algorithm
                 AlgorithmName = this.GetType().Name,
                 RunDates =  this.StartDate.ToShortDateString() + " - " + this.EndDate.ToShortDateString(),
                 Symbol = this.Symbol,
+                BuyAndHold = BuyAndHold,
                 EndingAccount =  Broker.TotalEquity,
                 StartingAccount = Broker.StartingCash,
                 NetProfit = Broker.NetProfit,

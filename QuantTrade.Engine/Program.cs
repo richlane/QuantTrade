@@ -3,7 +3,11 @@ using QuantTrade.Core.Algorithm;
 using QuantTrade.Core.Utilities;
 using QuantTrade.Core.Configuration;
 using System;
-
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace QuantTrade
 {
@@ -57,14 +61,33 @@ namespace QuantTrade
             if (string.IsNullOrEmpty(symbols)) return;
             
             //Loops the stocks and run the alogo
-            string[] symbolsArray = symbols.Split(' ');
+            string[] symbolsCollection = symbols.Split(' ');
 
-            foreach (var symbol in symbolsArray)
+            //Start Timer
+            DateTime startRun = DateTime.Now;
+
+            //Non-parallel method for processing
+            //foreach (var symbol in symbolsCollection)
+            //{
+            //    IAlogorithm algo = Activator.CreateInstance(_defaultAlgoType) as IAlogorithm;
+            //    algo.Initialize(symbol, buyAndHold);
+
+            //   // Console.WriteLine("{0}, Thread Id= {1}", symbol, Thread.CurrentThread.ManagedThreadId);
+            //}
+
+            //Parallel method for processing
+            Parallel.ForEach(symbolsCollection, symbol =>
             {
                 IAlogorithm algo = Activator.CreateInstance(_defaultAlgoType) as IAlogorithm;
                 algo.Initialize(symbol, buyAndHold);
-            }
 
+                // Console.WriteLine("{0}, Thread Id= {1}", symbol, Thread.CurrentThread.ManagedThreadId);
+            });
+
+            //End Timer
+            DateTime endRun = DateTime.Now;
+            decimal totalRunTime = (endRun - startRun).Milliseconds;
+            Logger.Log($"Total Run Time: {totalRunTime.ToString()} ms", ConsoleColor.Yellow);
         }
 
 

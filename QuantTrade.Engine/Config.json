@@ -3,14 +3,15 @@
   "default-alogrithm": "RSI2Algorithm",
   "alpha-api-key": "1CP91IVE5IWVQE4A",
   "data-source": "AlphaAdvantage",
-  "enable-transaction-logging" :  "false",
+  "enable-transaction-logging": "false",
+  "randomize-data" :  "false",
   "transaction-log-location": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\",
   "summary-report-log": "C:\\Zip\\QuantTrade\\QuantTrade\\QuantTrade.Core\\Downloads\\SummaryReport.log",
   "allow-margin": "true",
   "transaction-fee": "7",
   "starting-cash": "10000",
-  "buyandhold-stocks": "",
-  "swingtrade-stocks": "SPXL TQQQ UDOW BIB SOXL",
+  "buyandhold-stocks": "SPY",
+  "swingtrade-stocks": "SPXL",
   "Comments": "SPXL TQQQ UDOW BIB SOXL"
   
 }

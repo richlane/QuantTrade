@@ -27,16 +27,12 @@ namespace QuantTrade.Core.Data
         #region Properties
 
         private TradeBar _previousTradebar;
-
         private List<TradeBar> _tradeBars;
-
         private string _symbol;
-
         private Resolution _resolution;
-
         private string _csvFile;
-
         private IDataSource _dataSource;
+        private bool _randomizeData = false;
 
         #endregion
 
@@ -96,7 +92,7 @@ namespace QuantTrade.Core.Data
             foreach (var item in _tradeBars)
             {
                 //Step 1: Adjust for splits if needed
-                if(splitDevisor > 1)
+                if (splitDevisor > 1)
                 {
                     item.Close = item.Close / splitDevisor;
                     item.Open = item.Open / splitDevisor;
@@ -111,34 +107,34 @@ namespace QuantTrade.Core.Data
 
             //Reverse tradebar order - Oldest to Newest
             _tradeBars.Reverse();
-           
+
         }
 
         /// <summary>
         /// Gets and reads historical stock quotes using AlphaAdvantage site.
         /// </summary>
-        public void ReadData(string symbol, 
-            Resolution resolution, 
-            DateTime ? startDate, 
-            DateTime ? endDate)
+        public void ReadData(string symbol,
+            Resolution resolution,
+            DateTime? startDate,
+            DateTime? endDate)
         {
 
             _symbol = symbol;
             _resolution = resolution;
+            _randomizeData = Convert.ToBoolean(Config.GetToken("randomize-data"));
 
-            //Download CSV
-           // IDataSource dataGenerator = new AlphaAdvantage();
+            //Download CSV & read the data
             _csvFile = _dataSource.GenerateData(symbol, resolution);
-
-            //Create Tradebars
             readCSV();
+
+            //Adjust bars
             adjustTradeBarsForSplits();
 
+            //Loop the trade bars
             foreach (TradeBar bar in _tradeBars)
             {
-                
                 bool skipLine = false;
-          
+
                 //Filter dates if applicable
                 if (startDate != null && endDate != null)
                 {
@@ -149,17 +145,20 @@ namespace QuantTrade.Core.Data
                 }
 
                 if (skipLine) continue;
-                
-                //Watch for a massive  price drop due to sotck splits or some other strange event!!!.
+
+                //Watch for a massive price drop due to sotck splits or some other strange event!!!.
                 if (_previousTradebar != null)
                 {
-                   decimal variance = Math.Round((bar.Close - _previousTradebar.Close)/ _previousTradebar.Close,2);  
-                   if( Math.Abs(variance) > .25m)  ///25% price difference between todays and yesteradys close
+                    decimal variance = Math.Round((bar.Close - _previousTradebar.Close) / _previousTradebar.Close, 2);
+                    if (Math.Abs(variance) > .25m)  ///25% price difference between todays and yesteradys close
                     {
                         Logger.Log($"Unusual price variance on {bar.Symbol} on {bar.Day.ToShortDateString()}: {_previousTradebar.Close} vs {bar.Close}", ConsoleColor.Red);
                     }
                 }
 
+                //Randominze Data
+                if(_randomizeData) randomizeData(bar);
+     
                 //Throw Event to the alogos
                 if (OnTradeBar != null)
                 {
@@ -171,5 +170,41 @@ namespace QuantTrade.Core.Data
 
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="newBar"></param>
+        private void randomizeData(TradeBar tradeBar)
+        {
+            decimal volatility = .1m;
+
+            Random randomizer = new Random();
+
+            decimal rnd = Convert.ToDecimal(randomizer.NextDouble());
+            
+            decimal changePercent = 2 * volatility * rnd;
+
+            if (changePercent > volatility)
+            {
+                changePercent -= (2 * volatility);
+            }
+
+            if(changePercent > 0)
+            {
+                changePercent = 1 + changePercent;
+            }
+            else
+            {
+                changePercent = 1 - changePercent;
+            }
+
+            //Update the prices
+            tradeBar.Open = tradeBar.Open * changePercent;
+            tradeBar.Close = tradeBar.Close * changePercent;
+            tradeBar.High = tradeBar.High * changePercent;
+            tradeBar.Low = tradeBar.Low * changePercent;
+
+        }
     }
 }
