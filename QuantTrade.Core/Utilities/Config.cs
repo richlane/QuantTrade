@@ -1,7 +1,4 @@
-﻿
-
-using System;
-/*
+﻿/*
 * BSD 2-Clause License 
 * Copyright (c) 2017, Rich Lane 
 * All rights reserved. 
@@ -27,79 +24,50 @@ using System;
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
+
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using QuantTrade.Core;
-using System.ComponentModel;
-using System.Diagnostics;
-using QuantTrade.Core.Securities;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
-namespace QuantTrade.Core.Indicators
+
+namespace QuantTrade.Core.Utilities
 {
     /// <summary>
-    /// MACD
+    /// Reads Json.Config settings
     /// </summary>
-    public class MACD : BaseIndicator, IIndicator
+    public static class Config
     {
-        #region Properties
+        //Location of the configuration file.
+        private const string _configurationFileName = "config.json";
+        private static JObject _settings;
 
-        public override bool IsReady
+        /// <summary>
+        /// 
+        /// </summary>
+        static Config()
         {
-            get
+            if (_settings == null)
             {
-                return false;
-                //return _rollingSum.Count >= Period;
+                _settings = JObject.Parse(File.ReadAllText(_configurationFileName));
             }
         }
 
-        #endregion
 
         /// <summary>
-        /// Constructor - Creating standard SMA
+        /// 
         /// </summary>
-        public MACD(int period)
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static string GetToken(string key)
         {
-            Period = period;
-           // _rollingSum = new List<decimal>();
+            return _settings.SelectToken(key).ToString();
+
         }
 
-
-        // <summary>
-        /// Gets called from other indicators
-        /// </summary>
-        /// <param name="data"></param>
-        public void UpdateIndicator(decimal data)
-        {
-            calculate(data);
-        }
-
-        /// <summary>
-        /// Gets called from the CSVReader
-        /// </summary>
-        public void UpdateIndicator(TradeBar data)
-        {
-            calculate(data.Close);
-        }
-
-        private void calculate(decimal input)
-        {
-            //Samples++;
-
-            ////Make sure the last closing price is at the top
-            //_rollingSum.Insert(0, input);
-
-            ////Trim the buffer by remove the oldest price from the running numbers
-            //if (_rollingSum.Count > Period)
-            //{
-            //    _rollingSum.RemoveAt(_rollingSum.Count - 1);
-            //}
-
-            //Value = _rollingSum.Average();
-            
-
-           
-        }
     }
 }

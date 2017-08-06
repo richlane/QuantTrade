@@ -1,25 +1,50 @@
-﻿using QuantTrade.Core.Configuration;
+﻿/*
+* BSD 2-Clause License 
+* Copyright (c) 2017, Rich Lane 
+* All rights reserved. 
+* 
+* Redistribution and use in source and binary forms, with or without 
+* modification, are permitted provided that the following conditions are met: 
+* 
+* Redistributions of source code must retain the above copyright notice, this 
+* list of conditions and the following disclaimer. 
+* 
+* Redistributions in binary form must reproduce the above copyright notice, 
+* this list of conditions and the following disclaimer in the documentation 
+* and/or other materials provided with the distribution. 
+* 
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE 
+* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+*/
+
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
-using QuantTrade.Core;
 using QuantTrade.Core.Utilities;
 
 namespace QuantTrade.Core.Data
 {
     /// <summary>
-    /// AlphaAdvantage
+    /// AlphaAdvantage downloader class. 
     /// </summary>
     public class AlphaAdvantage : IDataSource
     {
+        #region Properties
 
         private string _csvFileName;
+        private static readonly object _locker = new object();
 
+        #endregion
 
         /// <summary>
         /// 
@@ -27,6 +52,7 @@ namespace QuantTrade.Core.Data
         /// <param name="symbol"></param>
         public string GenerateData(string symbol, Resolution resolution)
         {
+
             string outputDirectory = Config.GetToken("data-directory");
             string apiKey = Config.GetToken("alpha-api-key");
 
@@ -34,19 +60,23 @@ namespace QuantTrade.Core.Data
 
             if (isDataNeeded())
             {
-                //See https://www.alphavantage.co/documentation/ for docs!
-                string requestString = $"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={symbol}&apikey={apiKey}&datatype=csv&outputsize=full";
+                //do not mutithread the down load!!!
+                lock (_locker)
+                {
 
-                callWebsite(requestString, symbol);
+                    //See https://www.alphavantage.co/documentation/ for docs!
+                    string requestString = $"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={symbol}&apikey={apiKey}&datatype=csv&outputsize=full";
+
+                    callWebsite(requestString, symbol);
+                }
             }
-
+            
             return _csvFileName;
         }
 
         /// <summary>
         /// The website downloads 20 years worth of data so there is not need to continuously download the data
         /// </summary>
-        /// <returns></returns>
         private bool isDataNeeded()
         {
             bool isNeeded = true;
@@ -61,31 +91,27 @@ namespace QuantTrade.Core.Data
 
 
         /// <summary>
-        /// 
+        /// Download CSV fomr website
         /// </summary>
         private void callWebsite(string requestString, string symbol)
         {
             Logger.Log($"Downloading {symbol} data......." + Environment.NewLine, ConsoleColor.Green);
 
-            string data = "";
-
             WebRequest request = WebRequest.Create(requestString);
             WebResponse response = request.GetResponse();
             Stream dataStream = response.GetResponseStream();
             StreamReader reader = new StreamReader(dataStream);
-            data = reader.ReadToEnd();
+            string data = reader.ReadToEnd();
             reader.Close();
             response.Close();
-            exportCSV(data);
+            formatCSV(data);
         }
 
         /// <summary>
-        /// 
+        /// Formats the CSV in memory.
         /// </summary>
-        /// <param name="data"></param>
-        private void exportCSV(string data)
+        private void formatCSV(string data)
         {
-
             List<string> tempStringBuilder = new List<string>();
             int counter = 0;
 
@@ -119,6 +145,10 @@ namespace QuantTrade.Core.Data
             writeCSV(dataToExport.ToString());
         }
 
+
+        /// <summary>
+        /// Write the CSV to disk
+        /// </summary>
         private void writeCSV(string data)
         {
             //get rid of the old files
@@ -129,46 +159,5 @@ namespace QuantTrade.Core.Data
         }
 
 
-        #region Formating Functions
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="priceString"></param>
-        /// <returns></returns>
-        private string formatPrice(string priceString)
-        {
-            decimal p1 = Math.Round(Convert.ToDecimal(priceString), 2) * 10000M;
-            p1 = Math.Round(p1, 0);
-            string p2 = p1.ToString();
-
-            return p2;
-
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="dateString"></param>
-        /// <returns></returns>
-        private string formatDate(string dateString)
-        {
-            DateTime dt = DateTime.Parse(dateString);
-            return dt.ToString("MM/dd/yyyy HH:mm");
-
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="dateString"></param>
-        /// <returns></returns>
-        private string formatVolume(string volumeString)
-        {
-            int volume = Convert.ToInt32(volumeString) * 1000;
-            return volume.ToString();
-        }
-
-        #endregion
-    }
+     }
 }

@@ -51,7 +51,7 @@
     <Compile Include="Reports\SummaryReport.cs" />
     <Compile Include="Interfaces\IAlogorithm.cs" />
     <Compile Include="Algorithms\RSI2Algorithm.cs" />
-    <Compile Include="Configuration\Config.cs" />
+    <Compile Include="Utilities\Config.cs" />
     <Compile Include="Data\DataSource\AlphaAdvantage.cs" />
     <Compile Include="Interfaces\ISymbolGenerator.cs" />
     <Compile Include="Data\DataReaders\CSVReader.cs" />

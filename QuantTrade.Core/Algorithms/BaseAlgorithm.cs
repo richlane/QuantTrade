@@ -7,7 +7,6 @@ using QuantTrade.Core.Securities;
 using QuantTrade.Core.Indicators;
 using QuantTrade.Core.Data;
 using QuantTrade.Core.Utilities;
-using QuantTrade.Core.Configuration;
 using QuantTrade.Core.Reports;
 
 namespace QuantTrade.Core.Algorithm
