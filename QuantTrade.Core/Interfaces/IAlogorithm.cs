@@ -25,6 +25,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
 
+using QuantTrade.Core.Reports;
+using QuantTrade.Core.Securities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +38,12 @@ namespace QuantTrade.Core.Algorithm
     public interface IAlogorithm
     {
         void Initialize(string symbol, bool buyAndHold = false, string comments ="");
+
+        string Symbol { get; set; }
+
+        SummaryReport SummaryReport { get; set; }
+
+         Broker Broker { get; set; }
       
     }
 }

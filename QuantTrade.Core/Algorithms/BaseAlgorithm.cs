@@ -29,14 +29,14 @@ namespace QuantTrade.Core.Algorithm
         private TradeBar _currentTradebar;
      
         public string Comments { get; set; }
-        public Broker Broker { get; private set; }
+        public Broker Broker { get;  set; }
         public DateTime StartDate { get; private set; }
         public DateTime EndDate { get; private set; }
         public Resolution Resolution { get; set; }
         public String Symbol { get; set; }
         public bool BuyAndHold { get; set; }
         public List<IIndicator> Indicators { get; private set; }
-        public SummaryReport SummaryReport { get; private set; }
+        public SummaryReport SummaryReport { get; set; }
         public decimal TotalRunTime { get; private set; }
 
 

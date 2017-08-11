@@ -37,4 +37,5 @@ namespace QuantTrade.Core
 {
     public delegate void OnDataHandler(TradeBar data, EventArgs e);
     public delegate void OnOrderHandler(Order data, EventArgs e);
+    public delegate void OnUILogHandler(string message, EventArgs e);
 }

@@ -39,6 +39,7 @@ namespace QuantTrade.Core.Utilities
     /// </summary>
     public static class Logger
     {
+    
         #region Properties
 
         private static string _transactionLogLocation;
@@ -175,7 +176,7 @@ namespace QuantTrade.Core.Utilities
             logSummaryReportToFile(sb.ToString());
 
             //Display report to console
-            Console.Write(sb.ToString());
+           // Console.Write(sb.ToString());
 
         }
 
@@ -185,11 +186,12 @@ namespace QuantTrade.Core.Utilities
         /// </summary>
         public static void Log(string message, ConsoleColor color = ConsoleColor.White)
         {
-            Console.ForegroundColor = color;
+            //Console.ForegroundColor = color;
 
-            Console.WriteLine(message);
+            //Console.WriteLine(message);
 
-            Console.ForegroundColor = ConsoleColor.White;
+            //Console.ForegroundColor = ConsoleColor.White;
         }
+
     }
 }

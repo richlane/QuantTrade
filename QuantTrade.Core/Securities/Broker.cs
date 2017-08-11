@@ -431,7 +431,6 @@ namespace QuantTrade.Core.Securities
             if (IsHoldingStock(tradeBar.Symbol))
             {
                 StockPortfolio.Find(p => p.Symbol == tradeBar.Symbol).CurrentPrice = tradeBar.Close;
-                //Logger.Log(tradeBar.Close.ToString());
             }
 
             //Update equity over time
