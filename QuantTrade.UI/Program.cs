@@ -24,45 +24,30 @@ namespace QuantTrade.UI
          
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            _graph = new GraphForm();
+            Application.Run(new GraphForm());
+
+
+            //_graph = new GraphForm();
         
-            try
-            {
-                //Start Timer
-                DateTime startRun = DateTime.Now;
+            //try
+            //{
+            //    //Get the default algo to run from the config.json file
+            //    _defaultAlgo = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
+            //    _defaultAlgoType = Type.GetType($"{_defaultAlgo}, QuantTrade.Core");
 
-                //TESTING TESTING TESTING
-                //runCustomRSI2Alog("TQQQ");
+            //    //Run buy and hold stocks - used to benchmark 
+            //    runAlgorithm(Config.GetToken("buyandhold-stocks"), true);
 
-                //Get the default algo to run from the config.json file
-                _defaultAlgo = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
-                _defaultAlgoType = Type.GetType($"{_defaultAlgo}, QuantTrade.Core");
-
-                //Run buy and hold stocks - used to benchmark 
-                runAlgorithm(Config.GetToken("buyandhold-stocks"), true);
-
-                //Run swing trade stocks
-                runAlgorithm(Config.GetToken("swingtrade-stocks"), false);
-
-                //End Timer
-                DateTime endRun = DateTime.Now;
-                decimal totalRunTime = (endRun - startRun).Milliseconds;
-                Logger.Log($"Total Run Time: {totalRunTime.ToString()} ms", ConsoleColor.Yellow);
-                //_graph.UpdateLog($"Total Run Time: {totalRunTime.ToString()} ms");
-
-                _graph.ShowDialog();
-
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ex.Message);
-                Logger.Log(ex.StackTrace.ToString());
-            }
-            finally
-            {
-                Logger.Log("Run complete. Hit any Enter to exit... ", ConsoleColor.Green);
-            }
-
+            //    //Run swing trade stocks
+            //    runAlgorithm(Config.GetToken("swingtrade-stocks"), false);
+          
+            //    _graph.ShowDialog();
+            //}
+            //catch (Exception ex)
+            //{
+            //    Logger.Log(ex.Message);
+            //    Logger.Log(ex.StackTrace.ToString());
+            //}
         }
 
         /// <summary>
@@ -70,20 +55,20 @@ namespace QuantTrade.UI
         /// </summary>
         private static void runAlgorithm(string symbols, bool buyAndHold)
         {
-            if (string.IsNullOrEmpty(symbols)) return;
+            //if (string.IsNullOrEmpty(symbols)) return;
 
-            //Loops the stocks and run the alogo
-            string[] symbolsCollection = symbols.Split(' ');
+            ////Loops the stocks and run the alogo
+            //string[] symbolsCollection = symbols.Split(' ');
 
-            //Parallel method for processing
-            Parallel.ForEach(symbolsCollection, symbol =>
-            {
-                IAlogorithm algo = Activator.CreateInstance(_defaultAlgoType) as IAlogorithm;
-                algo.Initialize(symbol, buyAndHold);
+            ////Parallel method for processing
+            //Parallel.ForEach(symbolsCollection, symbol =>
+            //{
+            //    IAlogorithm algo = Activator.CreateInstance(_defaultAlgoType) as IAlogorithm;
+            //    algo.Initialize(symbol, buyAndHold);
 
-                _graph.GraphResults(algo);
-                // Console.WriteLine("{0}, Thread Id= {1}", symbol, Thread.CurrentThread.ManagedThreadId);
-            });
+            //    _graph.GraphResults(algo);
+            //    // Console.WriteLine("{0}, Thread Id= {1}", symbol, Thread.CurrentThread.ManagedThreadId);
+            //});
 
         }
 

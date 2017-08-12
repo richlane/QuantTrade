@@ -4,61 +4,64 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using QuantTrade.Core.Utilities;
+using System.Linq;
+using System.Threading.Tasks;
 using System.ComponentModel;
 
 namespace QuantTrade.UI
 {
-
+   
     public partial class GraphForm : Form
     {
-        private List<SummaryReport> _reports;
+        #region Private Members
 
+        private List<SummaryReport> _algorithmSummaryReports;
+        private string _defaultAlgoName;
+        private Type _defaultAlgoType;
+
+        #endregion
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public GraphForm()
         {
             InitializeComponent();
 
-            _reports = new List<SummaryReport>();
+            _algorithmSummaryReports = new List<SummaryReport>();
         }
 
         
-        public void GraphResults(IAlogorithm algo)
+        /// <summary>
+        /// Add alog results to the the graph
+        /// </summary>
+        /// <param name="algorithmResults"></param>
+        private void graphResults(IAlogorithm algorithmResults)
         {
-            Series s = new Series()
+            Series series = new Series()
             {
-                Name = algo.Symbol,
+                Name = algorithmResults.Symbol,
                 ChartType = SeriesChartType.Line,
             };
 
-            Chart.Series.Add(s);
+            Chart.Series.Add(series);
 
-            foreach (KeyValuePair<DateTime, decimal> equity in algo.Broker.EquityOverTime)
-                Chart.Series[algo.Symbol].Points.AddXY(equity.Key, String.Format("{0:C}", equity.Value.ToString()));
+            foreach (KeyValuePair<DateTime, decimal> equity in algorithmResults.Broker.EquityOverTime)
+            {
+                Chart.Series[algorithmResults.Symbol].Points.AddXY(equity.Key, equity.Value);
+            }
 
-            _reports.Add(algo.SummaryReport);
-            Grid.Refresh();
+            //Add summary report to collection for the grid
+            _algorithmSummaryReports.Add(algorithmResults.SummaryReport);
+       
         }
 
-      
-
         /// <summary>
-        /// 
+        /// Format the datagrid cell columns
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Main_Load(object sender, EventArgs e)
+        private void formatGridColumns()
         {
-            Chart.ChartAreas["ChartArea1"].AxisX.MajorGrid.LineWidth = 0;
-            Chart.ChartAreas["ChartArea1"].AxisY.MajorGrid.LineWidth = 1;
-            Chart.ChartAreas[0].AxisY.ScaleView.Zoomable = true;
-            Chart.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
-             Chart.ChartAreas[0].CursorX.IsUserEnabled = true;
-             Chart.ChartAreas[0].CursorY.IsUserEnabled = true;
-            Chart.ChartAreas[0].CursorX.AutoScroll = true;
-            Chart.ChartAreas[0].CursorY.AutoScroll = true;
-
-            Grid.DataSource = _reports;
-        
-            //Format columns
             Grid.Columns["StartingAccount"].DefaultCellStyle.Format = "c0";
             Grid.Columns["EndingAccount"].DefaultCellStyle.Format = "c0";
             Grid.Columns["NetProfit"].DefaultCellStyle.Format = "p0";
@@ -72,45 +75,89 @@ namespace QuantTrade.UI
             Grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.AliceBlue;
             Grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.Silver;
             Grid.EnableHeadersVisualStyles = false;
-           
+        }
 
+        /// <summary>
+        /// For Load Event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Main_Load(object sender, EventArgs e)
+        {
+            //Format chart
+            Chart.ChartAreas[0].AxisX.MajorGrid.LineWidth = 0;
+            Chart.ChartAreas[0].AxisY.MajorGrid.LineWidth = 1;
+            Chart.ChartAreas[0].AxisY.ScaleView.Zoomable = true;
+            Chart.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
+            Chart.ChartAreas[0].CursorX.IsUserEnabled = true;
+            Chart.ChartAreas[0].CursorY.IsUserEnabled = true;
+            Chart.ChartAreas[0].CursorX.AutoScroll = true;
+            Chart.ChartAreas[0].CursorY.AutoScroll = true;
+            Chart.ChartAreas[0].AxisY.LabelStyle.Format = "C";
+
+            //Bind Grid 
+            Grid.DataSource = _algorithmSummaryReports;
+            formatGridColumns();
         }
 
 
-        
+        /// <summary>
+        /// Run the Algo click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void loadAlgorithmToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Clear old results
+            Chart.Series.Clear();
+            _algorithmSummaryReports.Clear();
 
-        //private void Chart_SelectionRangeChanged(object sender, CursorEventArgs e)
-        //{
-        //    double startX, endX, startY, endY;
+            _defaultAlgoName = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
+            _defaultAlgoType = Type.GetType($"{_defaultAlgoName}, QuantTrade.Core");
 
-        //    if (Chart.ChartAreas[0].CursorX.SelectionStart > Chart.ChartAreas[0].CursorX.SelectionEnd)
-        //    {
-        //        startX = Chart.ChartAreas[0].CursorX.SelectionEnd;
-        //        endX = Chart.ChartAreas[0].CursorX.SelectionStart;
-        //    }
-        //    else
-        //    {
-        //        startX = Chart.ChartAreas[0].CursorX.SelectionStart;
-        //        endX = Chart.ChartAreas[0].CursorX.SelectionEnd;
-        //    }
-        //    if (Chart.ChartAreas[0].CursorY.SelectionStart > Chart.ChartAreas[0].CursorY.SelectionEnd)
-        //    {
-        //        endY = Chart.ChartAreas[0].CursorY.SelectionStart;
-        //        startY = Chart.ChartAreas[0].CursorY.SelectionEnd;
-        //    }
-        //    else
-        //    {
-        //        startY = Chart.ChartAreas[0].CursorY.SelectionStart;
-        //        endY = Chart.ChartAreas[0].CursorY.SelectionEnd;
-        //    }
+            //Run buy and hold stocks - used to benchmark 
+            runAlgorithm(Config.GetToken("buyandhold-stocks"), true);
 
-        //    if (startX == endX && startY == endY)
-        //    {
-        //        return;
-        //    }
+            //Run swing trade stocks
+            runAlgorithm(Config.GetToken("swingtrade-stocks"), false);
 
-        //    Chart.ChartAreas[0].AxisX.ScaleView.Zoom(startX, (endX - startX), DateTimeIntervalType.Auto, true);
-        //    Chart.ChartAreas[0].AxisY.ScaleView.Zoom(startY, (endY - startY), DateTimeIntervalType.Auto, true);
-        //}
+            //Update the Grid
+            Grid.DataSource = null; // _summaryReports;
+            Grid.DataSource = _algorithmSummaryReports;
+            formatGridColumns();
+        }
+
+
+        /// <summary>
+        /// Loops the stocks and run the default alogorithm
+        /// </summary>
+        private void runAlgorithm(string symbols, bool buyAndHold)
+        {
+            if (string.IsNullOrEmpty(symbols)) return;
+
+            //Loops the stocks and run the alogo
+            string[] symbolsCollection = symbols.Split(' ');
+
+            foreach (var symbol in symbolsCollection)
+            {
+                IAlogorithm algo = Activator.CreateInstance(_defaultAlgoType) as IAlogorithm;
+                algo.Initialize(symbol, buyAndHold);
+                graphResults(algo);
+
+                Application.DoEvents();
+            }
+
+            #region Parallel method for processing
+            //Parallel.ForEach(symbolsCollection, symbol =>
+            //{
+            //    IAlogorithm algo = Activator.CreateInstance(_defaultAlgoType) as IAlogorithm;
+            //    algo.Initialize(symbol, buyAndHold);
+
+            //    graphResults(algo);
+            //    // Console.WriteLine("{0}, Thread Id= {1}", symbol, Thread.CurrentThread.ManagedThreadId);
+            //});
+            #endregion
+        }
+
     }
 }
