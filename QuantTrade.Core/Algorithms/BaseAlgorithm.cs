@@ -131,7 +131,6 @@ namespace QuantTrade.Core.Algorithm
 
             //Log summary report
             Logger.LogSummaryReport(SummaryReport);
-            
         }
 
         /// <summary>

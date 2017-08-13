@@ -71,9 +71,13 @@ namespace QuantTrade.Core.Securities
         {
             get
             {
-                if (_totalWins == 0 && _totalSellTrades == 0)
-                    return 0;
+                //Buy and hold
+                if (_totalWins == 0 && _totalLosses == 0 && TotalTrades == 1) return 1;
 
+                //Avoid divide error
+                if (_totalWins == 0 && _totalSellTrades == 0) return 0;
+
+         
                 decimal rate = _totalWins / _totalSellTrades;
                 return Math.Round(rate,2);
             }
@@ -83,8 +87,8 @@ namespace QuantTrade.Core.Securities
         {
             get
             {
-                if (_totalLosses == 0 && _totalSellTrades == 0)
-                    return 0;
+                //Avoid divide error
+                if (_totalLosses == 0 && _totalSellTrades == 0) return 0;
 
                 decimal rate = _totalLosses / _totalSellTrades;
                 return Math.Round(rate,2);

@@ -58,7 +58,8 @@ namespace QuantTrade.Core.Utilities
             if(string.IsNullOrEmpty(_transactionLogLocation) || string.IsNullOrEmpty(_summaryReportLogFile))
             {
                 //Results Log file
-                _summaryReportLogFile = Config.GetToken("summary-report-log");
+                _summaryReportLogFile = System.IO.Path.GetFullPath(Config.GetToken("summary-report-log"));
+
                 if (File.Exists(_summaryReportLogFile))
                 {
                     File.Delete(_summaryReportLogFile);
@@ -66,7 +67,7 @@ namespace QuantTrade.Core.Utilities
 
                 //Transaction log file
                 _enableTransactionLogging = Convert.ToBoolean(Config.GetToken("enable-transaction-logging"));
-                _transactionLogLocation = Config.GetToken("transaction-log-location");
+                _transactionLogLocation = System.IO.Path.GetFullPath(Config.GetToken("transaction-log-location")); 
 
                 if(!_transactionLogLocation.EndsWith(@"\"))
                 {

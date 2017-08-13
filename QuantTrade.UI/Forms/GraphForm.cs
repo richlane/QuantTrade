@@ -1,17 +1,45 @@
-﻿using QuantTrade.Core.Algorithm;
+﻿/*
+* BSD 2-Clause License 
+* Copyright (c) 2017, Rich Lane 
+* All rights reserved. 
+* 
+* Redistribution and use in source and binary forms, with or without 
+* modification, are permitted provided that the following conditions are met: 
+* 
+* Redistributions of source code must retain the above copyright notice, this 
+* list of conditions and the following disclaimer. 
+* 
+* Redistributions in binary form must reproduce the above copyright notice, 
+* this list of conditions and the following disclaimer in the documentation 
+* and/or other materials provided with the distribution. 
+* 
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE 
+* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+*/
+
+using QuantTrade.Core.Algorithm;
 using QuantTrade.Core.Reports;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using QuantTrade.Core.Utilities;
-using System.Linq;
-using System.Threading.Tasks;
-using System.ComponentModel;
+using System.Drawing;
 
 namespace QuantTrade.UI
 {
    
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class GraphForm : Form
     {
         #region Private Members
@@ -30,15 +58,20 @@ namespace QuantTrade.UI
             InitializeComponent();
 
             _algorithmSummaryReports = new List<SummaryReport>();
+
+            //Get default algo from config file
+            _defaultAlgoName = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
+            _defaultAlgoType = Type.GetType($"{_defaultAlgoName}, QuantTrade.Core");
         }
 
-        
+
         /// <summary>
         /// Add alog results to the the graph
         /// </summary>
         /// <param name="algorithmResults"></param>
         private void graphResults(IAlogorithm algorithmResults)
         {
+            //Create a new series and add to the chart
             Series series = new Series()
             {
                 Name = algorithmResults.Symbol,
@@ -46,10 +79,12 @@ namespace QuantTrade.UI
             };
 
             Chart.Series.Add(series);
-
+            
+            //Add equity over time results to the graph
             foreach (KeyValuePair<DateTime, decimal> equity in algorithmResults.Broker.EquityOverTime)
             {
                 Chart.Series[algorithmResults.Symbol].Points.AddXY(equity.Key, equity.Value);
+        
             }
 
             //Add summary report to collection for the grid
@@ -71,6 +106,13 @@ namespace QuantTrade.UI
             Grid.Columns["MaxDrawDown"].DefaultCellStyle.Format = "p0";
             Grid.Columns["TotalFees"].DefaultCellStyle.Format = "c0";
             Grid.Columns["Comments"].Visible = false;
+            Grid.Columns["RunDates"].Visible = false;
+            Grid.DefaultCellStyle.SelectionBackColor = Color.White;
+            Grid.DefaultCellStyle.SelectionForeColor = Color.Black;
+
+            Grid.RowHeadersDefaultCellStyle.SelectionBackColor = Color.Empty;
+
+
 
             Grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.AliceBlue;
             Grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.Silver;
@@ -95,56 +137,35 @@ namespace QuantTrade.UI
             Chart.ChartAreas[0].CursorY.AutoScroll = true;
             Chart.ChartAreas[0].AxisY.LabelStyle.Format = "C";
 
+            //Chart Title
+            Title title1 = Chart.Titles.Add("Account Value");
+            title1.Font = new System.Drawing.Font("Arial", 12, FontStyle.Bold);
+
+            //Title title2 = Chart.Titles.Add(_defaultAlgoName);
+            //title2.Font = new System.Drawing.Font("Arial", 11, FontStyle.Bold);
+
             //Bind Grid 
             Grid.DataSource = _algorithmSummaryReports;
             formatGridColumns();
         }
-
-
-        /// <summary>
-        /// Run the Algo click event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void loadAlgorithmToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            //Clear old results
-            Chart.Series.Clear();
-            _algorithmSummaryReports.Clear();
-
-            _defaultAlgoName = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
-            _defaultAlgoType = Type.GetType($"{_defaultAlgoName}, QuantTrade.Core");
-
-            //Run buy and hold stocks - used to benchmark 
-            runAlgorithm(Config.GetToken("buyandhold-stocks"), true);
-
-            //Run swing trade stocks
-            runAlgorithm(Config.GetToken("swingtrade-stocks"), false);
-
-            //Update the Grid
-            Grid.DataSource = null; // _summaryReports;
-            Grid.DataSource = _algorithmSummaryReports;
-            formatGridColumns();
-        }
-
+        
 
         /// <summary>
         /// Loops the stocks and run the default alogorithm
         /// </summary>
-        private void runAlgorithm(string symbols, bool buyAndHold)
+        private void runAlgorithm(Type defaultAlgoType, string symbols, bool buyAndHold)
         {
             if (string.IsNullOrEmpty(symbols)) return;
 
             //Loops the stocks and run the alogo
             string[] symbolsCollection = symbols.Split(' ');
-
+      
             foreach (var symbol in symbolsCollection)
             {
-                IAlogorithm algo = Activator.CreateInstance(_defaultAlgoType) as IAlogorithm;
+                Application.DoEvents();
+                IAlogorithm algo = Activator.CreateInstance(defaultAlgoType) as IAlogorithm;
                 algo.Initialize(symbol, buyAndHold);
                 graphResults(algo);
-
-                Application.DoEvents();
             }
 
             #region Parallel method for processing
@@ -159,5 +180,46 @@ namespace QuantTrade.UI
             #endregion
         }
 
+
+        #region Menu Bars
+
+        /// <summary>
+        /// Configure Click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void fileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ConfigureForm frm = new ConfigureForm();
+            frm.ShowDialog();
+        }
+
+        /// <summary>
+        /// Run Algo click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void loadAlgorithmToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Clear old results
+            Chart.Series.Clear();
+            _algorithmSummaryReports.Clear();
+            Status.Text = "Running";
+
+            //Run buy and hold stocks - used to benchmark 
+            runAlgorithm(_defaultAlgoType, Config.GetToken("buyandhold-stocks"), true);
+
+            //Run swing trade stocks
+            runAlgorithm(_defaultAlgoType, Config.GetToken("swingtrade-stocks"), false);
+
+            //Update the Grid
+            Grid.DataSource = null;
+            Grid.DataSource = _algorithmSummaryReports;
+            formatGridColumns();
+
+            Status.Text = "Idle";
+        }
+
+        #endregion
     }
 }

@@ -10,9 +10,9 @@ namespace QuantTrade.UI
 {
     static class Program
     {
-        private static string _defaultAlgo;
-        private static Type _defaultAlgoType;
-        private static GraphForm _graph;
+        //private static string _defaultAlgo;
+        //private static Type _defaultAlgoType;
+        //private static GraphForm _graph;
 
 
         /// <summary>
@@ -21,12 +21,10 @@ namespace QuantTrade.UI
         [STAThread]
         static void Main()
         {
-         
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new GraphForm());
-
-
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new GraphForm());
+            
             //_graph = new GraphForm();
         
             //try

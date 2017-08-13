@@ -47,15 +47,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GraphForm.cs">
+    <Compile Include="Forms\ConfigureForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GraphForm.Designer.cs">
+    <Compile Include="Forms\ConfigureForm.Designer.cs">
+      <DependentUpon>ConfigureForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\GraphForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\GraphForm.Designer.cs">
       <DependentUpon>GraphForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="GraphForm.resx">
+    <EmbeddedResource Include="Forms\ConfigureForm.resx">
+      <DependentUpon>ConfigureForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\GraphForm.resx">
       <DependentUpon>GraphForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

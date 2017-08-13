@@ -28,12 +28,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
+using Newtonsoft.Json;
 
 namespace QuantTrade.Core.Utilities
 {
@@ -51,23 +47,41 @@ namespace QuantTrade.Core.Utilities
         /// </summary>
         static Config()
         {
-            if (_settings == null)
-            {
-                _settings = JObject.Parse(File.ReadAllText(_configurationFileName));
-            }
+                
         }
 
 
         /// <summary>
-        /// 
+        /// Get value from JSON config file
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
         public static string GetToken(string key)
         {
+            //refresh settings
+            _settings = JObject.Parse(File.ReadAllText(_configurationFileName));
+
             return _settings.SelectToken(key).ToString();
 
         }
 
+
+        /// <summary>
+        /// Update JSON config file.
+        /// </summary>
+        /// <param name="tokens"></param>
+
+        public static void SaveTokens(Dictionary<string, string> tokens)
+        {
+            dynamic jsonObj = JsonConvert.DeserializeObject(File.ReadAllText(_configurationFileName));
+
+            foreach (var item in tokens)
+            {
+                jsonObj[item.Key] = item.Value;
+            }
+            
+            string output = JsonConvert.SerializeObject(jsonObj, Formatting.Indented);
+            File.WriteAllText(_configurationFileName, output);
+        }
     }
 }

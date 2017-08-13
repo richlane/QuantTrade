@@ -52,11 +52,16 @@ namespace QuantTrade.Core.Data
         /// <param name="symbol"></param>
         public string GenerateData(string symbol, Resolution resolution)
         {
+       
+            string outputDirectory = System.IO.Path.GetFullPath(Config.GetToken("data-directory"));
+            if (!outputDirectory.EndsWith(@"\"))
+            {
+                outputDirectory = outputDirectory + @"\";
+            }
 
-            string outputDirectory = Config.GetToken("data-directory");
             string apiKey = Config.GetToken("alpha-api-key");
 
-            _csvFileName = outputDirectory + @"\" + resolution + "_" + symbol + ".csv";
+            _csvFileName = outputDirectory + resolution + "_" + symbol + ".csv";
 
             if (isDataNeeded())
             {
