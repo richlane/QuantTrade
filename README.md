@@ -2,9 +2,9 @@
 Built in C# & WinForms, QuantTrade provides a way to quickly build and backtest stock investment strategies using technincal indicators 
 such as the EMA, SMA, MACD, & RSI. Historical stock feeds are provided for free by https://www.alphavantage.co
 
-<br/><br/>
+<br/>
 <img src="http://stalls.gb3.com/QuantTrade.png" />
-<br/><br/>
+<br/>
 
 Current Limitations:<br/>
  -Only supports Daily time series/resolution data. <br/>
