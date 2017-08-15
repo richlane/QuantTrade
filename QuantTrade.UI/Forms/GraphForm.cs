@@ -65,22 +65,33 @@ namespace QuantTrade.UI
         /// <param name="algorithmResults"></param>
         private void graphResults(IAlogorithm algorithmResults)
         {
+            //Create a unique name
+            string symbolName = algorithmResults.Symbol;
+
+            if (Chart.Series.IsUniqueName(symbolName) == false)
+            {
+                symbolName = symbolName + "_" + DateTime.Now.Second.ToString();
+            }
+         
             //Create a new series and add to the chart
             Series series = new Series()
             {
-                Name = algorithmResults.Symbol,
-                ChartType = SeriesChartType.Line,
+                Name = symbolName,
+                ChartType = SeriesChartType.Line
             };
 
             Chart.Series.Add(series);
-            
+
+
             //Add equity over time results to the graph
             foreach (KeyValuePair<DateTime, decimal> equity in algorithmResults.Broker.EquityOverTime)
             {
-                Chart.Series[algorithmResults.Symbol].Points.AddXY(equity.Key, equity.Value);
+                Chart.Series[symbolName].Points.AddXY(equity.Key, equity.Value);
             }
 
             //Add summary report to collection for the grid
+            //Update the symbol name in the report - avoiding duplicates
+            algorithmResults.SummaryReport.Symbol = symbolName;
             _algorithmSummaryReports.Add(algorithmResults.SummaryReport);
         }
 
