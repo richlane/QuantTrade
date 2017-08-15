@@ -47,8 +47,13 @@ namespace QuantTrade.Core.Utilities
         /// </summary>
         static Config()
         {
-                
+            readConfigFile();
         }
+
+        private static void readConfigFile()
+        {
+           _settings = JObject.Parse(File.ReadAllText(_configurationFileName));
+       }
 
 
         /// <summary>
@@ -58,11 +63,7 @@ namespace QuantTrade.Core.Utilities
         /// <returns></returns>
         public static string GetToken(string key)
         {
-            //refresh settings
-            _settings = JObject.Parse(File.ReadAllText(_configurationFileName));
-
             return _settings.SelectToken(key).ToString();
-
         }
 
 
@@ -82,6 +83,9 @@ namespace QuantTrade.Core.Utilities
             
             string output = JsonConvert.SerializeObject(jsonObj, Formatting.Indented);
             File.WriteAllText(_configurationFileName, output);
+
+            //Refresh Config File
+            readConfigFile();
         }
     }
 }

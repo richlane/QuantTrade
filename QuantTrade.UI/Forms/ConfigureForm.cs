@@ -55,7 +55,6 @@ namespace QuantTrade.UI
         /// <param name="e"></param>
         private void Close_Click(object sender, EventArgs e)
         {
-            
             this.Close();
         }
 
@@ -78,11 +77,13 @@ namespace QuantTrade.UI
             Dictionary<string, string> tokens = new Dictionary<string, string>();
 
             tokens.Add("starting-cash", StartingCash.Text);
-
             tokens.Add("allow-margin", AllowMargin.Checked.ToString());
             tokens.Add("transaction-fee", TransactionFee.Text);
             tokens.Add("buyandhold-stocks", BuyAndHoldStocks.Text.ToUpper());
             tokens.Add("swingtrade-stocks", SwingTradeStocks.Text.ToUpper());
+            tokens.Add("default-alogrithm", DefaultAlgorithm.Text);
+            tokens.Add("alpha-api-key", AlphaAPIKey.Text);
+
             Config.SaveTokens(tokens);
         }
 
@@ -97,6 +98,8 @@ namespace QuantTrade.UI
             BuyAndHoldStocks.Text = Config.GetToken("buyandhold-stocks");
             SwingTradeStocks.Text = Config.GetToken("swingtrade-stocks");
             AllowMargin.Checked= Convert.ToBoolean( Config.GetToken("allow-margin"));
+            DefaultAlgorithm.Text = Config.GetToken("default-alogrithm"); 
+            AlphaAPIKey.Text = Config.GetToken("alpha-api-key");
 
         }
     }

@@ -56,15 +56,9 @@ namespace QuantTrade.UI
         public GraphForm()
         {
             InitializeComponent();
-
-            _algorithmSummaryReports = new List<SummaryReport>();
-
-            //Get default algo from config file
-            _defaultAlgoName = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
-            _defaultAlgoType = Type.GetType($"{_defaultAlgoName}, QuantTrade.Core");
         }
 
-
+     
         /// <summary>
         /// Add alog results to the the graph
         /// </summary>
@@ -84,12 +78,10 @@ namespace QuantTrade.UI
             foreach (KeyValuePair<DateTime, decimal> equity in algorithmResults.Broker.EquityOverTime)
             {
                 Chart.Series[algorithmResults.Symbol].Points.AddXY(equity.Key, equity.Value);
-        
             }
 
             //Add summary report to collection for the grid
             _algorithmSummaryReports.Add(algorithmResults.SummaryReport);
-       
         }
 
         /// <summary>
@@ -126,6 +118,9 @@ namespace QuantTrade.UI
         /// <param name="e"></param>
         private void Main_Load(object sender, EventArgs e)
         {
+            _algorithmSummaryReports = new List<SummaryReport>();
+            getDefaultAlgorithm();
+
             //Format chart
             Chart.ChartAreas[0].AxisX.MajorGrid.LineWidth = 0;
             Chart.ChartAreas[0].AxisY.MajorGrid.LineWidth = 1;
@@ -137,18 +132,36 @@ namespace QuantTrade.UI
             Chart.ChartAreas[0].CursorY.AutoScroll = true;
             Chart.ChartAreas[0].AxisY.LabelStyle.Format = "C";
 
-            //Chart Title
-            Title title1 = Chart.Titles.Add("Account Value");
-            title1.Font = new System.Drawing.Font("Arial", 12, FontStyle.Bold);
-
-            //Title title2 = Chart.Titles.Add(_defaultAlgoName);
-            //title2.Font = new System.Drawing.Font("Arial", 11, FontStyle.Bold);
-
             //Bind Grid 
             Grid.DataSource = _algorithmSummaryReports;
             formatGridColumns();
         }
-        
+
+
+        /// <summary>
+        /// Get default algo from config file
+        /// </summary>
+        private void getDefaultAlgorithm()
+        {
+            _defaultAlgoName = $"QuantTrade.Core.Algorithm.{Config.GetToken("default-alogrithm")}";
+            _defaultAlgoType = Type.GetType($"{_defaultAlgoName}, QuantTrade.Core");
+
+            //Update chart Title
+            Chart.Titles.Clear();
+
+            try
+            {
+
+            }
+            catch
+            {
+
+            }
+            string newTitle = _defaultAlgoName.ToString().Replace("QuantTrade.Core.Algorithm.", "");
+            Title title = Chart.Titles.Add(newTitle + " - Results");
+            title.Font = new System.Drawing.Font("Arial", 12, FontStyle.Bold);
+        }
+
 
         /// <summary>
         /// Loops the stocks and run the default alogorithm
@@ -192,6 +205,9 @@ namespace QuantTrade.UI
         {
             ConfigureForm frm = new ConfigureForm();
             frm.ShowDialog();
+
+            //Refresh default algo
+            getDefaultAlgorithm();
         }
 
         /// <summary>
