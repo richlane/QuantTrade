@@ -110,16 +110,14 @@ namespace QuantTrade.UI
             Grid.Columns["TotalFees"].DefaultCellStyle.Format = "c0";
             Grid.Columns["Comments"].Visible = false;
             Grid.Columns["RunDates"].Visible = false;
+
             Grid.DefaultCellStyle.SelectionBackColor = Color.White;
             Grid.DefaultCellStyle.SelectionForeColor = Color.Black;
-
-            Grid.RowHeadersDefaultCellStyle.SelectionBackColor = Color.Empty;
-
-
-
+          
+            //Grid.RowHeadersDefaultCellStyle.SelectionBackColor = Color.Empty;
             Grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.AliceBlue;
-            Grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.Silver;
-            Grid.EnableHeadersVisualStyles = false;
+            //Grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.Silver;
+            Grid.EnableHeadersVisualStyles = true;
         }
 
         /// <summary>
@@ -159,15 +157,6 @@ namespace QuantTrade.UI
 
             //Update chart Title
             Chart.Titles.Clear();
-
-            try
-            {
-
-            }
-            catch
-            {
-
-            }
             string newTitle = _defaultAlgoName.ToString().Replace("QuantTrade.Core.Algorithm.", "");
             Title title = Chart.Titles.Add(newTitle + " - Results");
             title.Font = new System.Drawing.Font("Arial", 12, FontStyle.Bold);
