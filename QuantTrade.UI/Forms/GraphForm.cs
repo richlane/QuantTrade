@@ -158,7 +158,7 @@ namespace QuantTrade.UI
             //Update chart Title
             Chart.Titles.Clear();
             string newTitle = _defaultAlgoName.ToString().Replace("QuantTrade.Core.Algorithm.", "");
-            Title title = Chart.Titles.Add(newTitle + " - Results");
+            Title title = Chart.Titles.Add(newTitle + " Results");
             title.Font = new System.Drawing.Font("Arial", 12, FontStyle.Bold);
         }
 
