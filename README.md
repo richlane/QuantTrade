@@ -4,10 +4,13 @@ such as the EMA, SMA, MACD, & RSI. <br/>
 
 <img src="http://stalls.gb3.com/QuantTrade.png" /><br/>
 <b>Features</b><br/>
--Ability to backtest mutiple stocks simultaneously against your alogorithms to help reduce curve fitting.<br/>
--Results are output to a graph and datatable for easy reading. 
--Extremly fast algorithm execution time (typically < 50 ms per symbol).
--Built in integration with https://www.alphavantage.co for free historical stock feeds. Feeds are dynamically retrieved as needed.<br/>
+<ul>
+<li>Ability to backtest mutiple stocks simultaneously against your alogorithms to help reduce curve fitting.</li>
+<li>Results are output to a graph and datatable for easy reading. </li>
+<li>Extremly fast algorithm execution time (typically < 50 ms per symbol).</li>
+<li>Built in integration with https://www.alphavantage.co for free historical stock feeds. </li>
+<li>Historical data feeds are dynamically retrieved as needed.</li>
+</ul>
 	
 <b>Future Enhancements</b><br/>
 -Application currently only supports daily time series/resolution data. Support for additional time frames is planned.<br/>
