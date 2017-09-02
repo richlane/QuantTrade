@@ -30,24 +30,20 @@ using QuantTrade.Core.Indicators;
 using QuantTrade.Core.Securities;
 using QuantTrade.Core.Utilities;
 using System;
-using System.Text;
+using System.Collections.Generic;
 
 namespace QuantTrade.Core.Algorithm
 {
     /// <summary>
-    /// Jack's RSI2 Strategy
+    ///  Buy when close is below SMA and sell when close is above SMA
     /// </summary>
-    public class RSI2Algorithm : BaseAlgorithm, IAlogorithm
-    {
+    public class SMAAlgorithm : BaseAlgorithm, IAlogorithm
+    {      
         //Indicators & related settings
         private Resolution _resolution = Resolution.Daily;
-        private RelativeStrengthIndex _rsi;
         private SimpleMovingAverage _sma;
 
-        public int _smaLookBackPeriod = 50;
-        public int _rsiLookBackPeriod = 2;
-        public int _rsiBuyLevel = 30;
-        public int _rsiSellLevel = 70;
+        private int _smaLookBackPeriod = 10;
      
         //Date Ranges
         private int _startYear = 2011;
@@ -55,15 +51,10 @@ namespace QuantTrade.Core.Algorithm
 
         //Sell Stop
         bool _useSellStop = true;
-        public decimal _sellStopPercentage = .05m;
         decimal _sellStopPrice;
+        decimal _sellStopPercentage = .05m;
         decimal _pctToInvest;   //Using the 2%, 3%, 5% investment strategy
-      
-        //Custom Transaction Logging
-        bool _enableTransactionLogging =true;
-        StringBuilder _transactionLogBuilder;
-        string _logComments = "";
-        
+
 
         /// <summary>
         /// Subscribe to base class events.
@@ -84,28 +75,25 @@ namespace QuantTrade.Core.Algorithm
             BuyAndHold = buyAndHold;
             Comments = comments;
 
-            //////////////////////////////////
+            /////////////////////////////////////
             //Update base class proprties 
-            //////////////////////////////////
+            /////////////////////////////////////
 
             /// Set Start Date --> Need # days > SMA for the warmup period
             DateTime theActualStartDate= calcStartDate();
             SetStartDate(theActualStartDate.Year, theActualStartDate.Month, theActualStartDate.Day);
+            SetEndDate(_endYear, 12, 31);
+            SetStartDate(_startYear-1, 11, 15);  
             SetEndDate(_endYear, 12, 31);
 
             Resolution = _resolution;
             subscribeToEvents();
 
             //Setup Indictors
-            _rsi = CreateRelativeStrengthIndexIndicator(_rsiLookBackPeriod, MovingAverageType.Wilders);
             _sma = CreateSimpleMovingAverageIndicator(_smaLookBackPeriod);
-         
+        
             //Execute Test
             RunTest();
-
-            //Custom logging
-            if(_enableTransactionLogging)
-                Logger.LogTransactionsToFile(_transactionLogBuilder.ToString(), Symbol);
         }
 
 
@@ -129,7 +117,7 @@ namespace QuantTrade.Core.Algorithm
             //set sell stop price
             if (order.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
             {
-                _sellStopPrice = 
+                _sellStopPrice =
                     Broker.StockPortfolio.Find(p => p.Symbol == Symbol).AverageFillPrice * (1 - _sellStopPercentage);
             }
         }
@@ -140,11 +128,11 @@ namespace QuantTrade.Core.Algorithm
         public void OnTradeBarEvent(TradeBar tradebar, EventArgs e)
         {
             //Make sure indicators are ready
-            if (!_rsi.IsReady || !_sma.IsReady)
+            if (!_sma.IsReady)
             {
                 return;
             }
-                
+      
             //Buy, Sell, or Hold?
             Action action = getBuySellHoldDecision(tradebar);
 
@@ -155,7 +143,7 @@ namespace QuantTrade.Core.Algorithm
                     int buyQty = Convert.ToInt32(Math.Round(dollarAmt / tradebar.Close));
 
                     //Buying MOO  
-                    base.ExecuteOrder(Action.Buy,  OrderType.MOO, buyQty);
+                    base.ExecuteOrder(Action.Buy, OrderType.MOO, buyQty);
                     break;
 
                 case Action.Sell:
@@ -166,9 +154,6 @@ namespace QuantTrade.Core.Algorithm
                     break;
             }
 
-            //Custom logging
-            if(_enableTransactionLogging)
-                logTransacton(tradebar, action);
         }
 
         /// <summary>
@@ -178,12 +163,9 @@ namespace QuantTrade.Core.Algorithm
         {
             Action action = Action.na;
             bool buying = false;
-            _logComments = "";
-
-            /////////////////////////////////////////
+            
             //Here is the buy and hold logic
-            /////////////////////////////////////////
-            if (BuyAndHold)
+            if(BuyAndHold)
             {
                 if (Broker.IsHoldingStock(Symbol) == false)
                 {
@@ -192,12 +174,12 @@ namespace QuantTrade.Core.Algorithm
                 }
                 return action;
             }
-
-
+           
+            
             /////////////////////////////////////////
-            //Swing trade buy Logic
+            //Buy Logic
             /////////////////////////////////////////
-            if ( _rsi.Value  < _rsiBuyLevel && _pctToInvest < 1M)
+            if (tradebar.Close < _sma.Value)
             {
                 action = Action.Buy;
                 buying = true;
@@ -230,12 +212,12 @@ namespace QuantTrade.Core.Algorithm
             }
 
             /////////////////////////////////////////
-            //Swing trade sell and hold logic
+            //Sell and Hold Logic
             /////////////////////////////////////////
             if (Broker.IsHoldingStock(Symbol) && buying == false)
             {
-                //Sell - we hit our oversold RSI and SMA levels
-                if ( _rsi.Value > _rsiSellLevel && tradebar.Close > _sma.Value)
+                //Sell - we hit our SMA level
+                if ( tradebar.Close > _sma.Value)
                 {
                     action = Action.Sell;
                     _pctToInvest = 0;
@@ -247,7 +229,6 @@ namespace QuantTrade.Core.Algorithm
                     action = Action.Sell;
                     _pctToInvest = 0;
                     _sellStopPrice = 0;
-                    _logComments = "Stopped out";
                 }
                 //Hold
                 else
@@ -259,32 +240,6 @@ namespace QuantTrade.Core.Algorithm
             return action;
         }
 
-        #region used for verbose logging
-
-        /// <summary>
-        /// Logs the transaction into a csv for review
-        /// </summary>
-        private void logTransacton(TradeBar data, Action action)
-        {
-            if (_transactionLogBuilder == null)
-            {
-                _transactionLogBuilder = new StringBuilder();
-                _transactionLogBuilder.AppendLine("Date,Symbol,Action,Open,Close,RSI,SMA,Comments");
-            }
-
-            _transactionLogBuilder.AppendLine(string.Format
-                ("{0},{1},{2},{3},{4},{5},{6},{7}",
-                 data.Day,
-                Symbol,
-                action.ToString().Replace("na", ""),
-                Math.Round(data.Open, 2),
-                Math.Round(data.Close, 2),
-                Math.Round(_rsi.Value),
-                Math.Round(_sma.Value), 
-                _logComments
-               ));
-        }
-
-        #endregion
+   
     }
 }

@@ -46,6 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\BaseAlgorithm.cs" />
+    <Compile Include="Algorithms\EMAAlgorithm.cs" />
+    <Compile Include="Algorithms\SMAAlgorithm.cs" />
     <Compile Include="Algorithms\SMA20Algorithm.cs" />
     <Compile Include="Indicators\MACD.cs" />
     <Compile Include="Reports\SummaryReport.cs" />

@@ -35,7 +35,7 @@ using System.Collections.Generic;
 namespace QuantTrade.Core.Algorithm
 {
     /// <summary>
-    ///  Buy when close is below SMA(50) and sell when close is above SMA(50)
+    ///  Buy when close is below SMA(20) and sell when close is above SMA(20)
     /// </summary>
     public class SMA20Algorithm : BaseAlgorithm, IAlogorithm
     {      
@@ -43,23 +43,18 @@ namespace QuantTrade.Core.Algorithm
         private Resolution _resolution = Resolution.Daily;
         private SimpleMovingAverage _sma;
 
-        private int _smaLookBackPeriod = 10;
-        private OrderType _orderType = OrderType.MOC;
-
+        private int _smaLookBackPeriod = 20;
+     
         //Date Ranges
-        private int _startYear = 2014;
-        private int _endYear = 2016;
+        private int _startYear = 2011;
+        private int _endYear = 2017;
 
         //Sell Stop
         bool _useSellStop = false;
         decimal _sellStopPrice;
-        decimal _sellStopPercentage = .3m; 
+        decimal _sellStopPercentage = .05m; 
 
-        //Account Settings
-        private decimal _transactionFee = 7M;
-        private decimal _startingCash = 10000M;
-
-      
+       
         /// <summary>
         /// Subscribe to base class events.
         /// </summary>
@@ -79,19 +74,39 @@ namespace QuantTrade.Core.Algorithm
             BuyAndHold = buyAndHold;
             Comments = comments;
 
+            /////////////////////////////////////
             //Update base class proprties 
-            SetStartDate(_startYear-1, 11, 15); //Need time to warm up indicators --> allowing 45 days 
+            /////////////////////////////////////
+
+            /// Set Start Date --> Need # days > SMA for the warmup period
+            DateTime theActualStartDate= calcStartDate();
+            SetStartDate(theActualStartDate.Year, theActualStartDate.Month, theActualStartDate.Day);
             SetEndDate(_endYear, 12, 31);
+            SetStartDate(_startYear-1, 11, 15);  
+            SetEndDate(_endYear, 12, 31);
+
             Resolution = _resolution;
             subscribeToEvents();
 
             //Setup Indictors
             _sma = CreateSimpleMovingAverageIndicator(_smaLookBackPeriod);
         
-            //Execute Tests
+            //Execute Test
             RunTest();
         }
 
+
+        /// <summary>
+        /// Set Start Date --> Need # days > SMA for the warmup period
+        /// </summary>
+        private DateTime calcStartDate()
+        {
+            int backDays = ((_smaLookBackPeriod / 5) * 2) + _smaLookBackPeriod;
+            DateTime tmpStartDate = new DateTime(_startYear, 1, 1);
+            tmpStartDate = tmpStartDate.AddDays(backDays * -1);
+
+            return tmpStartDate;
+        }
 
         /// <summary>
         /// Event handler for a newly executed order
@@ -126,13 +141,13 @@ namespace QuantTrade.Core.Algorithm
                     decimal dollarAmt = (Broker.AvailableCash);
                     int buyQty = Convert.ToInt32(Math.Round(dollarAmt / tradebar.Close));
 
-                    base.ExecuteOrder(Action.Buy, _orderType, buyQty);
+                    base.ExecuteOrder(Action.Buy, OrderType.MOC, buyQty);
                     break;
 
                 case Action.Sell:
                     int sellQty = Broker.StockPortfolio.Find(p => p.Symbol == Symbol).Quantity;
 
-                    base.ExecuteOrder(Action.Sell, _orderType, sellQty);
+                    base.ExecuteOrder(Action.Sell, OrderType.MOC, sellQty);
                     break;
             }
 
