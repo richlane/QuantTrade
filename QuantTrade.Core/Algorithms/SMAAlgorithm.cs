@@ -134,7 +134,7 @@ namespace QuantTrade.Core.Algorithm
             }
       
             //Buy, Sell, or Hold?
-            Action action = getBuySellHoldDecision(tradebar);
+            Action action = getBuySellHoldDecision(tradebar);   
 
             switch (action)
             {
