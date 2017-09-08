@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantTrade.UI", "QuantTrade.UI\QuantTrade.UI.csproj", "{20B8B521-D6C2-4A7F-BB7E-13E3502FF4B2}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantTrade.Tests", "QuantTrade.Tests\QuantTrade.Tests.csproj", "{8872CB6D-E080-4D57-841F-B61FBCBAB5F4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantTrade.Core", "QuantTrade.Core\QuantTrade.Core.csproj", "{FF8AF88E-4105-4EE2-BB41-2AE10F6D3064}"
@@ -12,8 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantTrade.UI", "QuantTrade.UI\QuantTrade.UI.csproj", "{20B8B521-D6C2-4A7F-BB7E-13E3502FF4B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
