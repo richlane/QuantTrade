@@ -108,16 +108,21 @@ namespace QuantTrade.UI
             Grid.Columns["LossRate"].DefaultCellStyle.Format = "p0";
             Grid.Columns["MaxDrawDown"].DefaultCellStyle.Format = "p0";
             Grid.Columns["TotalFees"].DefaultCellStyle.Format = "c0";
-            Grid.Columns["Comments"].Visible = false;
             Grid.Columns["RunDates"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-      
+
+            Grid.Columns["Comments"].Visible = false;
+            //Grid.Columns["RunDates"].Visible = false;
+            //Grid.Columns["AlgorithmName"].Visible = false;
+
+
+
             Grid.DefaultCellStyle.SelectionBackColor = Color.White;
             Grid.DefaultCellStyle.SelectionForeColor = Color.Black;
-          
-            //Grid.RowHeadersDefaultCellStyle.SelectionBackColor = Color.Empty;
             Grid.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.Color.AliceBlue;
-            //Grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.Silver;
             Grid.EnableHeadersVisualStyles = true;
+            //Grid.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.Silver;
+            //Grid.RowHeadersDefaultCellStyle.SelectionBackColor = Color.Empty;
+
         }
 
         /// <summary>
