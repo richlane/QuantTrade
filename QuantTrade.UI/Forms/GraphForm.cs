@@ -109,8 +109,8 @@ namespace QuantTrade.UI
             Grid.Columns["MaxDrawDown"].DefaultCellStyle.Format = "p0";
             Grid.Columns["TotalFees"].DefaultCellStyle.Format = "c0";
             Grid.Columns["Comments"].Visible = false;
-            Grid.Columns["RunDates"].Visible = false;
-
+            Grid.Columns["RunDates"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+      
             Grid.DefaultCellStyle.SelectionBackColor = Color.White;
             Grid.DefaultCellStyle.SelectionForeColor = Color.Black;
           
