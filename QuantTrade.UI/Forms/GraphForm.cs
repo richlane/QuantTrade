@@ -169,7 +169,7 @@ namespace QuantTrade.UI
         private void runAlgorithm(Type defaultAlgoType, string symbols, bool buyAndHold)
         {
             if (string.IsNullOrEmpty(symbols)) return;
-
+           
             //Loops the stocks and run the alogo
             string[] symbolsCollection = symbols.Split(' ');
       

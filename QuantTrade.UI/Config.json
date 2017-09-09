@@ -12,6 +12,7 @@
   "starting-cash": "10000",
   "buyandhold-stocks": "SPY",
   "swingtrade-stocks": "SPY",
-  "Comments": ""
+  "start-date": "01/01/2015",
+  "end-date": "01/01/2017"
   
 }

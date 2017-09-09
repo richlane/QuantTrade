@@ -83,6 +83,8 @@ namespace QuantTrade.UI
             tokens.Add("swingtrade-stocks", SwingTradeStocks.Text.ToUpper());
             tokens.Add("default-alogrithm", DefaultAlgorithm.Text);
             tokens.Add("alpha-api-key", AlphaAPIKey.Text);
+            tokens.Add("start-date", StartDate.Text);
+            tokens.Add("end-date", EndDate.Text);
 
             Config.SaveTokens(tokens);
         }
@@ -100,7 +102,8 @@ namespace QuantTrade.UI
             AllowMargin.Checked= Convert.ToBoolean( Config.GetToken("allow-margin"));
             DefaultAlgorithm.Text = Config.GetToken("default-alogrithm"); 
             AlphaAPIKey.Text = Config.GetToken("alpha-api-key");
-
+            StartDate.Text = Config.GetToken("start-date");
+            EndDate.Text = Config.GetToken("end-date");
         }
     }
 }

@@ -35,6 +35,7 @@ using QuantTrade.Core;
 using QuantTrade.Core.Indicators;
 using QuantTrade.Core.Securities;
 using QuantTrade.Core.Utilities;
+using System.Globalization;
 
 namespace QuantTrade.Core.Data
 {
@@ -90,13 +91,13 @@ namespace QuantTrade.Core.Data
                     TradeResolution = _resolution,
                     Symbol = _symbol,
                     Day = DateTime.Parse(csv[0]),
-                    Open = decimal.Parse(csv[1]),
-                    High = decimal.Parse(csv[2]),
-                    Low = decimal.Parse(csv[3]),
-                    Close = decimal.Parse(csv[4]),
-                    Volume = decimal.Parse(csv[6]),
-                    Dividend = decimal.Parse(csv[7]),
-                    SplitCoefficient = decimal.Parse(csv[8]),
+                    Open = decimal.Parse(csv[1], NumberStyles.Any, CultureInfo.InvariantCulture),
+                    High = decimal.Parse(csv[2], NumberStyles.Any, CultureInfo.InvariantCulture),
+                    Low = decimal.Parse(csv[3], NumberStyles.Any, CultureInfo.InvariantCulture),
+                    Close = decimal.Parse(csv[4], NumberStyles.Any, CultureInfo.InvariantCulture),
+                    Volume = decimal.Parse(csv[6], NumberStyles.Any, CultureInfo.InvariantCulture),
+                    Dividend = decimal.Parse(csv[7], NumberStyles.Any, CultureInfo.InvariantCulture),
+                    SplitCoefficient = decimal.Parse(csv[8], NumberStyles.Any, CultureInfo.InvariantCulture),
                     SampleNumber = index
                 };
 
@@ -183,8 +184,8 @@ namespace QuantTrade.Core.Data
                 }
 
                 //Randominze Data
-                if(_randomizeData) randomizeData(bar);
-     
+                if (_randomizeData) randomizeData(bar);
+
                 //Throw Event to the alogos
                 if (OnTradeBar != null)
                 {
@@ -208,7 +209,7 @@ namespace QuantTrade.Core.Data
             Random randomizer = new Random();
 
             decimal rnd = Convert.ToDecimal(randomizer.NextDouble());
-            
+
             decimal changePercent = 2 * volatility * rnd;
 
             if (changePercent > volatility)
@@ -216,7 +217,7 @@ namespace QuantTrade.Core.Data
                 changePercent -= (2 * volatility);
             }
 
-            if(changePercent > 0)
+            if (changePercent > 0)
             {
                 changePercent = 1 + changePercent;
             }

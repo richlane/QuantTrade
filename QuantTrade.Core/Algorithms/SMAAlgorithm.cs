@@ -45,10 +45,6 @@ namespace QuantTrade.Core.Algorithm
 
         private int _smaLookBackPeriod = 10;
      
-        //Date Ranges
-        private int _startYear = 2011;
-        private int _endYear = 2017;
-
         //Sell Stop
         bool _useSellStop = true;
         decimal _sellStopPrice;
@@ -79,12 +75,13 @@ namespace QuantTrade.Core.Algorithm
             //Update base class proprties 
             /////////////////////////////////////
 
-            /// Set Start Date --> Need # days > SMA for the warmup period
-            DateTime theActualStartDate= calcStartDate();
-            SetStartDate(theActualStartDate.Year, theActualStartDate.Month, theActualStartDate.Day);
-            SetEndDate(_endYear, 12, 31);
-            SetStartDate(_startYear-1, 11, 15);  
-            SetEndDate(_endYear, 12, 31);
+            //Get dates from config file
+            string[] startDate = Config.GetToken("start-date").Split('/');
+            string[] endDate = Config.GetToken("end-date").Split('/');
+
+            //Now set date in base class
+            SetStartDate(Convert.ToInt32(startDate[2]), Convert.ToInt32(startDate[0]), Convert.ToInt32(startDate[1]));
+            SetEndDate(Convert.ToInt32(endDate[2]), Convert.ToInt32(endDate[0]), Convert.ToInt32(endDate[1]));
 
             Resolution = _resolution;
             subscribeToEvents();
@@ -94,19 +91,6 @@ namespace QuantTrade.Core.Algorithm
         
             //Execute Test
             RunTest();
-        }
-
-
-        /// <summary>
-        /// Set Start Date --> Need # days > SMA for the warmup period
-        /// </summary>
-        private DateTime calcStartDate()
-        {
-            int backDays = ((_smaLookBackPeriod / 5) * 2) + _smaLookBackPeriod;
-            DateTime tmpStartDate = new DateTime(_startYear, 1, 1);
-            tmpStartDate = tmpStartDate.AddDays(backDays * -1);
-
-            return tmpStartDate;
         }
 
         /// <summary>
