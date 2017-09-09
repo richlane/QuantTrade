@@ -12,6 +12,13 @@ such as the EMA, SMA, MACD, & RSI. <br/>
 <li>Historical data feeds are dynamically retrieved as needed.</li>
 </ul>
 	
+<b>System Requirements</b>
+<ul>
+<li>Microsoft .Net Framework Version 4.5.2 or better</li>
+<li>Visual Studio 2015 or better</li>
+<li>Windows 7 or better</li> 
+</ul>
+
 <b>Future Enhancements</b>
 <ul>
 <li>Application currently only supports daily time series/resolution data. Support for additional time frames is planned.</li>
