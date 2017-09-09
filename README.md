@@ -6,6 +6,7 @@ such as the EMA, SMA, MACD, & RSI. <br/>
 <b>Features</b>
 <ul>
 <li>Ability to backtest mutiple stocks simultaneously against your alogorithms to help reduce curve fitting.</li>
+<li>Easily compare swing trade strategies against buy and hold strategies.</li>
 <li>Results are output to a graph and datatable for easy reading. </li>
 <li>Extremly fast algorithm execution time (typically < 50 ms per symbol).</li>
 <li>Built in integration with https://www.alphavantage.co for free historical stock feeds. </li>
