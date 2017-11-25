@@ -189,7 +189,7 @@ namespace QuantTrade.Core.Algorithm
             return indicator;
         }
 
-        public ExponentialMovingAverage CreateExponentialIndicator(int period, MovingAverageType movingAverageType)
+        public ExponentialMovingAverage CreateExponentialMovingAverageIndicator(int period, MovingAverageType movingAverageType)
         {
             ExponentialMovingAverage indicator = new ExponentialMovingAverage(period, movingAverageType);
             Indicators.Add(indicator);

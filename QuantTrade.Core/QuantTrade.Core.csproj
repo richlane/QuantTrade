@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\BaseAlgorithm.cs" />
+    <Compile Include="Algorithms\SMAXoverAlgorithm.cs" />
     <Compile Include="Algorithms\SMAAlgorithm.cs" />
     <Compile Include="Indicators\MACD.cs" />
     <Compile Include="Reports\SummaryReport.cs" />
