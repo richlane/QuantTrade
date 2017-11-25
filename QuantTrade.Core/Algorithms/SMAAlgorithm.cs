@@ -98,7 +98,7 @@ namespace QuantTrade.Core.Algorithm
         public void OnOrderEvent(Order order, EventArgs e)
         {
             //set sell stop price
-            if (order.Status == OrderStatus.Filled  && _useSellStop)
+            if (order.Status == OrderStatus.Filled  && _useSellStop && order.Action == Action.Buy)
             {
                 _sellStopPrice =
                     Broker.StockPortfolio.Find(p => p.Symbol == Symbol).AverageFillPrice * (1 - _sellStopPercentage);
@@ -161,7 +161,7 @@ namespace QuantTrade.Core.Algorithm
             /////////////////////////////////////////
             //Buy Logic
             /////////////////////////////////////////
-            if (tradebar.Close < _sma.Value)
+            if (tradebar.Close < _sma.Value && Broker.IsHoldingStock(Symbol) == false)
             {
                 action = Action.Buy;
                 buying = true;
