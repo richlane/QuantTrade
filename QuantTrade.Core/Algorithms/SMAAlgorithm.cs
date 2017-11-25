@@ -35,7 +35,7 @@ using System.Collections.Generic;
 namespace QuantTrade.Core.Algorithm
 {
     /// <summary>
-    ///  Buy when close is below SMA and sell when close is above SMA
+    ///  This algo simply buys when close is below SMA and sells when close is above SMA
     /// </summary>
     public class SMAAlgorithm : BaseAlgorithm, IAlogorithm
     {      
@@ -48,9 +48,8 @@ namespace QuantTrade.Core.Algorithm
         //Sell Stop
         bool _useSellStop = true;
         decimal _sellStopPrice;
-        decimal _sellStopPercentage = .05m;
-        decimal _pctToInvest;   //Using the 2%, 3%, 5% investment strategy
-
+        decimal _sellStopPercentage = .05m;  //sell stop at a 5% loss
+        
 
         /// <summary>
         /// Subscribe to base class events.
@@ -99,7 +98,7 @@ namespace QuantTrade.Core.Algorithm
         public void OnOrderEvent(Order order, EventArgs e)
         {
             //set sell stop price
-            if (order.Status == OrderStatus.Filled && _pctToInvest == 1M && _useSellStop)
+            if (order.Status == OrderStatus.Filled  && _useSellStop)
             {
                 _sellStopPrice =
                     Broker.StockPortfolio.Find(p => p.Symbol == Symbol).AverageFillPrice * (1 - _sellStopPercentage);
@@ -123,7 +122,7 @@ namespace QuantTrade.Core.Algorithm
             switch (action)
             {
                 case Action.Buy:
-                    decimal dollarAmt = (Broker.AvailableCash * _pctToInvest);
+                    decimal dollarAmt = Broker.AvailableCash;
                     int buyQty = Convert.ToInt32(Math.Round(dollarAmt / tradebar.Close));
 
                     //Buying MOO  
@@ -154,7 +153,6 @@ namespace QuantTrade.Core.Algorithm
                 if (Broker.IsHoldingStock(Symbol) == false)
                 {
                     action = Action.Buy;
-                    _pctToInvest = 1M;
                 }
                 return action;
             }
@@ -167,32 +165,6 @@ namespace QuantTrade.Core.Algorithm
             {
                 action = Action.Buy;
                 buying = true;
-
-                //Calculate how much we want to invest using the 2%, 3%, 5% strategy
-                if (_pctToInvest == 0)
-                {
-                    _pctToInvest = .2M;
-                }
-                else if (_pctToInvest == .2M)
-                {
-                    _pctToInvest = .38M;
-                }
-                else if (_pctToInvest == .38M)
-                {
-                    _pctToInvest = 1M;
-                }
-
-                // _pctToInvest = 1M;
-
-
-                //if (_pctToInvest == 0)
-                //{
-                //    _pctToInvest = .5M;
-                //}
-                //else if (_pctToInvest == .5M)
-                //{
-                //    _pctToInvest = 1M;
-                //}
             }
 
             /////////////////////////////////////////
@@ -204,14 +176,12 @@ namespace QuantTrade.Core.Algorithm
                 if ( tradebar.Close > _sma.Value)
                 {
                     action = Action.Sell;
-                    _pctToInvest = 0;
                     _sellStopPrice = 0;
                 }
                 //Sell - stopped out
                 else if (_sellStopPrice > 0 && tradebar.Close < _sellStopPrice)
                 {
                     action = Action.Sell;
-                    _pctToInvest = 0;
                     _sellStopPrice = 0;
                 }
                 //Hold

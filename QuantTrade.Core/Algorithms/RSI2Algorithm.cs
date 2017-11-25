@@ -35,7 +35,8 @@ using System.Text;
 namespace QuantTrade.Core.Algorithm
 {
     /// <summary>
-    /// Jack's RSI2 Strategy
+    /// This is a very complex strategy that uses the RSI2. 
+    /// I actually use this strategy. 
     /// </summary>
     public class RSI2Algorithm : BaseAlgorithm, IAlogorithm
     {
